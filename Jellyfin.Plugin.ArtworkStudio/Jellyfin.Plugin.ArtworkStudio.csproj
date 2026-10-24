@@ -28,6 +28,8 @@
   <ItemGroup>
     <None Remove="Web\artworkStudio.html" />
     <EmbeddedResource Include="Web\artworkStudio.html" />
+    <None Remove="Web\libraryBackdrops.js" />
+    <EmbeddedResource Include="Web\libraryBackdrops.js" />
   </ItemGroup>
 
 </Project>

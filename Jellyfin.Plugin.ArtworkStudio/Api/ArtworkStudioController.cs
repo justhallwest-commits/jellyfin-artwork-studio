@@ -85,6 +85,42 @@ public class ArtworkStudioController : ControllerBase
 
     private static PluginConfiguration Config => Plugin.Instance?.Configuration ?? new PluginConfiguration();
 
+    // ---------------------------------------------------------------- Library backdrops (browser script)
+
+    /// <summary>Serves the browser script that shows library backdrops on library pages.</summary>
+    [HttpGet("ClientScript")]
+    [AllowAnonymous]
+    [Produces("application/javascript")]
+    public ActionResult GetClientScript()
+    {
+        var asm = typeof(Plugin).Assembly;
+        using var stream = asm.GetManifestResourceStream(typeof(Plugin).Namespace + ".Web.libraryBackdrops.js");
+        if (stream is null)
+        {
+            return NotFound();
+        }
+
+        using var reader = new StreamReader(stream);
+        var cfg = Config;
+        var prefix = "window.__artworkStudioCfg={enabled:" + (cfg.LibraryBackdrops ? "true" : "false")
+            + ",interval:" + Math.Clamp(cfg.BackdropRotateSeconds, 5, 600).ToString(System.Globalization.CultureInfo.InvariantCulture) + "};\n";
+        Response.Headers.CacheControl = "no-cache";
+        return Content(prefix + reader.ReadToEnd(), "application/javascript; charset=utf-8");
+    }
+
+    /// <summary>Reports whether the browser script is installed, and retries installing it.</summary>
+    [HttpGet("ClientStatus")]
+    public ActionResult GetClientStatus()
+    {
+        var plugin = Plugin.Instance;
+        plugin?.InjectClientScript();
+        return Ok(new
+        {
+            Installed = plugin?.ClientScriptInstalled ?? false,
+            Status = plugin?.ClientScriptStatus ?? "Plugin not loaded."
+        });
+    }
+
     // ---------------------------------------------------------------- NAS browsing
 
     /// <summary>Lists the configured NAS folders and whether Jellyfin can see them.</summary>

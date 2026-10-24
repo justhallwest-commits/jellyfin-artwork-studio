@@ -216,6 +216,21 @@
         <input class="as-in" id="asTimeout" type="number" min="5" max="600">
       </div>
     </div>
+    <div class="as-panel">
+      <h3>Library backgrounds</h3>
+      <div class="as-hint">Jellyfin normally shows random backdrops from titles inside a library. With this on, a library that has its own backdrops (set under <b>Library artwork</b>) shows those instead on its page. Several backdrops rotate.</div>
+      <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="asLibBg"> Show each library's own backdrops on its page</label></div>
+      <div class="as-field">
+        <label for="asRotate">Rotate every (seconds)</label>
+        <input class="as-in" id="asRotate" type="number" min="5" max="600">
+      </div>
+      <div class="as-field" style="max-width:none">
+        <label>Web app script</label>
+        <div id="asClientStatus" class="as-hint">Checking…</div>
+        <div id="asClientHelp" class="as-hint" style="display:none;margin-top:.5em">Jellyfin couldn't add the script itself. If you use the <b>JavaScript Injector</b> plugin, add a new script with this line, then refresh the page:
+          <pre style="white-space:pre-wrap;background:var(--as-soft);padding:.6em;border-radius:6px;margin:.4em 0;user-select:all">var s=document.createElement('script');s.src='../ArtworkStudio/ClientScript';document.head.appendChild(s);</pre></div>
+      </div>
+    </div>
     <button class="as-btn primary" id="asSave"><span class="material-icons">save</span>Save settings</button>
   </section>
 
@@ -235,6 +250,8 @@
         <li><b>NAS</b> — browse or search your artwork folders. <i>Copy</i> stores a copy in Jellyfin; <i>Link</i> points at the NAS file so it's never duplicated.</li>
         <li><b>Online</b> — Jellyfin's own providers (TMDB, Fanart.tv, etc., whichever you have enabled).</li>
       </ul>
+      <h4>Library backgrounds</h4>
+      <p>Backdrops added to a library under <b>Library artwork</b> become the background of that library's page (Settings → Library backgrounds). This works in the browser and in apps built on the web app (Jellyfin Media Player, the Android/iOS phone apps). Native TV apps keep their own behaviour.</p>
       <h4>Backdrops</h4>
       <p>Items can have several backdrops. The first one is the "main" one most apps show. Use the star button to make any backdrop the main one, the arrows to reorder, and the + tile to add more.</p>
       <h4>Doing many at once</h4>
@@ -1077,7 +1094,15 @@
             $('#asSaveLoc').value = cfg.SaveLocation || 'library';
             $('#asMaxMb').value = cfg.MaxImageSizeMb || 40;
             $('#asTimeout').value = cfg.DownloadTimeoutSeconds || 45;
+            $('#asLibBg').checked = cfg.LibraryBackdrops !== false;
+            $('#asRotate').value = cfg.BackdropRotateSeconds || 12;
             checkRoots();
+            api('GET', 'ArtworkStudio/ClientStatus').then(function (r) {
+                var st = $('#asClientStatus');
+                st.className = 'as-status ' + (r.Installed ? 'ok' : 'bad');
+                st.innerHTML = (r.Installed ? icon('check_circle') : icon('error')) + esc(r.Status) + (r.Installed ? ' Refresh the browser (Ctrl+F5) after installing or updating.' : '');
+                $('#asClientHelp').style.display = r.Installed ? 'none' : '';
+            }).catch(function () { $('#asClientStatus').textContent = 'Restart Jellyfin to finish installing the plugin.'; });
         });
     }
     function checkRoots() {
@@ -1103,6 +1128,8 @@
         cfg.SaveLocation = $('#asSaveLoc').value;
         cfg.MaxImageSizeMb = Math.max(1, Math.min(200, parseInt($('#asMaxMb').value, 10) || 40));
         cfg.DownloadTimeoutSeconds = Math.max(5, Math.min(600, parseInt($('#asTimeout').value, 10) || 45));
+        cfg.LibraryBackdrops = $('#asLibBg').checked;
+        cfg.BackdropRotateSeconds = Math.max(5, Math.min(600, parseInt($('#asRotate').value, 10) || 12));
         ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function (res) {
             S.roots = null;
             if (window.Dashboard && Dashboard.processPluginConfigurationUpdateResult) Dashboard.processPluginConfigurationUpdateResult(res);

@@ -31,4 +31,10 @@ public class PluginConfiguration : BasePluginConfiguration
 
     /// <summary>Gets or sets the timeout for downloading from links, in seconds.</summary>
     public int DownloadTimeoutSeconds { get; set; } = 45;
+
+    /// <summary>Gets or sets a value indicating whether library pages show the library's own backdrops.</summary>
+    public bool LibraryBackdrops { get; set; } = true;
+
+    /// <summary>Gets or sets how often library backdrops rotate, in seconds.</summary>
+    public int BackdropRotateSeconds { get; set; } = 12;
 }
