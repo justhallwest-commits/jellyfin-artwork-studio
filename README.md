@@ -22,7 +22,7 @@ A friendly place in the Jellyfin dashboard to add and manage artwork for your li
 
 ### Option A — plugin repository (recommended)
 1. Push this repo to GitHub as `justhallwest-commits/jellyfin-artwork-studio`.
-2. Create a tag/release named `v1.0.0` (Releases → *Draft a new release* → new tag `v1.0.0` → Publish). The workflow builds the plugin and attaches the zip and `manifest.json`.
+2. Every push to `main` builds the plugin and publishes a new release (`v1.0.<build number>`) with the zip and `manifest.json` attached — no manual tagging needed. Change `BASE_VERSION` in the workflow for a bigger version bump.
 3. In Jellyfin: **Dashboard → Plugins → Repositories → +**, URL:
    `https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/latest/download/manifest.json`
 4. **Catalog → Artwork Studio → Install**, then restart Jellyfin.
