@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Defaults build for Jellyfin 10.11. For 10.10 pass: -p:JellyfinVersion=10.10.7 -p:TargetFramework=net8.0 -->
+    <!-- Defaults build for Jellyfin 10.11. For 10.10 pass: -p:JellyfinVersion=10.10.7 -p:JellyfinTfm=net8.0 -->
     <JellyfinVersion Condition="'$(JellyfinVersion)' == ''">10.11.0</JellyfinVersion>
-    <TargetFramework Condition="'$(TargetFramework)' == ''">net9.0</TargetFramework>
+    <JellyfinTfm Condition="'$(JellyfinTfm)' == ''">net9.0</JellyfinTfm>
+    <TargetFramework>$(JellyfinTfm)</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.ArtworkStudio</RootNamespace>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>

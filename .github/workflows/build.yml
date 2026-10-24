@@ -47,7 +47,7 @@ jobs:
         run: |
           rm -rf Jellyfin.Plugin.ArtworkStudio/bin Jellyfin.Plugin.ArtworkStudio/obj
           dotnet build "$PROJECT" -c Release \
-            -p:JellyfinVersion=10.10.7 -p:TargetFramework=net8.0 \
+            -p:JellyfinVersion=10.10.7 -p:JellyfinTfm=net8.0 \
             -p:AssemblyVersion=${{ steps.ver.outputs.v1010 }} -p:FileVersion=${{ steps.ver.outputs.v1010 }} \
             -o out-1010
 
@@ -55,7 +55,7 @@ jobs:
         run: |
           rm -rf Jellyfin.Plugin.ArtworkStudio/bin Jellyfin.Plugin.ArtworkStudio/obj
           dotnet build "$PROJECT" -c Release \
-            -p:JellyfinVersion=10.11.0 -p:TargetFramework=net9.0 \
+            -p:JellyfinVersion=10.11.0 -p:JellyfinTfm=net9.0 \
             -p:AssemblyVersion=${{ steps.ver.outputs.v1011 }} -p:FileVersion=${{ steps.ver.outputs.v1011 }} \
             -o out-1011
 
