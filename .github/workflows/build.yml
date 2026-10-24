@@ -13,6 +13,7 @@ permissions:
 env:
   # Bump this for bigger releases; the last number goes up automatically on every push to main.
   BASE_VERSION: '1.0'
+  PROJECT: Jellyfin.Plugin.ArtworkStudio/Jellyfin.Plugin.ArtworkStudio.csproj
 
 jobs:
   build:
@@ -22,7 +23,9 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
       - name: Work out version
         id: ver
@@ -32,32 +35,47 @@ jobs:
           else
             V="${BASE_VERSION}.${GITHUB_RUN_NUMBER}"
           fi
-          # Jellyfin wants four parts: 1.2.3 -> 1.2.3.0
-          IFS='.' read -r a b c d <<< "$V"
-          FULL="${a:-1}.${b:-0}.${c:-0}.${d:-0}"
-          echo "version=$FULL" >> "$GITHUB_OUTPUT"
-          echo "tag=v${a:-1}.${b:-0}.${c:-0}" >> "$GITHUB_OUTPUT"
+          IFS='.' read -r a b c _ <<< "$V"
+          BASE="${a:-1}.${b:-0}.${c:-0}"
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          echo "tag=v$BASE" >> "$GITHUB_OUTPUT"
+          # The last number marks the Jellyfin line, so a 10.11 server prefers the 10.11 build
+          echo "v1010=$BASE.10" >> "$GITHUB_OUTPUT"
+          echo "v1011=$BASE.11" >> "$GITHUB_OUTPUT"
 
-      - name: Build
+      - name: Build for Jellyfin 10.10 (.NET 8)
         run: |
-          dotnet build Jellyfin.Plugin.ArtworkStudio/Jellyfin.Plugin.ArtworkStudio.csproj \
-            -c Release \
-            -p:AssemblyVersion=${{ steps.ver.outputs.version }} \
-            -p:FileVersion=${{ steps.ver.outputs.version }} \
-            -o out
+          rm -rf Jellyfin.Plugin.ArtworkStudio/bin Jellyfin.Plugin.ArtworkStudio/obj
+          dotnet build "$PROJECT" -c Release \
+            -p:JellyfinVersion=10.10.7 -p:TargetFramework=net8.0 \
+            -p:AssemblyVersion=${{ steps.ver.outputs.v1010 }} -p:FileVersion=${{ steps.ver.outputs.v1010 }} \
+            -o out-1010
+
+      - name: Build for Jellyfin 10.11 (.NET 9)
+        run: |
+          rm -rf Jellyfin.Plugin.ArtworkStudio/bin Jellyfin.Plugin.ArtworkStudio/obj
+          dotnet build "$PROJECT" -c Release \
+            -p:JellyfinVersion=10.11.0 -p:TargetFramework=net9.0 \
+            -p:AssemblyVersion=${{ steps.ver.outputs.v1011 }} -p:FileVersion=${{ steps.ver.outputs.v1011 }} \
+            -o out-1011
 
       - name: Package
         id: pkg
         run: |
           mkdir -p dist
-          ZIP="artwork-studio_${{ steps.ver.outputs.version }}.zip"
-          (cd out && zip -j "../dist/$ZIP" Jellyfin.Plugin.ArtworkStudio.dll)
-          MD5=$(md5sum "dist/$ZIP" | cut -d' ' -f1)
-          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
-          echo "md5=$MD5" >> "$GITHUB_OUTPUT"
+          Z10="artwork-studio_${{ steps.ver.outputs.v1010 }}_jellyfin-10.10.zip"
+          Z11="artwork-studio_${{ steps.ver.outputs.v1011 }}_jellyfin-10.11.zip"
+          (cd out-1010 && zip -j "../dist/$Z10" Jellyfin.Plugin.ArtworkStudio.dll)
+          (cd out-1011 && zip -j "../dist/$Z11" Jellyfin.Plugin.ArtworkStudio.dll)
+          echo "z10=$Z10" >> "$GITHUB_OUTPUT"
+          echo "z11=$Z11" >> "$GITHUB_OUTPUT"
+          echo "md10=$(md5sum "dist/$Z10" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "md11=$(md5sum "dist/$Z11" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - name: Write repository manifest
         run: |
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          URL="https://github.com/${{ github.repository }}/releases/download/${{ steps.ver.outputs.tag }}"
           cat > dist/manifest.json <<EOF
           [
             {
@@ -69,12 +87,20 @@ jobs:
               "category": "General",
               "versions": [
                 {
-                  "version": "${{ steps.ver.outputs.version }}",
-                  "changelog": "See GitHub release notes.",
+                  "version": "${{ steps.ver.outputs.v1011 }}",
+                  "changelog": "Build for Jellyfin 10.11.",
                   "targetAbi": "10.11.0.0",
-                  "sourceUrl": "https://github.com/${{ github.repository }}/releases/download/${{ steps.ver.outputs.tag }}/${{ steps.pkg.outputs.zip }}",
-                  "checksum": "${{ steps.pkg.outputs.md5 }}",
-                  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                  "sourceUrl": "$URL/${{ steps.pkg.outputs.z11 }}",
+                  "checksum": "${{ steps.pkg.outputs.md11 }}",
+                  "timestamp": "$TS"
+                },
+                {
+                  "version": "${{ steps.ver.outputs.v1010 }}",
+                  "changelog": "Build for Jellyfin 10.10.",
+                  "targetAbi": "10.10.0.0",
+                  "sourceUrl": "$URL/${{ steps.pkg.outputs.z10 }}",
+                  "checksum": "${{ steps.pkg.outputs.md10 }}",
+                  "timestamp": "$TS"
                 }
               ]
             }
@@ -95,6 +121,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           make_latest: true
           files: |
-            dist/${{ steps.pkg.outputs.zip }}
+            dist/${{ steps.pkg.outputs.z10 }}
+            dist/${{ steps.pkg.outputs.z11 }}
             dist/manifest.json
           generate_release_notes: true

@@ -2,7 +2,7 @@
 
 A friendly place in the Jellyfin dashboard to add and manage artwork for your libraries and everything in them — posters, backdrops, logos, thumbs, banners, clear art, disc art, box art and more.
 
-**Targets Jellyfin 10.11 (.NET 9).**
+**Works with Jellyfin 10.10 and 10.11** — each release contains a build for both, and the plugin catalog picks the right one.
 
 ## What it does
 
