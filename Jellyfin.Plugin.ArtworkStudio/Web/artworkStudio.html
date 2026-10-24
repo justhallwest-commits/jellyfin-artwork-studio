@@ -1,0 +1,1130 @@
+<div id="artworkStudioPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+<div data-role="content">
+<div class="content-primary">
+
+<style>
+#artworkStudioPage { --as-accent:#00a4dc; --as-line:rgba(128,128,128,.28); --as-soft:rgba(128,128,128,.12); --as-softer:rgba(128,128,128,.07); --as-ok:#3cb371; --as-bad:#e0565b; --as-warn:#e8a33d; }
+#artworkStudioPage .as-wrap { max-width:1500px; margin:0 auto; padding-bottom:6em; }
+#artworkStudioPage .as-head { display:flex; align-items:center; gap:1em; flex-wrap:wrap; margin:.5em 0 1em; }
+#artworkStudioPage .as-head h2 { margin:0; font-size:1.6em; display:flex; align-items:center; gap:.4em; }
+#artworkStudioPage .as-tabs { display:flex; gap:.25em; margin-left:auto; background:var(--as-soft); padding:.25em; border-radius:999px; }
+#artworkStudioPage .as-tab { border:0; background:transparent; color:inherit; padding:.5em 1.1em; border-radius:999px; cursor:pointer; font:inherit; }
+#artworkStudioPage .as-tab.active { background:var(--as-accent); color:#fff; }
+#artworkStudioPage .as-btn { display:inline-flex; align-items:center; gap:.35em; border:1px solid var(--as-line); background:var(--as-soft); color:inherit; padding:.5em .95em; border-radius:8px; cursor:pointer; font:inherit; font-size:.92em; line-height:1.2; white-space:nowrap; }
+#artworkStudioPage .as-btn:hover { background:rgba(128,128,128,.22); }
+#artworkStudioPage .as-btn.primary { background:var(--as-accent); border-color:var(--as-accent); color:#fff; }
+#artworkStudioPage .as-btn.primary:hover { filter:brightness(1.1); }
+#artworkStudioPage .as-btn.danger { color:var(--as-bad); }
+#artworkStudioPage .as-btn.small { padding:.3em .6em; font-size:.82em; }
+#artworkStudioPage .as-btn[disabled] { opacity:.45; cursor:default; }
+#artworkStudioPage .as-btn .material-icons { font-size:1.15em; }
+#artworkStudioPage input.as-in, #artworkStudioPage select.as-in { background:rgba(0,0,0,.25); border:1px solid var(--as-line); color:inherit; border-radius:8px; padding:.55em .7em; font:inherit; min-width:0; }
+#artworkStudioPage select.as-in option { color:#000; }
+#artworkStudioPage .as-chips { display:flex; gap:.4em; flex-wrap:wrap; margin-bottom:.8em; }
+#artworkStudioPage .as-chip { border:1px solid var(--as-line); background:transparent; color:inherit; border-radius:999px; padding:.4em .9em; cursor:pointer; font:inherit; font-size:.9em; }
+#artworkStudioPage .as-chip.active { background:var(--as-accent); border-color:var(--as-accent); color:#fff; }
+#artworkStudioPage .as-chip.special { border-style:dashed; }
+#artworkStudioPage .as-toolbar { display:flex; gap:.5em; flex-wrap:wrap; align-items:center; margin-bottom:1em; }
+#artworkStudioPage .as-toolbar .as-search { flex:1 1 240px; }
+#artworkStudioPage .as-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1em; }
+#artworkStudioPage .as-card { position:relative; cursor:pointer; border-radius:10px; overflow:hidden; background:var(--as-softer); border:2px solid transparent; transition:transform .12s, border-color .12s; }
+#artworkStudioPage .as-card:hover { transform:translateY(-2px); border-color:var(--as-line); }
+#artworkStudioPage .as-card.selected { border-color:var(--as-accent); }
+#artworkStudioPage .as-card .as-poster { aspect-ratio:2/3; background:var(--as-soft) center/cover no-repeat; display:flex; align-items:center; justify-content:center; color:rgba(128,128,128,.8); }
+#artworkStudioPage .as-card.wide .as-poster { aspect-ratio:16/9; }
+#artworkStudioPage .as-card .as-meta { padding:.45em .55em .55em; }
+#artworkStudioPage .as-card .as-name { font-size:.88em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#artworkStudioPage .as-card .as-sub { font-size:.75em; opacity:.65; }
+#artworkStudioPage .as-badges { display:flex; gap:3px; margin-top:.35em; flex-wrap:wrap; }
+#artworkStudioPage .as-badge { font-size:.66em; padding:1px 5px; border-radius:4px; background:rgba(60,179,113,.25); color:var(--as-ok); font-weight:600; letter-spacing:.02em; }
+#artworkStudioPage .as-badge.off { background:rgba(128,128,128,.15); color:rgba(128,128,128,.85); text-decoration:line-through; }
+#artworkStudioPage .as-check { position:absolute; top:6px; left:6px; width:26px; height:26px; border-radius:50%; background:rgba(0,0,0,.55); border:2px solid rgba(255,255,255,.7); display:flex; align-items:center; justify-content:center; color:#fff; opacity:0; transition:opacity .12s; }
+#artworkStudioPage .as-card:hover .as-check, #artworkStudioPage .as-card.selected .as-check, #artworkStudioPage.as-selecting .as-check { opacity:1; }
+#artworkStudioPage .as-card.selected .as-check { background:var(--as-accent); border-color:var(--as-accent); }
+#artworkStudioPage .as-check .material-icons { font-size:16px; }
+#artworkStudioPage .as-empty { padding:3em 1em; text-align:center; opacity:.7; }
+#artworkStudioPage .as-more { text-align:center; margin:1.5em 0; }
+#artworkStudioPage .as-bulkbar { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:#1c1c1e; color:#fff; border:1px solid rgba(255,255,255,.15); border-radius:14px; padding:.6em .8em; display:none; gap:.6em; align-items:center; z-index:1050; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+#artworkStudioPage .as-bulkbar.show { display:flex; }
+
+/* Overlays */
+#artworkStudioPage .as-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1100; display:flex; align-items:stretch; justify-content:center; padding:2vh 2vw; backdrop-filter:blur(3px); }
+#artworkStudioPage .as-overlay.stack2 { z-index:1110; }
+#artworkStudioPage .as-overlay.stack3 { z-index:1120; }
+#artworkStudioPage .as-modal { background:#181818; color:#eee; width:100%; max-width:1280px; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(255,255,255,.1); box-shadow:0 20px 80px rgba(0,0,0,.6); }
+#artworkStudioPage .as-modal.narrow { max-width:620px; height:auto; align-self:center; }
+#artworkStudioPage .as-modal-head { display:flex; align-items:center; gap:.8em; padding:.9em 1.1em; border-bottom:1px solid rgba(255,255,255,.1); }
+#artworkStudioPage .as-modal-head h3 { margin:0; font-size:1.2em; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#artworkStudioPage .as-modal-body { padding:1.1em; overflow:auto; flex:1; }
+#artworkStudioPage .as-modal-foot { padding:.8em 1.1em; border-top:1px solid rgba(255,255,255,.1); display:flex; gap:.6em; justify-content:flex-end; align-items:center; flex-wrap:wrap; }
+#artworkStudioPage .as-modal input.as-in, #artworkStudioPage .as-modal select.as-in { background:#0f0f0f; }
+#artworkStudioPage .as-x { background:transparent; border:0; color:inherit; cursor:pointer; padding:.3em; border-radius:50%; display:flex; }
+#artworkStudioPage .as-x:hover { background:rgba(255,255,255,.1); }
+
+/* Editor slots */
+#artworkStudioPage .as-slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.1em; }
+#artworkStudioPage .as-slot { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:.85em; display:flex; flex-direction:column; gap:.6em; }
+#artworkStudioPage .as-slot.wide { grid-column:1 / -1; }
+#artworkStudioPage .as-slot-title { display:flex; align-items:baseline; gap:.5em; }
+#artworkStudioPage .as-slot-title b { font-size:1em; }
+#artworkStudioPage .as-slot-title span { font-size:.78em; opacity:.6; }
+#artworkStudioPage .as-tiles { display:flex; gap:.7em; flex-wrap:wrap; }
+#artworkStudioPage .as-tile { position:relative; border-radius:8px; overflow:hidden; background:rgba(255,255,255,.05); flex:0 0 auto; }
+#artworkStudioPage .as-tile img { display:block; width:100%; height:100%; object-fit:contain; }
+#artworkStudioPage .as-tile.checker { background-color:#2a2a2a; background-image:linear-gradient(45deg,#333 25%,transparent 25%),linear-gradient(-45deg,#333 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#333 75%),linear-gradient(-45deg,transparent 75%,#333 75%); background-size:16px 16px; background-position:0 0,0 8px,8px -8px,-8px 0; }
+#artworkStudioPage .as-tile-info { position:absolute; left:0; right:0; bottom:0; padding:.3em .45em; font-size:.7em; background:linear-gradient(transparent,rgba(0,0,0,.85)); color:#fff; display:flex; justify-content:space-between; gap:.4em; }
+#artworkStudioPage .as-tile-tools { position:absolute; top:5px; right:5px; display:flex; gap:4px; opacity:0; transition:opacity .12s; }
+#artworkStudioPage .as-tile:hover .as-tile-tools, #artworkStudioPage .as-tile:focus-within .as-tile-tools { opacity:1; }
+@media (hover:none) { #artworkStudioPage .as-tile-tools { opacity:1; } }
+#artworkStudioPage .as-ibtn { width:30px; height:30px; border-radius:50%; border:0; background:rgba(0,0,0,.72); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+#artworkStudioPage .as-ibtn:hover { background:var(--as-accent); }
+#artworkStudioPage .as-ibtn.danger:hover { background:var(--as-bad); }
+#artworkStudioPage .as-ibtn .material-icons { font-size:17px; }
+#artworkStudioPage .as-mainflag { position:absolute; top:5px; left:5px; background:var(--as-accent); color:#fff; font-size:.65em; padding:2px 6px; border-radius:4px; font-weight:600; }
+#artworkStudioPage .as-linkflag { position:absolute; top:5px; left:5px; background:rgba(232,163,61,.92); color:#111; font-size:.65em; padding:2px 6px; border-radius:4px; font-weight:600; }
+#artworkStudioPage .as-mainflag + .as-linkflag { top:24px; }
+#artworkStudioPage .as-drop { border:2px dashed rgba(255,255,255,.22); border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3em; text-align:center; padding:.6em; cursor:pointer; color:rgba(255,255,255,.65); font-size:.82em; transition:all .12s; flex:0 0 auto; }
+#artworkStudioPage .as-drop:hover, #artworkStudioPage .as-drop.over, #artworkStudioPage .as-tile.over { border-color:var(--as-accent); color:#fff; background:rgba(0,164,220,.1); outline:2px solid var(--as-accent); outline-offset:-2px; }
+#artworkStudioPage .as-drop .material-icons { font-size:2em; }
+#artworkStudioPage .as-busy { position:absolute; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:.85em; z-index:2; }
+#artworkStudioPage .as-slot-actions { display:flex; gap:.4em; flex-wrap:wrap; }
+#artworkStudioPage .as-lastslot { outline:2px solid rgba(0,164,220,.55); outline-offset:2px; }
+
+/* Source picker */
+#artworkStudioPage .as-srctabs { display:flex; gap:.25em; padding:0 1.1em; border-bottom:1px solid rgba(255,255,255,.1); overflow-x:auto; }
+#artworkStudioPage .as-srctab { border:0; background:transparent; color:rgba(255,255,255,.7); padding:.8em 1em; cursor:pointer; font:inherit; border-bottom:3px solid transparent; display:flex; align-items:center; gap:.4em; white-space:nowrap; }
+#artworkStudioPage .as-srctab.active { color:#fff; border-bottom-color:var(--as-accent); }
+#artworkStudioPage .as-bigdrop { border:2px dashed rgba(255,255,255,.25); border-radius:12px; min-height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.6em; text-align:center; padding:1.2em; cursor:pointer; }
+#artworkStudioPage .as-bigdrop.over { border-color:var(--as-accent); background:rgba(0,164,220,.08); }
+#artworkStudioPage .as-bigdrop img { max-height:340px; max-width:100%; border-radius:8px; }
+#artworkStudioPage .as-hint { font-size:.82em; opacity:.65; line-height:1.45; }
+#artworkStudioPage .as-row { display:flex; gap:.6em; align-items:center; flex-wrap:wrap; }
+#artworkStudioPage .as-crumbs { display:flex; gap:.2em; align-items:center; flex-wrap:wrap; font-size:.9em; margin:.7em 0; }
+#artworkStudioPage .as-crumbs button { background:transparent; border:0; color:var(--as-accent); cursor:pointer; font:inherit; padding:.2em .3em; border-radius:4px; }
+#artworkStudioPage .as-crumbs button:hover { background:rgba(255,255,255,.08); }
+#artworkStudioPage .as-pick-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.7em; }
+#artworkStudioPage .as-pick { border-radius:8px; overflow:hidden; background:rgba(255,255,255,.05); cursor:pointer; border:2px solid transparent; position:relative; }
+#artworkStudioPage .as-pick:hover { border-color:rgba(255,255,255,.25); }
+#artworkStudioPage .as-pick.sel { border-color:var(--as-accent); box-shadow:0 0 0 2px var(--as-accent); }
+#artworkStudioPage .as-pick .as-pimg { aspect-ratio:3/2; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.3); }
+#artworkStudioPage .as-pick .as-pimg img { max-width:100%; max-height:100%; object-fit:contain; }
+#artworkStudioPage .as-pick .as-pcap { padding:.35em .45em; font-size:.74em; line-height:1.3; word-break:break-word; }
+#artworkStudioPage .as-pick .as-pcap small { opacity:.6; display:block; }
+#artworkStudioPage .as-folder .as-pimg { aspect-ratio:3/2; }
+#artworkStudioPage .as-folder .as-pimg .material-icons { font-size:3em; color:var(--as-warn); }
+#artworkStudioPage .as-seg { display:inline-flex; border:1px solid rgba(255,255,255,.2); border-radius:8px; overflow:hidden; }
+#artworkStudioPage .as-seg button { background:transparent; border:0; color:inherit; padding:.45em .8em; cursor:pointer; font:inherit; font-size:.88em; }
+#artworkStudioPage .as-seg button.active { background:var(--as-accent); color:#fff; }
+
+/* Settings */
+#artworkStudioPage .as-panel { background:var(--as-softer); border:1px solid var(--as-line); border-radius:12px; padding:1.1em 1.2em; margin-bottom:1.1em; }
+#artworkStudioPage .as-panel h3 { margin:0 0 .3em; }
+#artworkStudioPage .as-rootrow { display:grid; grid-template-columns:minmax(120px,1fr) minmax(160px,2fr) auto auto; gap:.5em; align-items:center; margin:.45em 0; }
+@media (max-width:640px){ #artworkStudioPage .as-rootrow { grid-template-columns:1fr auto; } #artworkStudioPage .as-rootrow .as-in { grid-column:1 / -1; } }
+#artworkStudioPage .as-status { font-size:.8em; display:inline-flex; align-items:center; gap:.2em; }
+#artworkStudioPage .as-status.ok { color:var(--as-ok); } #artworkStudioPage .as-status.bad { color:var(--as-bad); }
+#artworkStudioPage .as-field { display:flex; flex-direction:column; gap:.3em; margin:.8em 0; max-width:520px; }
+#artworkStudioPage .as-field label { font-weight:600; font-size:.92em; }
+#artworkStudioPage .as-help h4 { margin:1.2em 0 .3em; }
+#artworkStudioPage .as-help p, #artworkStudioPage .as-help li { line-height:1.55; opacity:.9; }
+#artworkStudioPage .as-help code { background:var(--as-soft); padding:.1em .35em; border-radius:4px; }
+#artworkStudioPage .as-toast { position:fixed; left:50%; bottom:80px; transform:translateX(-50%) translateY(20px); background:#222; color:#fff; padding:.75em 1.2em; border-radius:10px; z-index:1200; opacity:0; transition:all .2s; pointer-events:none; max-width:90vw; border-left:4px solid var(--as-ok); box-shadow:0 10px 30px rgba(0,0,0,.5); }
+#artworkStudioPage .as-toast.err { border-left-color:var(--as-bad); }
+#artworkStudioPage .as-toast.show { opacity:1; transform:translateX(-50%); }
+#artworkStudioPage .as-progress { height:6px; background:rgba(255,255,255,.1); border-radius:3px; overflow:hidden; margin:.8em 0; }
+#artworkStudioPage .as-progress div { height:100%; background:var(--as-accent); width:0; transition:width .2s; }
+#artworkStudioPage .as-spin { width:22px; height:22px; border:3px solid rgba(255,255,255,.2); border-top-color:var(--as-accent); border-radius:50%; animation:as-spin .8s linear infinite; }
+@keyframes as-spin { to { transform:rotate(360deg); } }
+</style>
+
+<div class="as-wrap">
+  <div class="as-head">
+    <h2><span class="material-icons">photo_library</span>Artwork Studio</h2>
+    <div class="as-tabs">
+      <button class="as-tab active" data-tab="browse">Browse</button>
+      <button class="as-tab" data-tab="settings">Settings</button>
+      <button class="as-tab" data-tab="help">Help</button>
+    </div>
+  </div>
+
+  <!-- ===================== BROWSE ===================== -->
+  <section data-section="browse">
+    <div class="as-chips" id="asLibChips"></div>
+    <div class="as-toolbar">
+      <input class="as-in as-search" id="asSearch" type="search" placeholder="Search titles…" autocomplete="off">
+      <select class="as-in" id="asType" title="Item type">
+        <option value="auto">Type: Auto</option>
+        <option value="Movie">Movies</option>
+        <option value="Series">Shows</option>
+        <option value="Season">Seasons</option>
+        <option value="Episode">Episodes</option>
+        <option value="BoxSet">Collections</option>
+        <option value="MusicAlbum">Albums</option>
+        <option value="MusicArtist">Artists</option>
+        <option value="MusicVideo">Music videos</option>
+        <option value="Playlist">Playlists</option>
+        <option value="Video">Home videos</option>
+      </select>
+      <select class="as-in" id="asMissing" title="Show only items missing…">
+        <option value="">Show: Everything</option>
+        <option value="Primary">Missing poster</option>
+        <option value="Backdrop">Missing backdrop</option>
+        <option value="Logo">Missing logo</option>
+        <option value="Thumb">Missing thumb</option>
+        <option value="Banner">Missing banner</option>
+        <option value="Art">Missing clear art</option>
+        <option value="Disc">Missing disc</option>
+      </select>
+      <button class="as-btn" id="asSelectMode" title="Select several items to apply the same artwork"><span class="material-icons">checklist</span>Select</button>
+    </div>
+    <div id="asStatus" class="as-hint" style="margin-bottom:.6em"></div>
+    <div class="as-grid" id="asGrid"></div>
+    <div class="as-more"><button class="as-btn" id="asMore" style="display:none">Load more</button></div>
+  </section>
+
+  <!-- ===================== SETTINGS ===================== -->
+  <section data-section="settings" style="display:none">
+    <div class="as-panel">
+      <h3>NAS folders</h3>
+      <div class="as-hint">Folders Jellyfin can see that hold your artwork. Use the path <b>inside the Jellyfin container</b> (e.g. <code>/artwork</code>), not the NAS share path. See Help for how to add one on a UGREEN NAS.</div>
+      <div id="asRoots" style="margin-top:.8em"></div>
+      <button class="as-btn" id="asAddRoot" style="margin-top:.4em"><span class="material-icons">add</span>Add folder</button>
+    </div>
+    <div class="as-panel">
+      <h3>Behaviour</h3>
+      <div class="as-field">
+        <label for="asNasMode">When using a NAS image</label>
+        <select class="as-in" id="asNasMode">
+          <option value="copy">Copy it into Jellyfin (safest)</option>
+          <option value="link">Link to the file on the NAS (no copy, edits on NAS show up)</option>
+        </select>
+      </div>
+      <div class="as-field">
+        <label for="asSaveLoc">Where copied artwork is saved</label>
+        <select class="as-in" id="asSaveLoc">
+          <option value="library">Follow each library's setting</option>
+          <option value="media">Next to the media files (poster.jpg, fanart.jpg…)</option>
+          <option value="metadata">Jellyfin's metadata folder</option>
+        </select>
+      </div>
+      <div class="as-field">
+        <label for="asMaxMb">Largest image allowed (MB)</label>
+        <input class="as-in" id="asMaxMb" type="number" min="1" max="200">
+      </div>
+      <div class="as-field">
+        <label for="asTimeout">Web link download timeout (seconds)</label>
+        <input class="as-in" id="asTimeout" type="number" min="5" max="600">
+      </div>
+    </div>
+    <button class="as-btn primary" id="asSave"><span class="material-icons">save</span>Save settings</button>
+  </section>
+
+  <!-- ===================== HELP ===================== -->
+  <section data-section="help" class="as-help" style="display:none">
+    <div class="as-panel">
+      <h4 style="margin-top:0">The basics</h4>
+      <ol>
+        <li>Pick a library chip at the top (or <b>Library artwork</b> to change the library tiles themselves).</li>
+        <li>Click any title to open its artwork editor.</li>
+        <li>For each slot (Poster, Backdrops, Logo…) you can <b>drag an image onto it</b>, click it to choose a source, or click it and press <b>Ctrl+V</b> to paste.</li>
+      </ol>
+      <h4>Four ways to add an image</h4>
+      <ul>
+        <li><b>Upload</b> — a file from this computer or phone.</li>
+        <li><b>Web link</b> — any public image address. Google Drive, Dropbox, OneDrive and Imgur share links are converted automatically. Tip: you can also drag a picture straight from another browser tab onto a slot.</li>
+        <li><b>NAS</b> — browse or search your artwork folders. <i>Copy</i> stores a copy in Jellyfin; <i>Link</i> points at the NAS file so it's never duplicated.</li>
+        <li><b>Online</b> — Jellyfin's own providers (TMDB, Fanart.tv, etc., whichever you have enabled).</li>
+      </ul>
+      <h4>Backdrops</h4>
+      <p>Items can have several backdrops. The first one is the "main" one most apps show. Use the star button to make any backdrop the main one, the arrows to reorder, and the + tile to add more.</p>
+      <h4>Doing many at once</h4>
+      <p>Click <b>Select</b>, tick the items, then <b>Apply artwork</b> to put the same image on all of them (handy for season posters or a collection's backdrop).</p>
+      <h4>Adding a UGREEN NAS folder</h4>
+      <ol>
+        <li>In UGOS, open <b>Docker → Containers</b>, stop the Jellyfin container and choose <b>Edit</b>.</li>
+        <li>Under <b>Storage space / Volume</b>, add a folder: pick your artwork folder on the NAS (e.g. <code>/volume1/Media/Artwork</code>) and set the container path to <code>/artwork</code>. Read-only is fine for Copy mode.</li>
+        <li>Start the container, then here in <b>Settings</b> add a folder named e.g. "UGREEN Artwork" with path <code>/artwork</code>. A green tick means Jellyfin can see it.</li>
+      </ol>
+      <p>Your existing media folders (already mapped for your libraries) can be added the same way — use the same container path your library uses.</p>
+      <h4>Linked images</h4>
+      <p>Linked images show an orange <b>NAS</b> tag. If you later move or rename that file on the NAS, Jellyfin will lose the image. A metadata refresh with "Replace existing images" ticked can also swap them for downloaded ones.</p>
+    </div>
+  </section>
+</div>
+
+<div class="as-bulkbar" id="asBulkBar">
+  <span id="asBulkCount">0 selected</span>
+  <button class="as-btn small" id="asBulkAll" style="color:#fff">Select page</button>
+  <button class="as-btn small primary" id="asBulkApply"><span class="material-icons">auto_awesome</span>Apply artwork</button>
+  <button class="as-btn small" id="asBulkClear" style="color:#fff">Done</button>
+</div>
+
+</div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+    var PLUGIN_ID = '7143ab64-23ea-4969-b0b9-672c6893c4b3';
+    var page = document.querySelector('#artworkStudioPage');
+    if (!page || page.dataset.asInit) { return; }
+    page.dataset.asInit = '1';
+
+    // ------------------------------------------------------------ constants
+    var SLOTS = [
+        { type: 'Primary',  label: 'Poster / Cover', hint: 'Main image · posters 2:3 (1000×1500), albums 1:1', w: 2, h: 3 },
+        { type: 'Backdrop', label: 'Backdrops', hint: 'Background art · 16:9, 1920×1080 or larger · first one is the main', w: 16, h: 9, multi: true, wide: true },
+        { type: 'Logo',     label: 'Logo', hint: 'Transparent PNG title · ~800×310', w: 800, h: 310, clear: true },
+        { type: 'Thumb',    label: 'Thumb', hint: 'Landscape card · 16:9 · ~1000×562', w: 16, h: 9 },
+        { type: 'Banner',   label: 'Banner', hint: 'Wide strip · ~1000×185', w: 1000, h: 185 },
+        { type: 'Art',      label: 'Clear Art', hint: 'Transparent character art · ~1000×562', w: 16, h: 9, clear: true },
+        { type: 'Disc',     label: 'Disc', hint: 'Round disc art · 1000×1000', w: 1, h: 1, clear: true },
+        { type: 'Box',      label: 'Box', hint: 'Box front', w: 3, h: 4, extra: true },
+        { type: 'BoxRear',  label: 'Box (rear)', hint: 'Box back', w: 3, h: 4, extra: true },
+        { type: 'Menu',     label: 'Menu', hint: 'Disc menu art', w: 16, h: 9, extra: true },
+        { type: 'Screenshot', label: 'Screenshots', hint: 'Extra stills', w: 16, h: 9, multi: true, extra: true }
+    ];
+    var SLOT = {}; SLOTS.forEach(function (s) { SLOT[s.type] = s; });
+    var BADGES = [['Primary', 'P'], ['Backdrop', 'B'], ['Logo', 'L'], ['Thumb', 'T']];
+    var AUTO_TYPES = {
+        movies: 'Movie', tvshows: 'Series', music: 'MusicAlbum,MusicArtist', boxsets: 'BoxSet',
+        musicvideos: 'MusicVideo', homevideos: 'Video,PhotoAlbum', playlists: 'Playlist', books: 'Book,AudioBook'
+    };
+    var DEFAULT_TYPES = 'Movie,Series,BoxSet,MusicAlbum,MusicArtist,MusicVideo,Video';
+    var PAGE_SIZE = 60, MISSING_PAGE_SIZE = 400;
+
+    // ------------------------------------------------------------ state
+    var S = {
+        libraries: [], lib: null /* null = all, 'LIBS' = library artwork */, search: '', type: 'auto', missing: '',
+        items: [], scanned: 0, total: 0, loading: false, selecting: false, selected: {}, config: null, roots: null, reqId: 0
+    };
+
+    // ------------------------------------------------------------ helpers
+    function $(sel, root) { return (root || page).querySelector(sel); }
+    function $$(sel, root) { return Array.prototype.slice.call((root || page).querySelectorAll(sel)); }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    function icon(n) { return '<span class="material-icons">' + n + '</span>'; }
+    function fmtSize(b) { if (!b && b !== 0) return ''; if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(0) + ' KB'; return (b / 1048576).toFixed(1) + ' MB'; }
+    function debounce(fn, ms) { var t; return function () { var a = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, a); }, ms); }; }
+    function userId() { return ApiClient.getCurrentUserId(); }
+
+    function api(method, path, opts) {
+        opts = opts || {};
+        var headers = { 'X-Emby-Token': ApiClient.accessToken() };
+        var body;
+        if (opts.json !== undefined) { headers['Content-Type'] = 'application/json'; body = JSON.stringify(opts.json); }
+        else if (opts.form) { body = opts.form; }
+        return fetch(ApiClient.getUrl(path, opts.query || {}), { method: method, headers: headers, body: body }).then(function (r) {
+            if (!r.ok) {
+                return r.text().then(function (t) {
+                    var msg = t;
+                    try { var j = JSON.parse(t); msg = j.message || j.Message || j.detail || j.title || t; } catch (e) { /* not json */ }
+                    if (!msg) msg = r.status + ' ' + r.statusText;
+                    if (r.status === 404 && /ArtworkStudio/.test(path) && !t) msg = 'Plugin endpoint not found — restart Jellyfin after installing the plugin.';
+                    throw new Error(msg);
+                });
+            }
+            if (opts.raw) return r;
+            var ct = r.headers.get('content-type') || '';
+            return ct.indexOf('json') >= 0 ? r.json() : null;
+        });
+    }
+
+    var toastEl;
+    function toast(msg, isErr) {
+        if (!toastEl) { toastEl = document.createElement('div'); toastEl.className = 'as-toast'; page.appendChild(toastEl); }
+        toastEl.textContent = msg;
+        toastEl.className = 'as-toast show' + (isErr ? ' err' : '');
+        clearTimeout(toastEl._t);
+        toastEl._t = setTimeout(function () { toastEl.className = 'as-toast' + (isErr ? ' err' : ''); }, isErr ? 6000 : 2600);
+    }
+
+    function imgUrl(itemId, type, index, tag, maxWidth) {
+        var q = { quality: 90 };
+        if (tag) q.tag = tag; else q.v = Date.now();
+        if (maxWidth) q.maxWidth = maxWidth;
+        return ApiClient.getUrl('Items/' + itemId + '/Images/' + type + (index != null ? '/' + index : ''), q);
+    }
+
+    function itemHas(item, type) {
+        if (type === 'Backdrop') return (item.BackdropImageTags || []).length > 0;
+        return !!(item.ImageTags && item.ImageTags[type]);
+    }
+
+    function modal(html, cls, stack) {
+        var ov = document.createElement('div');
+        ov.className = 'as-overlay' + (stack ? ' stack' + stack : '');
+        ov.innerHTML = '<div class="as-modal ' + (cls || '') + '">' + html + '</div>';
+        page.appendChild(ov);
+        ov.addEventListener('mousedown', function (e) { if (e.target === ov && ov._close) ov._close(); });
+        return ov;
+    }
+
+    // Extract an image URL / file from a drop or paste
+    function readTransfer(dt) {
+        if (!dt) return null;
+        var files = dt.files && dt.files.length ? dt.files : null;
+        if (!files && dt.items) {
+            for (var i = 0; i < dt.items.length; i++) {
+                if (dt.items[i].kind === 'file') { var f = dt.items[i].getAsFile(); if (f) { files = [f]; break; } }
+            }
+        }
+        if (files && files[0] && /^image\//.test(files[0].type)) return { kind: 'upload', file: files[0] };
+        if (files && files[0]) return { error: 'That file isn\'t an image.' };
+        var html = dt.getData && dt.getData('text/html');
+        if (html) { var m = html.match(/<img[^>]+src=["']([^"']+)["']/i); if (m && /^https?:/i.test(m[1])) return { kind: 'url', url: m[1].replace(/&amp;/g, '&') }; }
+        var uri = dt.getData && (dt.getData('text/uri-list') || dt.getData('text/plain'));
+        if (uri) { uri = uri.split('\n')[0].trim(); if (/^https?:\/\//i.test(uri)) return { kind: 'url', url: uri }; }
+        return null;
+    }
+
+    // ------------------------------------------------------------ apply a source to an item
+    function applySource(itemId, type, index, src) {
+        var single = !(SLOT[type] && SLOT[type].multi);
+        var idx = single ? null : (index == null ? null : index);
+        if (src.kind === 'upload') {
+            var fd = new FormData();
+            fd.append('file', src.file, src.file.name || 'pasted-image.png');
+            var q = { type: type }; if (idx != null) q.index = idx;
+            return api('POST', 'ArtworkStudio/Items/' + itemId + '/Upload', { query: q, form: fd });
+        }
+        if (src.kind === 'url' || src.kind === 'remote') {
+            return api('POST', 'ArtworkStudio/Items/' + itemId + '/FromUrl', { json: { Type: type, Index: idx, Url: src.url } });
+        }
+        if (src.kind === 'nas') {
+            return api('POST', 'ArtworkStudio/Items/' + itemId + '/FromNas', { json: { Type: type, Index: idx, Root: src.root, Path: src.path, Mode: src.mode } });
+        }
+        return Promise.reject(new Error('Unknown source'));
+    }
+
+    // ============================================================ TABS
+    $$('.as-tab').forEach(function (b) {
+        b.addEventListener('click', function () {
+            $$('.as-tab').forEach(function (x) { x.classList.toggle('active', x === b); });
+            $$('section[data-section]').forEach(function (s) { s.style.display = s.dataset.section === b.dataset.tab ? '' : 'none'; });
+            if (b.dataset.tab === 'settings') loadSettings();
+        });
+    });
+
+    // ============================================================ BROWSE
+    function loadLibraries() {
+        return api('GET', 'Library/VirtualFolders').then(function (libs) {
+            S.libraries = (libs || []).filter(function (l) { return l.ItemId; });
+            renderChips();
+        }).catch(function (e) { toast('Couldn\'t load libraries: ' + e.message, true); });
+    }
+
+    function renderChips() {
+        var html = '<button class="as-chip special' + (S.lib === 'LIBS' ? ' active' : '') + '" data-lib="LIBS">' + '🖼 Library artwork</button>';
+        html += '<button class="as-chip' + (S.lib === null ? ' active' : '') + '" data-lib="">All libraries</button>';
+        S.libraries.forEach(function (l) {
+            html += '<button class="as-chip' + (S.lib === l.ItemId ? ' active' : '') + '" data-lib="' + esc(l.ItemId) + '">' + esc(l.Name) + '</button>';
+        });
+        $('#asLibChips').innerHTML = html;
+    }
+
+    $('#asLibChips').addEventListener('click', function (e) {
+        var b = e.target.closest('.as-chip'); if (!b) return;
+        S.lib = b.dataset.lib === 'LIBS' ? 'LIBS' : (b.dataset.lib || null);
+        renderChips(); reload();
+    });
+    $('#asSearch').addEventListener('input', debounce(function () { S.search = $('#asSearch').value.trim(); reload(); }, 300));
+    $('#asType').addEventListener('change', function () { S.type = this.value; reload(); });
+    $('#asMissing').addEventListener('change', function () { S.missing = this.value; reload(); });
+    $('#asMore').addEventListener('click', function () { loadItems(false); });
+
+    function currentLib() { return S.libraries.filter(function (l) { return l.ItemId === S.lib; })[0]; }
+
+    function includeTypes() {
+        if (S.type !== 'auto') return S.type;
+        var lib = currentLib();
+        if (lib && AUTO_TYPES[(lib.CollectionType || '').toLowerCase()]) return AUTO_TYPES[(lib.CollectionType || '').toLowerCase()];
+        return DEFAULT_TYPES;
+    }
+
+    function reload() {
+        S.items = []; S.scanned = 0; S.total = 0;
+        $('#asGrid').innerHTML = '';
+        loadItems(true);
+    }
+
+    function loadItems() {
+        var req = ++S.reqId;
+        var status = $('#asStatus');
+        status.innerHTML = '<span style="display:inline-flex;gap:.5em;align-items:center"><span class="as-spin"></span>Loading…</span>';
+        $('#asMore').style.display = 'none';
+
+        var p;
+        if (S.lib === 'LIBS') {
+            var ids = S.libraries.map(function (l) { return l.ItemId; }).join(',');
+            p = (ids ? api('GET', 'Items', { query: { userId: userId(), Ids: ids, Fields: 'PrimaryImageAspectRatio', EnableImageTypes: 'Primary,Backdrop,Thumb,Logo,Banner,Art,Disc' } }) : Promise.resolve({ Items: [] }))
+                .catch(function () { return { Items: [] }; })
+                .then(function (res) {
+                    var byId = {}; (res.Items || []).forEach(function (i) { byId[i.Id] = i; });
+                    var items = S.libraries.map(function (l) {
+                        var i = byId[l.ItemId] || {};
+                        return { Id: l.ItemId, Name: l.Name, Type: 'CollectionFolder', ImageTags: i.ImageTags || {}, BackdropImageTags: i.BackdropImageTags || [], _lib: true, _ct: l.CollectionType };
+                    });
+                    if (S.search) items = items.filter(function (i) { return i.Name.toLowerCase().indexOf(S.search.toLowerCase()) >= 0; });
+                    return { Items: items, TotalRecordCount: items.length, done: true };
+                });
+        } else {
+            var limit = S.missing ? MISSING_PAGE_SIZE : PAGE_SIZE;
+            var q = {
+                userId: userId(), Recursive: true, IncludeItemTypes: includeTypes(), SortBy: 'SortName', SortOrder: 'Ascending',
+                Fields: 'PrimaryImageAspectRatio,ProductionYear,ParentId', EnableImageTypes: 'Primary,Backdrop,Thumb,Logo,Banner,Art,Disc',
+                ImageTypeLimit: 10, StartIndex: S.scanned, Limit: limit, EnableTotalRecordCount: true
+            };
+            if (S.lib) q.ParentId = S.lib;
+            if (S.search) q.SearchTerm = S.search;
+            p = api('GET', 'Items', { query: q });
+        }
+
+        p.then(function (res) {
+            if (req !== S.reqId) return;
+            var batch = res.Items || [];
+            S.total = res.TotalRecordCount || 0;
+            S.scanned += batch.length;
+            if (S.missing) batch = batch.filter(function (i) { return !itemHas(i, S.missing); });
+            S.items = S.items.concat(batch);
+            appendCards(batch);
+
+            var more = !res.done && S.scanned < S.total;
+            $('#asMore').style.display = more ? '' : 'none';
+            if (!S.items.length && !more) {
+                $('#asGrid').innerHTML = '<div class="as-empty" style="grid-column:1/-1">' + (S.missing ? '🎉 Nothing is missing that artwork here.' : 'No items found.') + '</div>';
+            }
+            if (S.lib === 'LIBS') status.textContent = 'These are the tiles shown for each library on the home screen. Click one to change its artwork.';
+            else if (S.missing) status.textContent = S.items.length + ' missing ' + SLOT[S.missing].label.toLowerCase() + ' · checked ' + S.scanned + ' of ' + S.total;
+            else status.textContent = 'Showing ' + S.items.length + ' of ' + S.total;
+        }).catch(function (e) {
+            if (req !== S.reqId) return;
+            status.textContent = '';
+            toast('Couldn\'t load items: ' + e.message, true);
+        });
+    }
+
+    function isWide(item) { return item._lib || item.Type === 'Episode' || item.Type === 'Video' || item.Type === 'MusicVideo'; }
+
+    function cardHtml(item) {
+        var wide = isWide(item);
+        var tag = item.ImageTags && item.ImageTags.Primary;
+        var bg = '';
+        if (tag) bg = 'background-image:url(\'' + imgUrl(item.Id, 'Primary', null, tag, wide ? 420 : 300) + '\')';
+        var sub = item._lib ? (item._ct || 'library') : [item.Type === 'BoxSet' ? 'Collection' : item.Type, item.ProductionYear].filter(Boolean).join(' · ');
+        if (item.SeriesName) sub = item.SeriesName + (item.Type === 'Season' ? '' : ' · ' + sub);
+        var badges = BADGES.map(function (b) {
+            var has = itemHas(item, b[0]);
+            var n = b[0] === 'Backdrop' ? (item.BackdropImageTags || []).length : 0;
+            return '<span class="as-badge' + (has ? '' : ' off') + '" title="' + SLOT[b[0]].label + (has ? '' : ' missing') + '">' + b[1] + (n > 1 ? n : '') + '</span>';
+        }).join('');
+        return '<div class="as-card' + (wide ? ' wide' : '') + (S.selected[item.Id] ? ' selected' : '') + '" data-id="' + esc(item.Id) + '">' +
+            '<div class="as-poster" style="' + bg + '">' + (tag ? '' : icon(item._lib ? 'folder' : 'image_not_supported')) + '</div>' +
+            (item._lib ? '' : '<div class="as-check" title="Select">' + icon('check') + '</div>') +
+            '<div class="as-meta"><div class="as-name" title="' + esc(item.Name) + '">' + esc(item.Name) + '</div><div class="as-sub">' + esc(sub) + '</div><div class="as-badges">' + badges + '</div></div></div>';
+    }
+
+    function appendCards(items) {
+        var grid = $('#asGrid');
+        grid.insertAdjacentHTML('beforeend', items.map(cardHtml).join(''));
+    }
+
+    function findItem(id) { return S.items.filter(function (i) { return i.Id === id; })[0]; }
+
+    function refreshCard(id) {
+        var item = findItem(id); if (!item) return;
+        var p = item._lib
+            ? api('GET', 'Items/' + id + '/Images').then(function (infos) {
+                item.ImageTags = {}; item.BackdropImageTags = [];
+                (infos || []).forEach(function (i) { if (i.ImageType === 'Backdrop') item.BackdropImageTags.push(i.ImageTag); else item.ImageTags[i.ImageType] = i.ImageTag; });
+            })
+            : api('GET', 'Items', { query: { userId: userId(), Ids: id, Fields: 'PrimaryImageAspectRatio,ProductionYear', EnableImageTypes: 'Primary,Backdrop,Thumb,Logo,Banner,Art,Disc', ImageTypeLimit: 10 } })
+                .then(function (res) { var fresh = (res.Items || [])[0]; if (fresh) { item.ImageTags = fresh.ImageTags; item.BackdropImageTags = fresh.BackdropImageTags; } });
+        p.then(function () {
+            var el = $('.as-card[data-id="' + id + '"]');
+            if (el) { var tmp = document.createElement('div'); tmp.innerHTML = cardHtml(item); el.replaceWith(tmp.firstChild); }
+        }).catch(function () { /* ignore */ });
+    }
+
+    $('#asGrid').addEventListener('click', function (e) {
+        var card = e.target.closest('.as-card'); if (!card) return;
+        var id = card.dataset.id;
+        if (e.target.closest('.as-check') || (S.selecting && !findItem(id)._lib)) { toggleSelect(id, card); return; }
+        openEditor(findItem(id));
+    });
+
+    // ------------------------------------------------------------ selection / bulk
+    function toggleSelect(id, card) {
+        if (S.selected[id]) delete S.selected[id]; else S.selected[id] = true;
+        if (card) card.classList.toggle('selected', !!S.selected[id]);
+        if (!S.selecting && Object.keys(S.selected).length) setSelecting(true);
+        updateBulkBar();
+    }
+    function setSelecting(on) {
+        S.selecting = on; page.classList.toggle('as-selecting', on);
+        if (!on) { S.selected = {}; $$('.as-card.selected').forEach(function (c) { c.classList.remove('selected'); }); }
+        updateBulkBar();
+    }
+    function updateBulkBar() {
+        var n = Object.keys(S.selected).length;
+        $('#asBulkCount').textContent = n + ' selected';
+        $('#asBulkApply').disabled = !n;
+        $('#asBulkBar').classList.toggle('show', S.selecting);
+    }
+    $('#asSelectMode').addEventListener('click', function () { setSelecting(!S.selecting); });
+    $('#asBulkClear').addEventListener('click', function () { setSelecting(false); });
+    $('#asBulkAll').addEventListener('click', function () {
+        S.items.forEach(function (i) { if (!i._lib) S.selected[i.Id] = true; });
+        $$('.as-card').forEach(function (c) { if (S.selected[c.dataset.id]) c.classList.add('selected'); });
+        updateBulkBar();
+    });
+    $('#asBulkApply').addEventListener('click', openBulk);
+
+    function openBulk() {
+        var ids = Object.keys(S.selected); if (!ids.length) return;
+        var opts = SLOTS.map(function (s) { return '<option value="' + s.type + '"' + (S.missing === s.type ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
+        var ov = modal(
+            '<div class="as-modal-head"><h3>Apply artwork to ' + ids.length + ' item' + (ids.length > 1 ? 's' : '') + '</h3><button class="as-x" data-close>' + icon('close') + '</button></div>' +
+            '<div class="as-modal-body">' +
+            '<div class="as-field"><label>Artwork type</label><select class="as-in" id="asBulkType">' + opts + '</select></div>' +
+            '<div class="as-field" id="asBulkModeWrap"><label>For backdrops</label><div class="as-seg" id="asBulkMode"><button data-v="add" class="active">Add as another backdrop</button><button data-v="replace">Replace the main backdrop</button></div></div>' +
+            '<div class="as-field"><label>Only items that don\'t have one yet</label><label class="as-row" style="font-weight:normal"><input type="checkbox" id="asBulkSkip"> Skip items that already have this artwork</label></div>' +
+            '<div id="asBulkProg" style="display:none"><div class="as-progress"><div></div></div><div class="as-hint" id="asBulkMsg"></div></div>' +
+            '</div><div class="as-modal-foot"><button class="as-btn" data-close>Cancel</button><button class="as-btn primary" id="asBulkGo">' + icon('image') + 'Choose image…</button></div>', 'narrow');
+        var close = ov._close = function () { ov.remove(); };
+        $$('[data-close]', ov).forEach(function (b) { b.onclick = close; });
+        var mode = 'add';
+        function syncMode() { $('#asBulkModeWrap', ov).style.display = SLOT[$('#asBulkType', ov).value].multi ? '' : 'none'; }
+        $('#asBulkType', ov).onchange = syncMode; syncMode();
+        $('#asBulkMode', ov).onclick = function (e) { var b = e.target.closest('button'); if (!b) return; mode = b.dataset.v; $$('button', this).forEach(function (x) { x.classList.toggle('active', x === b); }); };
+        $('#asBulkGo', ov).onclick = function () {
+            var type = $('#asBulkType', ov).value;
+            var skip = $('#asBulkSkip', ov).checked;
+            var firstItem = findItem(ids[0]) || {};
+            openSource({ title: SLOT[type].label + ' for ' + ids.length + ' items', type: type, itemId: null, guess: firstItem.SeriesName || firstItem.Name, stack: 2 }).then(function (src) {
+                if (!src) return;
+                var go = $('#asBulkGo', ov); go.disabled = true;
+                $('#asBulkProg', ov).style.display = '';
+                var bar = $('.as-progress div', ov), msg = $('#asBulkMsg', ov);
+                var done = 0, ok = 0, skipped = 0, fails = [];
+                var index = SLOT[type].multi && mode === 'replace' ? 0 : null;
+                (function next(i) {
+                    if (i >= ids.length) {
+                        msg.innerHTML = '✅ ' + ok + ' updated' + (skipped ? ' · ' + skipped + ' skipped' : '') + (fails.length ? '<br>❌ ' + fails.length + ' failed: ' + fails.map(esc).join('; ') : '');
+                        go.disabled = false; go.innerHTML = icon('done') + 'Close'; go.onclick = close;
+                        ids.forEach(refreshCard);
+                        return;
+                    }
+                    var id = ids[i], it = findItem(id) || { Name: id };
+                    msg.textContent = 'Working on ' + it.Name + '…';
+                    var p = (skip && itemHas(it, type)) ? Promise.resolve('skip') : applySource(id, type, index, src);
+                    p.then(function (r) { if (r === 'skip') skipped++; else ok++; })
+                        .catch(function (e) { fails.push(it.Name + ' (' + e.message + ')'); })
+                        .then(function () { done++; bar.style.width = (done / ids.length * 100) + '%'; next(i + 1); });
+                })(0);
+            });
+        };
+    }
+
+    // ============================================================ ITEM EDITOR
+    var editor = null; // { ov, item, infos, last: {type,index} }
+
+    function openEditor(item) {
+        var ov = modal(
+            '<div class="as-modal-head">' + icon(item._lib ? 'folder' : 'movie') + '<h3>' + esc(item.Name) + '</h3>' +
+            (item._lib ? '' : '<a class="as-btn small" target="_blank" href="#/details?id=' + esc(item.Id) + '">' + icon('open_in_new') + 'Open</a>') +
+            '<button class="as-btn small" id="asEdExtra">' + icon('tune') + 'More types</button>' +
+            '<button class="as-x" data-close title="Close">' + icon('close') + '</button></div>' +
+            '<div class="as-modal-body"><div class="as-hint" style="margin-bottom:.9em">Drag an image (or a picture from another browser tab) onto any slot · click a slot then Ctrl+V to paste · or use the buttons.</div><div class="as-slots" id="asSlots"><div class="as-spin"></div></div></div>');
+        editor = { ov: ov, item: item, infos: [], last: { type: 'Primary', index: null }, extra: false };
+        ov._close = function () { ov.remove(); document.removeEventListener('paste', onPaste); editor = null; refreshCard(item.Id); };
+        $('[data-close]', ov).onclick = ov._close;
+        $('#asEdExtra', ov).onclick = function () { editor.extra = !editor.extra; this.classList.toggle('primary', editor.extra); renderSlots(); };
+        document.addEventListener('paste', onPaste);
+        (S.roots ? Promise.resolve() : api('GET', 'ArtworkStudio/Roots').then(function (r) { S.roots = r; }).catch(function () {})).then(loadInfos);
+    }
+
+    function loadInfos() {
+        if (!editor) return Promise.resolve();
+        var ed = editor;
+        return api('GET', 'Items/' + ed.item.Id + '/Images').then(function (infos) {
+            if (ed !== editor) return;
+            ed.infos = infos || [];
+            if (!ed.extra && ed.infos.some(function (i) { return SLOT[i.ImageType] && SLOT[i.ImageType].extra; })) {
+                ed.extra = true; $('#asEdExtra', ed.ov).classList.add('primary');
+            }
+            renderSlots();
+        }).catch(function (e) { toast('Couldn\'t load artwork: ' + e.message, true); });
+    }
+
+    function tileSize(slot) {
+        var item = editor.item;
+        var w = slot.w, h = slot.h;
+        if (slot.type === 'Primary') {
+            if (item.PrimaryImageAspectRatio) { w = item.PrimaryImageAspectRatio; h = 1; }
+            else if (item._lib || item.Type === 'Episode' || item.Type === 'Video') { w = 16; h = 9; }
+            else if (/^Music/.test(item.Type) || item.Type === 'Playlist') { w = 1; h = 1; }
+        }
+        var ratio = w / h;
+        var height = slot.multi ? 150 : (ratio > 2.5 ? 90 : ratio >= 1.2 ? 160 : 230);
+        return { w: Math.round(height * ratio), h: height };
+    }
+
+    // A NAS-linked image lives under a configured NAS folder and isn't one of Jellyfin's standard saved names
+    function isLinked(path) {
+        if (!path || !S.roots || !S.roots.Roots) return false;
+        var inRoot = S.roots.Roots.some(function (r) { return r.Path && path.indexOf(r.Path.replace(/\/+$/, '') + '/') === 0; });
+        return inRoot && !/[\\\/](poster|folder|cover|fanart|backdrop|logo|clearlogo|banner|thumb|landscape|clearart|disc|discart|box|boxrear|menu|screenshot)\d*\.(jpe?g|png|webp|gif|bmp|tbn)$/i.test(path);
+    }
+
+    function renderSlots() {
+        var ed = editor; if (!ed) return;
+        var html = SLOTS.filter(function (s) { return ed.extra || !s.extra; }).map(function (slot) {
+            var imgs = ed.infos.filter(function (i) { return i.ImageType === slot.type; }).sort(function (a, b) { return (a.ImageIndex || 0) - (b.ImageIndex || 0); });
+            var sz = tileSize(slot);
+            var style = 'width:' + sz.w + 'px;height:' + sz.h + 'px';
+            var tiles = imgs.map(function (info, n) {
+                var idx = slot.multi ? (info.ImageIndex != null ? info.ImageIndex : n) : null;
+                var linked = isLinked(info.Path);
+                return '<div class="as-tile' + (slot.clear ? ' checker' : '') + '" style="' + style + '" data-type="' + slot.type + '" data-index="' + (idx == null ? '' : idx) + '" tabindex="0" title="' + esc(info.Path || '') + '">' +
+                    '<img loading="lazy" src="' + imgUrl(ed.item.Id, slot.type, idx, info.ImageTag, 700) + '" alt="">' +
+                    (slot.multi && n === 0 ? '<span class="as-mainflag">MAIN</span>' : '') +
+                    (linked ? '<span class="as-linkflag" title="Linked to a file outside Jellyfin\'s own folders">NAS</span>' : '') +
+                    '<div class="as-tile-tools">' +
+                    (slot.multi && n > 0 ? '<button class="as-ibtn" data-act="main" title="Make main">' + icon('star') + '</button><button class="as-ibtn" data-act="left" title="Move left">' + icon('chevron_left') + '</button>' : '') +
+                    (slot.multi && n < imgs.length - 1 ? '<button class="as-ibtn" data-act="right" title="Move right">' + icon('chevron_right') + '</button>' : '') +
+                    '<button class="as-ibtn" data-act="view" title="View full size">' + icon('zoom_in') + '</button>' +
+                    '<button class="as-ibtn" data-act="replace" title="Replace">' + icon('swap_horiz') + '</button>' +
+                    '<button class="as-ibtn danger" data-act="delete" title="Remove">' + icon('delete') + '</button>' +
+                    '</div>' +
+                    '<div class="as-tile-info"><span>' + (info.Width ? info.Width + '×' + info.Height : '') + '</span><span>' + fmtSize(info.Size) + '</span></div></div>';
+            }).join('');
+            var showDrop = slot.multi || !imgs.length;
+            if (showDrop) {
+                tiles += '<div class="as-drop" style="' + style + ';min-width:150px" data-type="' + slot.type + '" data-index="" tabindex="0">' +
+                    icon(imgs.length ? 'add_photo_alternate' : 'add_photo_alternate') + '<span>' + (slot.multi && imgs.length ? 'Add another' : 'Add ' + slot.label.toLowerCase()) + '</span><span style="opacity:.6">drop · paste · click</span></div>';
+            }
+            return '<div class="as-slot' + (slot.wide ? ' wide' : '') + '" data-slot="' + slot.type + '">' +
+                '<div class="as-slot-title"><b>' + slot.label + (slot.multi && imgs.length ? ' (' + imgs.length + ')' : '') + '</b><span>' + slot.hint + '</span></div>' +
+                '<div class="as-tiles">' + tiles + '</div></div>';
+        }).join('');
+        var wrap = $('#asSlots', ed.ov);
+        wrap.innerHTML = html;
+        bindSlotEvents(wrap);
+    }
+
+    function targetOf(el) {
+        var t = el.closest('[data-type]');
+        if (!t) return null;
+        return { el: t, type: t.dataset.type, index: t.dataset.index === '' ? null : parseInt(t.dataset.index, 10), isDrop: t.classList.contains('as-drop') };
+    }
+
+    function setLast(tg) {
+        if (!editor) return;
+        $$('.as-lastslot', editor.ov).forEach(function (x) { x.classList.remove('as-lastslot'); });
+        tg.el.classList.add('as-lastslot');
+        editor.last = { type: tg.type, index: tg.index };
+    }
+
+    function bindSlotEvents(wrap) {
+        wrap.addEventListener('click', function (e) {
+            var tg = targetOf(e.target); if (!tg) return;
+            setLast(tg);
+            var actBtn = e.target.closest('[data-act]');
+            var act = actBtn ? actBtn.dataset.act : (tg.isDrop ? 'add' : null);
+            if (!act) return;
+            if (act === 'add' || act === 'replace') chooseFor(tg.type, act === 'add' ? null : tg.index);
+            else if (act === 'delete') removeImage(tg);
+            else if (act === 'view') window.open(imgUrl(editor.item.Id, tg.type, tg.index, null, null), '_blank');
+            else if (act === 'main') moveImage(tg, 0);
+            else if (act === 'left') moveImage(tg, tg.index - 1);
+            else if (act === 'right') moveImage(tg, tg.index + 1);
+        });
+        ['dragenter', 'dragover'].forEach(function (ev) {
+            wrap.addEventListener(ev, function (e) { var tg = targetOf(e.target); if (!tg) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; tg.el.classList.add('over'); });
+        });
+        wrap.addEventListener('dragleave', function (e) { var tg = targetOf(e.target); if (tg && !tg.el.contains(e.relatedTarget)) tg.el.classList.remove('over'); });
+        wrap.addEventListener('drop', function (e) {
+            var tg = targetOf(e.target); if (!tg) return;
+            e.preventDefault(); tg.el.classList.remove('over'); setLast(tg);
+            var src = readTransfer(e.dataTransfer);
+            if (!src) { toast('Couldn\'t read that — try dropping an image file or a picture from a web page.', true); return; }
+            if (src.error) { toast(src.error, true); return; }
+            run(tg.type, tg.isDrop ? null : tg.index, src, tg.el);
+        });
+    }
+
+    function onPaste(e) {
+        if (!editor || page.querySelector('.as-overlay.stack2')) return; // source picker handles its own paste
+        if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+        var src = readTransfer(e.clipboardData);
+        if (!src) return;
+        e.preventDefault();
+        if (src.error) { toast(src.error, true); return; }
+        var last = editor.last;
+        var el = $('[data-type="' + last.type + '"][data-index="' + (last.index == null ? '' : last.index) + '"]', editor.ov);
+        toast('Pasting into ' + SLOT[last.type].label + '…');
+        run(last.type, last.index, src, el);
+    }
+
+    function busy(el, text) {
+        if (!el) return function () {};
+        var b = document.createElement('div'); b.className = 'as-busy'; b.innerHTML = '<span class="as-spin"></span>&nbsp; ' + esc(text || 'Saving…');
+        if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+        el.appendChild(b);
+        return function () { b.remove(); };
+    }
+
+    function run(type, index, src, el) {
+        var ed = editor; if (!ed) return;
+        var done = busy(el, src.kind === 'url' ? 'Downloading…' : 'Saving…');
+        return applySource(ed.item.Id, type, index, src).then(function () {
+            toast(SLOT[type].label + ' updated');
+            return loadInfos();
+        }).catch(function (e) { done(); toast(e.message, true); });
+    }
+
+    function chooseFor(type, index) {
+        var item = editor.item;
+        openSource({ title: (index == null && SLOT[type].multi ? 'Add ' : 'Set ') + SLOT[type].label.toLowerCase() + ' · ' + item.Name, type: type, itemId: item._lib ? null : item.Id, guess: item.Name, stack: 2 })
+            .then(function (src) {
+                if (!src || !editor) return;
+                var el = $('[data-type="' + type + '"][data-index="' + (index == null ? '' : index) + '"]', editor.ov);
+                run(type, index, src, el);
+            });
+    }
+
+    function removeImage(tg) {
+        if (!confirm('Remove this ' + SLOT[tg.type].label.toLowerCase() + '?')) return;
+        var done = busy(tg.el, 'Removing…');
+        var idx = tg.index == null ? 0 : tg.index;
+        api('DELETE', 'Items/' + editor.item.Id + '/Images/' + tg.type + '/' + idx)
+            .then(function () { toast('Removed'); return loadInfos(); })
+            .catch(function (e) { done(); toast(e.message, true); });
+    }
+
+    function moveImage(tg, newIndex) {
+        if (newIndex < 0) return;
+        var done = busy(tg.el, 'Moving…');
+        api('POST', 'Items/' + editor.item.Id + '/Images/' + tg.type + '/' + tg.index + '/Index', { query: { newIndex: newIndex } })
+            .then(loadInfos)
+            .catch(function (e) { done(); toast(e.message, true); });
+    }
+
+    // ============================================================ SOURCE PICKER
+    // Resolves with { kind:'upload', file } | { kind:'url', url } | { kind:'nas', root, path, mode } | { kind:'remote', url } | null
+    function openSource(o) {
+        return new Promise(function (resolve) {
+            var tabs = [['upload', 'upload', 'Upload'], ['url', 'link', 'Web link'], ['nas', 'dns', 'NAS']];
+            if (o.itemId) tabs.push(['online', 'travel_explore', 'Online']);
+            var ov = modal(
+                '<div class="as-modal-head">' + icon('add_photo_alternate') + '<h3>' + esc(o.title) + '</h3><button class="as-x" data-close>' + icon('close') + '</button></div>' +
+                '<div class="as-srctabs">' + tabs.map(function (t) { return '<button class="as-srctab" data-src="' + t[0] + '">' + icon(t[1]) + t[2] + '</button>'; }).join('') + '</div>' +
+                '<div class="as-modal-body" id="asSrcBody"></div>' +
+                '<div class="as-modal-foot"><span class="as-hint" id="asSrcSel" style="margin-right:auto"></span><button class="as-btn" data-close>Cancel</button><button class="as-btn primary" id="asSrcUse" disabled>' + icon('check') + 'Use this image</button></div>',
+                '', o.stack || 2);
+            var chosen = null, objectUrls = [], finished = false;
+            var body = $('#asSrcBody', ov), useBtn = $('#asSrcUse', ov), selLabel = $('#asSrcSel', ov);
+
+            function choose(src, label) { chosen = src; useBtn.disabled = !src; selLabel.textContent = label || ''; }
+            function finish(val) {
+                if (finished) return; finished = true;
+                document.removeEventListener('paste', onSrcPaste);
+                objectUrls.forEach(function (u) { URL.revokeObjectURL(u); });
+                ov.remove(); resolve(val);
+            }
+            ov._close = function () { finish(null); };
+            $$('[data-close]', ov).forEach(function (b) { b.onclick = ov._close; });
+            useBtn.onclick = function () { if (chosen) finish(chosen); };
+
+            function onSrcPaste(e) {
+                if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+                var src = readTransfer(e.clipboardData); if (!src || src.error) return;
+                e.preventDefault();
+                if (src.kind === 'upload') { show('upload'); setUpload(src.file); }
+                else { show('url'); $('#asUrlIn', ov).value = src.url; $('#asUrlIn', ov).dispatchEvent(new Event('input')); }
+            }
+            document.addEventListener('paste', onSrcPaste);
+
+            // ---------- tabs
+            var current;
+            function show(name) {
+                if (current === name) return;
+                current = name; choose(null);
+                $$('.as-srctab', ov).forEach(function (t) { t.classList.toggle('active', t.dataset.src === name); });
+                if (name === 'upload') renderUpload();
+                else if (name === 'url') renderUrl();
+                else if (name === 'nas') renderNas();
+                else if (name === 'online') renderOnline();
+                try { localStorage.setItem('as-last-src', name); } catch (e) { /* ignore */ }
+            }
+            $('.as-srctabs', ov).onclick = function (e) { var t = e.target.closest('.as-srctab'); if (t) show(t.dataset.src); };
+
+            // ---------- upload
+            function setUpload(file) {
+                if (!file || !/^image\//.test(file.type)) { toast('Please choose an image file.', true); return; }
+                var u = URL.createObjectURL(file); objectUrls.push(u);
+                var dz = $('#asBigDrop', ov);
+                if (dz) dz.innerHTML = '<img src="' + u + '"><div class="as-hint">' + esc(file.name || 'Pasted image') + ' · ' + fmtSize(file.size) + ' — click to pick a different one</div>';
+                choose({ kind: 'upload', file: file }, file.name || 'Pasted image');
+            }
+            function renderUpload() {
+                body.innerHTML = '<input type="file" id="asFile" accept="image/*" style="display:none">' +
+                    '<div class="as-bigdrop" id="asBigDrop">' + icon('cloud_upload') + '<div><b>Drop an image here</b> or click to browse</div><div class="as-hint">JPG, PNG, WebP, GIF or BMP · you can also paste with Ctrl+V</div></div>';
+                var dz = $('#asBigDrop', ov), fi = $('#asFile', ov);
+                dz.onclick = function () { fi.click(); };
+                fi.onchange = function () { if (fi.files[0]) setUpload(fi.files[0]); };
+                dz.ondragover = function (e) { e.preventDefault(); dz.classList.add('over'); };
+                dz.ondragleave = function () { dz.classList.remove('over'); };
+                dz.ondrop = function (e) {
+                    e.preventDefault(); dz.classList.remove('over');
+                    var src = readTransfer(e.dataTransfer);
+                    if (src && src.kind === 'upload') setUpload(src.file);
+                    else if (src && src.kind === 'url') { show('url'); $('#asUrlIn', ov).value = src.url; $('#asUrlIn', ov).dispatchEvent(new Event('input')); }
+                };
+            }
+
+            // ---------- url
+            function renderUrl() {
+                body.innerHTML = '<div class="as-field" style="max-width:none"><label for="asUrlIn">Image address</label>' +
+                    '<input class="as-in" id="asUrlIn" type="url" placeholder="https://…/poster.jpg" autocomplete="off"></div>' +
+                    '<div class="as-hint">Works with direct image links plus Google Drive, Dropbox, OneDrive and Imgur share links (the file must be shared publicly). The Jellyfin server downloads it, so the link must be reachable from your server.</div>' +
+                    '<div id="asUrlPrev" style="margin-top:1em;text-align:center"></div>';
+                var input = $('#asUrlIn', ov), prev = $('#asUrlPrev', ov);
+                input.focus();
+                input.oninput = debounce(function () {
+                    var v = input.value.trim();
+                    if (!/^https?:\/\/\S+\.\S+/i.test(v)) { prev.innerHTML = ''; choose(null); return; }
+                    choose({ kind: 'url', url: v }, 'Web link');
+                    var share = /drive\.google|dropbox\.com|1drv\.ms|onedrive/i.test(v);
+                    prev.innerHTML = share ? '<div class="as-hint">' + icon('cloud_done') + ' Share link detected — it will be converted to a direct download.</div>'
+                        : '<img style="max-height:340px;max-width:100%;border-radius:8px" referrerpolicy="no-referrer" src="' + esc(v) + '">';
+                    var img = $('img', prev);
+                    if (img) {
+                        img.onload = function () { selLabel.textContent = 'Web link · ' + img.naturalWidth + '×' + img.naturalHeight; };
+                        img.onerror = function () { prev.innerHTML = '<div class="as-hint">' + icon('help_outline') + ' Your browser can\'t preview this link, but the server will still try. If it fails, make sure it\'s the address of the image itself (right-click the picture → Copy image address).</div>'; };
+                    }
+                }, 350);
+            }
+
+            // ---------- NAS
+            var nas = { root: 0, path: '', mode: null, sel: null, observer: null, queue: [], active: 0 };
+            function nasThumb(img) {
+                nas.queue.push(img); pump();
+            }
+            function pump() {
+                while (nas.active < 6 && nas.queue.length) {
+                    var img = nas.queue.shift();
+                    if (!img.isConnected) continue;
+                    nas.active++;
+                    (function (img) {
+                        api('GET', 'ArtworkStudio/File', { query: { root: nas.root, path: img.dataset.path }, raw: true })
+                            .then(function (r) { return r.blob(); })
+                            .then(function (b) {
+                                var u = URL.createObjectURL(b); objectUrls.push(u); img.src = u;
+                                img.onload = function () { var c = img.closest('.as-pick'); var d = c && $('.as-dim', c); if (d) d.textContent = img.naturalWidth + '×' + img.naturalHeight; };
+                            })
+                            .catch(function () { img.alt = '⚠'; })
+                            .then(function () { nas.active--; pump(); });
+                    })(img);
+                }
+            }
+            function observeThumbs() {
+                if (nas.observer) nas.observer.disconnect();
+                nas.observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (en) { if (en.isIntersecting) { nas.observer.unobserve(en.target); nasThumb(en.target); } });
+                }, { root: body, rootMargin: '300px' });
+                $$('img[data-path]', body).forEach(function (i) { nas.observer.observe(i); });
+            }
+            function fileTile(f) {
+                return '<div class="as-pick" data-file="' + esc(f.Path) + '"><div class="as-pimg"><img data-path="' + esc(f.Path) + '" alt=""></div>' +
+                    '<div class="as-pcap">' + esc(f.Name) + '<small>' + (f.Path.indexOf('/') >= 0 && nas.searching ? esc(f.Path.substring(0, f.Path.lastIndexOf('/'))) + ' · ' : '') + '<span class="as-dim"></span> ' + fmtSize(f.Size) + '</small></div></div>';
+            }
+            function renderNas() {
+                body.innerHTML = '<div class="as-spin"></div>';
+                (S.roots ? Promise.resolve(S.roots) : api('GET', 'ArtworkStudio/Roots').then(function (r) { S.roots = r; return r; }))
+                    .then(function (r) {
+                        var roots = (r.Roots || []).filter(function (x) { return x.Path; });
+                        if (!roots.length) {
+                            body.innerHTML = '<div class="as-empty">' + icon('dns') + '<p>No NAS folders set up yet.</p><button class="as-btn primary" id="asGoSettings">Open settings</button></div>';
+                            $('#asGoSettings', ov).onclick = function () { finish(null); if (editor) editor.ov._close(); $('.as-tab[data-tab="settings"]').click(); };
+                            return;
+                        }
+                        if (nas.mode == null) nas.mode = (r.DefaultNasMode || 'copy').toLowerCase();
+                        try { var saved = JSON.parse(localStorage.getItem('as-nas') || 'null'); if (saved && roots.some(function (x) { return x.Index === saved.root; })) { nas.root = saved.root; nas.path = saved.path || ''; } else { nas.root = roots[0].Index; } } catch (e) { nas.root = roots[0].Index; }
+                        body.innerHTML = '<div class="as-row">' +
+                            '<select class="as-in" id="asNasRoot">' + roots.map(function (x) { return '<option value="' + x.Index + '"' + (x.Index === nas.root ? ' selected' : '') + '>' + esc(x.Name || x.Path) + (x.Exists ? '' : ' (not found)') + '</option>'; }).join('') + '</select>' +
+                            '<input class="as-in" id="asNasQ" type="search" placeholder="Search file names…" style="flex:1 1 200px" value="' + esc(o.guess || '') + '">' +
+                            '<button class="as-btn" id="asNasFind">' + icon('search') + 'Search</button>' +
+                            '<div class="as-seg" id="asNasMode" title="Copy keeps a copy in Jellyfin; Link points at the NAS file"><button data-v="copy">Copy</button><button data-v="link">Link</button></div>' +
+                            '</div><div class="as-crumbs" id="asCrumbs"></div><div id="asNasList"></div>';
+                        $$('#asNasMode button', ov).forEach(function (b) { b.classList.toggle('active', b.dataset.v === nas.mode); });
+                        $('#asNasMode', ov).onclick = function (e) {
+                            var b = e.target.closest('button'); if (!b) return; nas.mode = b.dataset.v;
+                            $$('button', this).forEach(function (x) { x.classList.toggle('active', x === b); });
+                            if (chosen && chosen.kind === 'nas') chosen.mode = nas.mode;
+                        };
+                        $('#asNasRoot', ov).onchange = function () { nas.root = parseInt(this.value, 10); nas.path = ''; browse(); };
+                        var q = $('#asNasQ', ov);
+                        $('#asNasFind', ov).onclick = function () { if (q.value.trim()) search(q.value.trim()); else browse(); };
+                        q.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); $('#asNasFind', ov).click(); } };
+                        q.onsearch = function () { if (!q.value) browse(); };
+                        browse();
+                    })
+                    .catch(function (e) { body.innerHTML = '<div class="as-empty">' + esc(e.message) + '</div>'; });
+            }
+            function crumbs() {
+                var parts = nas.path ? nas.path.split('/') : [];
+                var rootName = $('#asNasRoot option:checked', ov); rootName = rootName ? rootName.textContent : 'Root';
+                var h = '<button data-p="">' + icon('home') + '</button>';
+                var acc = '';
+                h += '<span>' + esc(rootName) + '</span>';
+                parts.forEach(function (p) { acc = acc ? acc + '/' + p : p; h += ' / <button data-p="' + esc(acc) + '">' + esc(p) + '</button>'; });
+                if (nas.searching) h += ' <span class="as-hint">· search results</span>';
+                $('#asCrumbs', ov).innerHTML = h;
+                $('#asCrumbs', ov).onclick = function (e) { var b = e.target.closest('button'); if (b) { nas.path = b.dataset.p; browse(); } };
+            }
+            function bindPicks(list) {
+                list.onclick = function (e) {
+                    var f = e.target.closest('[data-folder]');
+                    if (f) { nas.path = f.dataset.folder; browse(); return; }
+                    var p = e.target.closest('[data-file]'); if (!p) return;
+                    $$('.as-pick.sel', list).forEach(function (x) { x.classList.remove('sel'); });
+                    p.classList.add('sel');
+                    choose({ kind: 'nas', root: nas.root, path: p.dataset.file, mode: nas.mode }, p.dataset.file);
+                };
+                list.ondblclick = function (e) { if (e.target.closest('[data-file]') && chosen) useBtn.click(); };
+            }
+            function browse() {
+                nas.searching = false; choose(null);
+                try { localStorage.setItem('as-nas', JSON.stringify({ root: nas.root, path: nas.path })); } catch (e) { /* ignore */ }
+                crumbs();
+                var list = $('#asNasList', ov); list.innerHTML = '<div class="as-spin"></div>';
+                api('GET', 'ArtworkStudio/Browse', { query: { root: nas.root, path: nas.path } }).then(function (r) {
+                    var h = '';
+                    if (r.Parent != null) h += '<div class="as-pick as-folder" data-folder="' + esc(r.Parent) + '"><div class="as-pimg">' + icon('arrow_upward') + '</div><div class="as-pcap">Up a level</div></div>';
+                    h += r.Folders.map(function (d) { return '<div class="as-pick as-folder" data-folder="' + esc(d.Path) + '"><div class="as-pimg">' + icon('folder') + '</div><div class="as-pcap">' + esc(d.Name) + '</div></div>'; }).join('');
+                    h += r.Files.map(fileTile).join('');
+                    list.innerHTML = h ? '<div class="as-pick-grid">' + h + '</div>' : '<div class="as-empty">This folder is empty.</div>';
+                    if (!r.Files.length && r.Folders.length) list.insertAdjacentHTML('afterbegin', '<div class="as-hint" style="margin-bottom:.6em">Open a folder, or search above to look through every subfolder at once.</div>');
+                    bindPicks(list); observeThumbs();
+                }).catch(function (e) { list.innerHTML = '<div class="as-empty">' + esc(e.message) + '</div>'; });
+            }
+            function search(q) {
+                nas.searching = true; choose(null); crumbs();
+                var list = $('#asNasList', ov); list.innerHTML = '<div class="as-row"><span class="as-spin"></span> Searching…</div>';
+                api('GET', 'ArtworkStudio/Search', { query: { root: nas.root, path: nas.path, q: q } }).then(function (r) {
+                    list.innerHTML = r.Files.length
+                        ? '<div class="as-hint" style="margin-bottom:.6em">' + r.Files.length + (r.Files.length >= 300 ? '+' : '') + ' matches for "' + esc(q) + '"</div><div class="as-pick-grid">' + r.Files.map(fileTile).join('') + '</div>'
+                        : '<div class="as-empty">No images matching "' + esc(q) + '". Try fewer words, or browse instead.</div>';
+                    bindPicks(list); observeThumbs();
+                }).catch(function (e) { list.innerHTML = '<div class="as-empty">' + esc(e.message) + '</div>'; });
+            }
+
+            // ---------- online providers
+            function renderOnline() {
+                body.innerHTML = '<div class="as-row"><select class="as-in" id="asProv"><option value="">All providers</option></select>' +
+                    '<label class="as-row" style="gap:.3em"><input type="checkbox" id="asAllLang"> All languages</label></div><div id="asOnList" style="margin-top:1em"></div>';
+                api('GET', 'Items/' + o.itemId + '/RemoteImages/Providers').then(function (provs) {
+                    var sel = $('#asProv', ov); if (!sel) return;
+                    (provs || []).filter(function (p) { return !p.SupportedImages || p.SupportedImages.indexOf(o.type) >= 0; })
+                        .forEach(function (p) { sel.insertAdjacentHTML('beforeend', '<option>' + esc(p.Name) + '</option>'); });
+                }).catch(function () { /* ignore */ });
+                $('#asProv', ov).onchange = loadOnline;
+                $('#asAllLang', ov).onchange = loadOnline;
+                loadOnline();
+            }
+            function loadOnline() {
+                var list = $('#asOnList', ov); if (!list) return;
+                choose(null);
+                list.innerHTML = '<div class="as-row"><span class="as-spin"></span> Asking providers…</div>';
+                var q = { type: o.type, includeAllLanguages: $('#asAllLang', ov).checked, limit: 120, startIndex: 0 };
+                var prov = $('#asProv', ov).value; if (prov) q.providerName = prov;
+                api('GET', 'Items/' + o.itemId + '/RemoteImages', { query: q }).then(function (r) {
+                    var imgs = (r.Images || []).slice().sort(function (a, b) { return (b.CommunityRating || 0) - (a.CommunityRating || 0) || (b.VoteCount || 0) - (a.VoteCount || 0); });
+                    if (!imgs.length) { list.innerHTML = '<div class="as-empty">No ' + SLOT[o.type].label.toLowerCase() + ' found online for this item. Check that it\'s matched correctly (Identify) and that image providers are enabled for the library.</div>'; return; }
+                    list.innerHTML = '<div class="as-pick-grid">' + imgs.map(function (im, i) {
+                        var meta = [im.Width && im.Height ? im.Width + '×' + im.Height : '', im.Language ? im.Language.toUpperCase() : '', im.CommunityRating ? '★ ' + im.CommunityRating.toFixed(1) : ''].filter(Boolean).join(' · ');
+                        return '<div class="as-pick" data-i="' + i + '"><div class="as-pimg"><img loading="lazy" referrerpolicy="no-referrer" src="' + esc(im.ThumbnailUrl || im.Url) + '"></div><div class="as-pcap">' + esc(im.ProviderName) + '<small>' + esc(meta) + '</small></div></div>';
+                    }).join('') + '</div>';
+                    list.onclick = function (e) {
+                        var p = e.target.closest('[data-i]'); if (!p) return;
+                        $$('.as-pick.sel', list).forEach(function (x) { x.classList.remove('sel'); }); p.classList.add('sel');
+                        var im = imgs[+p.dataset.i]; choose({ kind: 'remote', url: im.Url }, im.ProviderName + (im.Width ? ' · ' + im.Width + '×' + im.Height : ''));
+                    };
+                    list.ondblclick = function (e) { if (e.target.closest('[data-i]') && chosen) useBtn.click(); };
+                }).catch(function (e) { list.innerHTML = '<div class="as-empty">' + esc(e.message) + '</div>'; });
+            }
+
+            var start = 'upload';
+            try { var last = localStorage.getItem('as-last-src'); if (last && tabs.some(function (t) { return t[0] === last; })) start = last; } catch (e) { /* ignore */ }
+            show(start);
+        });
+    }
+
+    // ============================================================ SETTINGS
+    function rootRow(r) {
+        return '<div class="as-rootrow"><input class="as-in" data-k="Name" placeholder="Name (e.g. UGREEN Artwork)" value="' + esc(r.Name) + '">' +
+            '<input class="as-in" data-k="Path" placeholder="/artwork" value="' + esc(r.Path) + '">' +
+            '<span class="as-status"></span><button class="as-btn small danger" data-del title="Remove">' + icon('delete') + '</button></div>';
+    }
+    function loadSettings() {
+        ApiClient.getPluginConfiguration(PLUGIN_ID).then(function (cfg) {
+            S.config = cfg;
+            $('#asRoots').innerHTML = (cfg.NasRoots || []).map(rootRow).join('') || '';
+            if (!(cfg.NasRoots || []).length) $('#asRoots').innerHTML = rootRow({ Name: 'NAS Artwork', Path: '' });
+            $('#asNasMode').value = cfg.DefaultNasMode || 'copy';
+            $('#asSaveLoc').value = cfg.SaveLocation || 'library';
+            $('#asMaxMb').value = cfg.MaxImageSizeMb || 40;
+            $('#asTimeout').value = cfg.DownloadTimeoutSeconds || 45;
+            checkRoots();
+        });
+    }
+    function checkRoots() {
+        api('GET', 'ArtworkStudio/Roots').then(function (r) {
+            S.roots = r;
+            var rows = $$('.as-rootrow');
+            (r.Roots || []).forEach(function (x, i) {
+                var st = rows[i] && $('.as-status', rows[i]); if (!st || !x.Path) return;
+                st.className = 'as-status ' + (x.Exists ? 'ok' : 'bad');
+                st.innerHTML = x.Exists ? icon('check_circle') + 'Found' : icon('error') + 'Not found';
+                st.title = x.Exists ? 'Jellyfin can see this folder' : 'Jellyfin can\'t see this path — check the container folder mapping';
+            });
+        }).catch(function () { /* plugin not loaded yet */ });
+    }
+    $('#asAddRoot').addEventListener('click', function () { $('#asRoots').insertAdjacentHTML('beforeend', rootRow({ Name: '', Path: '' })); });
+    $('#asRoots').addEventListener('click', function (e) { var d = e.target.closest('[data-del]'); if (d) d.closest('.as-rootrow').remove(); });
+    $('#asSave').addEventListener('click', function () {
+        var cfg = S.config || {};
+        cfg.NasRoots = $$('.as-rootrow').map(function (row) {
+            return { Name: $('[data-k="Name"]', row).value.trim(), Path: $('[data-k="Path"]', row).value.trim().replace(/\/+$/, '') || '' };
+        }).filter(function (r) { return r.Path; }).map(function (r) { if (!r.Name) r.Name = r.Path; return r; });
+        cfg.DefaultNasMode = $('#asNasMode').value;
+        cfg.SaveLocation = $('#asSaveLoc').value;
+        cfg.MaxImageSizeMb = Math.max(1, Math.min(200, parseInt($('#asMaxMb').value, 10) || 40));
+        cfg.DownloadTimeoutSeconds = Math.max(5, Math.min(600, parseInt($('#asTimeout').value, 10) || 45));
+        ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function (res) {
+            S.roots = null;
+            if (window.Dashboard && Dashboard.processPluginConfigurationUpdateResult) Dashboard.processPluginConfigurationUpdateResult(res);
+            else toast('Settings saved');
+            loadSettings();
+        }).catch(function (e) { toast('Couldn\'t save: ' + (e && e.message || e), true); });
+    });
+
+    // ============================================================ START
+    function start() {
+        if (S.started) return;
+        S.started = true;
+        loadLibraries().then(reload);
+    }
+    page.addEventListener('pageshow', start);
+    page.addEventListener('viewshow', start);
+    if (window.ApiClient) start();
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape' || !page.isConnected) return;
+        var ovs = $$('.as-overlay'); var top = ovs[ovs.length - 1];
+        if (top && top._close) top._close();
+    });
+})();
+</script>
+</div>
