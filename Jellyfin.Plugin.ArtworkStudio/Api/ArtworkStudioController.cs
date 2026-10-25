@@ -94,13 +94,19 @@ public class ArtworkStudioController : ControllerBase
     public ActionResult GetClientScript()
     {
         var asm = typeof(Plugin).Assembly;
-        using var stream = asm.GetManifestResourceStream(typeof(Plugin).Namespace + ".Web.libraryBackdrops.js");
-        if (stream is null)
+        var script = new System.Text.StringBuilder();
+        foreach (var name in new[] { "libraryBackdrops.js", "siteTheme.js" })
         {
-            return NotFound();
+            using var stream = asm.GetManifestResourceStream(typeof(Plugin).Namespace + ".Web." + name);
+            if (stream is null)
+            {
+                continue;
+            }
+
+            using var reader = new StreamReader(stream);
+            script.Append(reader.ReadToEnd()).Append('\n');
         }
 
-        using var reader = new StreamReader(stream);
         var cfg = Config;
         var clientCfg = new
         {
@@ -109,11 +115,18 @@ public class ArtworkStudioController : ControllerBase
             dim = Math.Clamp(cfg.BackdropDimPercent, 0, 100),
             dimAll = cfg.DimAllBackdrops,
             home = ListPageFiles("home"),
-            login = ListPageFiles("login")
+            login = ListPageFiles("login"),
+            brand = new
+            {
+                logo = ListPageFiles("logo").FirstOrDefault(),
+                loginLogo = ListPageFiles("loginlogo").FirstOrDefault(),
+                favicon = ListPageFiles("favicon").FirstOrDefault()
+            },
+            theme = cfg.Theme ?? new ThemeSettings()
         };
         var prefix = "window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
         Response.Headers.CacheControl = "no-cache";
-        return Content(prefix + reader.ReadToEnd(), "application/javascript; charset=utf-8");
+        return Content(prefix + script, "application/javascript; charset=utf-8");
     }
 
     /// <summary>Reports whether the browser script is installed, and retries installing it.</summary>
@@ -131,7 +144,10 @@ public class ArtworkStudioController : ControllerBase
 
     // ---------------------------------------------------------------- Home & login page backdrops
 
-    private static readonly string[] Pages = { "home", "login" };
+    // "home"/"login" hold several rotating backdrops; the brand slots hold a single image each.
+    private static readonly string[] Pages = { "home", "login", "logo", "loginlogo", "favicon" };
+
+    private static readonly string[] SingleImagePages = { "logo", "loginlogo", "favicon" };
 
     /// <summary>Lists the backdrops for the home or login page.</summary>
     [HttpGet("Backdrops/{page}")]
@@ -291,6 +307,14 @@ public class ArtworkStudioController : ControllerBase
         };
         var dir = PageDir(page);
         Directory.CreateDirectory(dir);
+        if (SingleImagePages.Contains(page, StringComparer.Ordinal))
+        {
+            foreach (var existing in Directory.EnumerateFiles(dir))
+            {
+                System.IO.File.Delete(existing);
+            }
+        }
+
         var name = DateTime.UtcNow.ToString("yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture) + "-" + Guid.NewGuid().ToString("N")[..8] + ext;
         System.IO.File.Copy(source, System.IO.Path.Combine(dir, name));
         _logger.LogInformation("Artwork Studio: added {Page} page backdrop {Name}", page, name);

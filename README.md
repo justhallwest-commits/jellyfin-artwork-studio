@@ -16,6 +16,10 @@ A friendly place in the Jellyfin dashboard to add and manage artwork for your li
   - **Online** — Jellyfin's built-in providers (TMDB, Fanart.tv…), sorted by rating, with language filter
 - **Shortcuts:** drag a file onto a slot, drag a picture straight from another browser tab, or click a slot and press **Ctrl+V**.
 - **Multiple backdrops:** add, reorder, make any one the main backdrop, remove.
+- **Design tab:** your own header logo, login logo and browser-tab icon; site name in the tab; accent and background colours; Google Fonts; top-bar style (glass/solid/transparent); poster corner roundness and hover zoom; backdrop blur; login welcome message, frosted sign-in box, hide Forgot Password / Quick Connect; a home-page announcement banner; custom CSS — with a live preview.
+- **Page backgrounds:** your own backdrops for each library page, the home page and the login page, with adjustable darkness.
+- **Fill from online:** select items and fill missing artwork with the best-rated provider image.
+- **Backup:** export/import all settings as a file.
 - **Bulk apply:** select many items and put the same image on all of them, optionally skipping ones that already have it.
 
 ## Install

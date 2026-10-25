@@ -18,7 +18,7 @@
 #artworkStudioPage .as-btn.small { padding:.3em .6em; font-size:.82em; }
 #artworkStudioPage .as-btn[disabled] { opacity:.45; cursor:default; }
 #artworkStudioPage .as-btn .material-icons { font-size:1.15em; }
-#artworkStudioPage input.as-in, #artworkStudioPage select.as-in { background:rgba(0,0,0,.25); border:1px solid var(--as-line); color:inherit; border-radius:8px; padding:.55em .7em; font:inherit; min-width:0; }
+#artworkStudioPage input.as-in, #artworkStudioPage select.as-in, #artworkStudioPage textarea.as-in { background:rgba(0,0,0,.25); border:1px solid var(--as-line); color:inherit; border-radius:8px; padding:.55em .7em; font:inherit; min-width:0; }
 #artworkStudioPage select.as-in option { color:#000; }
 #artworkStudioPage .as-chips { display:flex; gap:.4em; flex-wrap:wrap; margin-bottom:.8em; }
 #artworkStudioPage .as-chip { border:1px solid var(--as-line); background:transparent; color:inherit; border-radius:999px; padding:.4em .9em; cursor:pointer; font:inherit; font-size:.9em; }
@@ -135,6 +135,44 @@
 #artworkStudioPage .as-progress div { height:100%; background:var(--as-accent); width:0; transition:width .2s; }
 #artworkStudioPage .as-spin { width:22px; height:22px; border:3px solid rgba(255,255,255,.2); border-top-color:var(--as-accent); border-radius:50%; animation:as-spin .8s linear infinite; }
 @keyframes as-spin { to { transform:rotate(360deg); } }
+#artworkStudioPage .as-design { display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,420px); gap:1.2em; align-items:start; }
+@media (max-width:980px){ #artworkStudioPage .as-design { grid-template-columns:1fr; } #artworkStudioPage .as-pv-wrap { position:static !important; } }
+#artworkStudioPage .as-pv-wrap { position:sticky; top:4.5em; }
+#artworkStudioPage .as-brand-row { display:flex; align-items:center; gap:1em; padding:.6em 0; border-bottom:1px solid var(--as-line); flex-wrap:wrap; }
+#artworkStudioPage .as-brand-row:last-child { border-bottom:0; }
+#artworkStudioPage .as-brand-thumb { width:180px; height:64px; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; flex:0 0 auto; background-color:#2a2a2a; background-image:linear-gradient(45deg,#333 25%,transparent 25%),linear-gradient(-45deg,#333 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#333 75%),linear-gradient(-45deg,transparent 75%,#333 75%); background-size:16px 16px; background-position:0 0,0 8px,8px -8px,-8px 0; color:rgba(255,255,255,.5); font-size:.8em; }
+#artworkStudioPage .as-brand-thumb.square { width:64px; }
+#artworkStudioPage .as-brand-thumb img { max-width:100%; max-height:100%; object-fit:contain; }
+#artworkStudioPage .as-brand-info { flex:1 1 180px; min-width:0; }
+#artworkStudioPage .as-brand-info b { display:block; }
+#artworkStudioPage .as-colorrow { display:flex; align-items:center; gap:.6em; }
+#artworkStudioPage .as-colorrow input[type=color] { width:3em; height:2.2em; border:1px solid var(--as-line); border-radius:6px; background:transparent; padding:0; cursor:pointer; }
+#artworkStudioPage .as-swatches { display:flex; gap:.35em; flex-wrap:wrap; }
+#artworkStudioPage .as-swatch { width:1.6em; height:1.6em; border-radius:50%; border:2px solid rgba(255,255,255,.25); cursor:pointer; padding:0; }
+#artworkStudioPage textarea.as-in { width:100%; min-height:5em; resize:vertical; font:inherit; box-sizing:border-box; }
+#artworkStudioPage textarea.as-code { font-family:ui-monospace,Consolas,monospace; font-size:.85em; min-height:9em; }
+#artworkStudioPage .as-pv { border-radius:12px; overflow:hidden; border:1px solid var(--as-line); box-shadow:0 10px 30px rgba(0,0,0,.35); color:#eee; }
+#artworkStudioPage .as-pv-header { display:flex; align-items:center; gap:.8em; padding:.6em .9em; background:#101010; position:relative; z-index:1; }
+#artworkStudioPage .as-pv-logo { height:1.6em; width:7em; background:center left/contain no-repeat; font-weight:700; display:flex; align-items:center; }
+#artworkStudioPage .as-pv-tab { font-size:.8em; opacity:.75; padding-bottom:.2em; }
+#artworkStudioPage .as-pv-tab.on { opacity:1; border-bottom:2px solid currentColor; }
+#artworkStudioPage .as-pv-stage { position:relative; min-height:300px; background:#101010; }
+#artworkStudioPage .as-pv-bd { position:absolute; inset:0; background:linear-gradient(120deg,#5b3a1e,#1f3c6b 55%,#16584f) center/cover; }
+#artworkStudioPage .as-pv-shade { position:absolute; inset:0; background:#000; }
+#artworkStudioPage .as-pv-body { position:relative; padding:.9em; }
+#artworkStudioPage .as-pv-ann { border-radius:8px; padding:.55em .8em; font-size:.82em; margin-bottom:.7em; color:#fff; }
+#artworkStudioPage .as-pv-h { margin:.2em 0 .5em; font-size:1em; }
+#artworkStudioPage .as-pv-cards { display:flex; gap:.6em; margin-bottom:.9em; }
+#artworkStudioPage .as-pv-card { flex:1; aspect-ratio:2/3; border-radius:4px; position:relative; overflow:hidden; transition:transform .2s; }
+#artworkStudioPage .as-pv-card .bar { position:absolute; left:6%; right:6%; bottom:6%; height:4px; background:rgba(255,255,255,.25); border-radius:2px; }
+#artworkStudioPage .as-pv-card .bar i { display:block; height:100%; width:60%; border-radius:2px; }
+#artworkStudioPage .as-pv-btn { border:0; color:#fff; border-radius:6px; padding:.45em 1.1em; font:inherit; font-size:.85em; }
+#artworkStudioPage .as-pv-login { display:none; flex-direction:column; align-items:center; padding:1.2em; position:relative; }
+#artworkStudioPage .as-pv-login img { max-height:3.5em; max-width:70%; margin-bottom:.4em; }
+#artworkStudioPage .as-pv-login .msg { font-size:.82em; opacity:.9; text-align:center; white-space:pre-line; margin-bottom:.6em; }
+#artworkStudioPage .as-pv-form { width:85%; padding:.8em; border-radius:6px; }
+#artworkStudioPage .as-pv-form div { height:1.6em; background:rgba(255,255,255,.12); border-radius:4px; margin-bottom:.5em; }
+#artworkStudioPage .as-pv-form .go { height:1.9em; border-radius:4px; margin:0; }
 </style>
 
 <div class="as-wrap">
@@ -142,6 +180,7 @@
     <h2><span class="material-icons">photo_library</span>Artwork Studio</h2>
     <div class="as-tabs">
       <button class="as-tab active" data-tab="browse">Browse</button>
+      <button class="as-tab" data-tab="design">Design</button>
       <button class="as-tab" data-tab="settings">Settings</button>
       <button class="as-tab" data-tab="help">Help</button>
     </div>
@@ -180,6 +219,97 @@
     <div id="asStatus" class="as-hint" style="margin-bottom:.6em"></div>
     <div class="as-grid" id="asGrid"></div>
     <div class="as-more"><button class="as-btn" id="asMore" style="display:none">Load more</button></div>
+  </section>
+
+  <!-- ===================== DESIGN ===================== -->
+  <section data-section="design" style="display:none">
+   <div class="as-design">
+    <div>
+    <div class="as-panel">
+      <div class="as-row" style="justify-content:space-between"><h3 style="margin:0">Site design</h3>
+        <label class="as-row" style="gap:.4em"><input type="checkbox" id="tEnabled"> Apply design changes</label></div>
+      <div class="as-hint">Changes show in the browser and apps built on the Jellyfin web app after you save and refresh (Ctrl+F5). Native TV apps use their own look. Leave anything blank to keep Jellyfin's default.</div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Logos &amp; name</h3>
+      <div id="asBrandSlots"></div>
+      <div class="as-field"><label for="tSiteName">Site name (browser tab)</label><input class="as-in" id="tSiteName" placeholder="e.g. HallFlix"></div>
+      <div class="as-field"><label for="tLogoH">Header logo size: <span id="tLogoHVal"></span></label><input id="tLogoH" type="range" min="0" max="5" step="0.25" style="width:100%"></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Colours &amp; fonts</h3>
+      <div class="as-field"><label>Accent colour <span class="as-hint">(buttons, progress bars, active tabs, checkboxes)</span></label>
+        <div class="as-colorrow"><label class="as-row" style="gap:.3em;font-weight:normal"><input type="checkbox" id="tAccentOn"> Custom</label><input type="color" id="tAccent" value="#e50914">
+        <div class="as-swatches" data-for="tAccent">
+          <button class="as-swatch" style="background:#e50914" data-c="#e50914" title="Red"></button><button class="as-swatch" style="background:#00a4dc" data-c="#00a4dc" title="Jellyfin blue"></button><button class="as-swatch" style="background:#aa5cc3" data-c="#aa5cc3" title="Purple"></button><button class="as-swatch" style="background:#f5a623" data-c="#f5a623" title="Gold"></button><button class="as-swatch" style="background:#1db954" data-c="#1db954" title="Green"></button><button class="as-swatch" style="background:#ff4f8b" data-c="#ff4f8b" title="Pink"></button>
+        </div></div></div>
+      <div class="as-field"><label>Page background colour</label>
+        <div class="as-colorrow"><label class="as-row" style="gap:.3em;font-weight:normal"><input type="checkbox" id="tBgOn"> Custom</label><input type="color" id="tBg" value="#0b0b0f">
+        <div class="as-swatches" data-for="tBg">
+          <button class="as-swatch" style="background:#000000" data-c="#000000" title="Black"></button><button class="as-swatch" style="background:#0b0b0f" data-c="#0b0b0f" title="Near black"></button><button class="as-swatch" style="background:#141821" data-c="#141821" title="Midnight"></button><button class="as-swatch" style="background:#1a1220" data-c="#1a1220" title="Plum"></button>
+        </div></div></div>
+      <div class="as-field"><label for="tHeader">Top bar style</label>
+        <select class="as-in" id="tHeader"><option value="default">Jellyfin default</option><option value="glass">Frosted glass</option><option value="solid">Solid</option><option value="transparent">Transparent (fade)</option></select></div>
+      <div class="as-field"><label for="tBodyFont">Text font <span class="as-hint">(any Google Font name)</span></label><input class="as-in" id="tBodyFont" list="asFontList" placeholder="Jellyfin default"></div>
+      <div class="as-field"><label for="tHeadFont">Heading font</label><input class="as-in" id="tHeadFont" list="asFontList" placeholder="Same as text"></div>
+      <datalist id="asFontList"><option>Inter</option><option>Poppins</option><option>Montserrat</option><option>Roboto</option><option>Open Sans</option><option>Lato</option><option>Nunito</option><option>Outfit</option><option>DM Sans</option><option>Manrope</option><option>Work Sans</option><option>Raleway</option><option>Quicksand</option><option>Oswald</option><option>Bebas Neue</option><option>Anton</option><option>Playfair Display</option><option>Merriweather</option></datalist>
+    </div>
+
+    <div class="as-panel">
+      <h3>Posters &amp; backdrops</h3>
+      <div class="as-field"><label for="tRadius">Poster corner roundness: <span id="tRadiusVal"></span></label><input id="tRadius" type="range" min="-1" max="24" step="1" style="width:100%"></div>
+      <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tHover"> Zoom posters slightly on mouse hover</label></div>
+      <div class="as-field"><label for="tBlur">Backdrop blur: <span id="tBlurVal"></span></label><input id="tBlur" type="range" min="0" max="30" step="1" style="width:100%"></div>
+      <div class="as-hint">Backdrop darkness is under Settings → Page backgrounds.</div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Login page</h3>
+      <div class="as-hint">The login logo uses the header logo unless you set a separate one above. Login backgrounds are under Browse → Library artwork → Login page.</div>
+      <div class="as-field" style="max-width:none"><label for="tLoginMsg">Welcome message</label><textarea class="as-in" id="tLoginMsg" placeholder="e.g. Welcome to HallFlix — sign in to start watching."></textarea></div>
+      <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tLoginGlass"> Frosted-glass sign-in box</label>
+        <label class="as-row" style="font-weight:normal"><input type="checkbox" id="tHideForgot"> Hide "Forgot password" button</label>
+        <label class="as-row" style="font-weight:normal"><input type="checkbox" id="tHideQuick"> Hide "Quick Connect" button</label></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Home page announcement</h3>
+      <div class="as-hint">A banner at the top of everyone's home screen — new arrivals, maintenance notices, etc. Links are clickable. Leave blank for none.</div>
+      <div class="as-field" style="max-width:none"><textarea class="as-in" id="tAnn" placeholder="e.g. New this week: …"></textarea></div>
+      <div class="as-row"><select class="as-in" id="tAnnStyle"><option value="info">Blue</option><option value="success">Green</option><option value="warning">Amber</option><option value="accent">Accent colour</option></select>
+        <label class="as-row" style="gap:.3em"><input type="checkbox" id="tAnnDismiss"> Viewers can dismiss it</label></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Custom CSS <span class="as-hint">(advanced)</span></h3>
+      <div class="as-hint">Added after everything above. Kept separate from Jellyfin's own Custom CSS box, so they don't overwrite each other.</div>
+      <textarea class="as-in as-code" id="tCss" spellcheck="false" placeholder=".itemDetailPage .detailLogo { max-height: 8em; }"></textarea>
+    </div>
+
+    <button class="as-btn primary" id="asSaveDesign"><span class="material-icons">save</span>Save design</button>
+    </div>
+
+    <div class="as-pv-wrap">
+      <div class="as-row" style="justify-content:space-between;margin-bottom:.5em"><b>Preview</b>
+        <div class="as-seg" id="asPvMode"><button data-v="home" class="active">Home</button><button data-v="login">Login</button></div></div>
+      <div class="as-pv" id="asPv">
+        <div class="as-pv-header" id="asPvHeader"><div class="as-pv-logo" id="asPvLogo"></div><span class="as-pv-tab on">Home</span><span class="as-pv-tab">Favorites</span></div>
+        <div class="as-pv-stage" id="asPvStage">
+          <div class="as-pv-bd" id="asPvBd"></div><div class="as-pv-shade" id="asPvShade"></div>
+          <div class="as-pv-body" id="asPvHome">
+            <div class="as-pv-ann" id="asPvAnn"></div>
+            <h3 class="as-pv-h" id="asPvH">Continue Watching</h3>
+            <div class="as-pv-cards" id="asPvCards"></div>
+            <button class="as-pv-btn" id="asPvBtn">Play</button> <span id="asPvLink" style="font-size:.85em;margin-left:.6em">More info</span>
+          </div>
+          <div class="as-pv-login" id="asPvLogin"><img id="asPvLoginLogo" alt=""><div class="msg" id="asPvMsg"></div><div class="as-pv-form" id="asPvForm"><div></div><div></div><div class="go" id="asPvGo"></div></div></div>
+        </div>
+      </div>
+      <div class="as-hint" style="margin-top:.5em">A rough preview — the real result also depends on the page.</div>
+    </div>
+   </div>
   </section>
 
   <!-- ===================== SETTINGS ===================== -->
@@ -238,6 +368,12 @@
           <pre style="white-space:pre-wrap;background:var(--as-soft);padding:.6em;border-radius:6px;margin:.4em 0;user-select:all">var s=document.createElement('script');s.src='../ArtworkStudio/ClientScript';document.head.appendChild(s);</pre></div>
       </div>
     </div>
+    <div class="as-panel">
+      <h3>Backup</h3>
+      <div class="as-hint">Save all Artwork Studio settings (NAS folders, page backgrounds, design) to a file, or restore them — handy when moving between servers. Images themselves aren't included.</div>
+      <div class="as-row" style="margin-top:.7em"><button class="as-btn" id="asExport"><span class="material-icons">download</span>Export settings</button>
+        <button class="as-btn" id="asImport"><span class="material-icons">upload</span>Import settings…</button><input type="file" id="asImportFile" accept=".json,application/json" style="display:none"></div>
+    </div>
     <button class="as-btn primary" id="asSave"><span class="material-icons">save</span>Save settings</button>
   </section>
 
@@ -257,6 +393,10 @@
         <li><b>NAS</b> — browse or search your artwork folders. <i>Copy</i> stores a copy in Jellyfin; <i>Link</i> points at the NAS file so it's never duplicated.</li>
         <li><b>Online</b> — Jellyfin's own providers (TMDB, Fanart.tv, etc., whichever you have enabled).</li>
       </ul>
+      <h4>Design</h4>
+      <p>The <b>Design</b> tab changes how the whole site looks: your own logo in the top bar and on the login page, the browser-tab icon and name, accent and background colours, fonts, poster corners and hover zoom, backdrop blur, the top bar style, a welcome message and frosted sign-in box on the login page, a home-page announcement banner, and your own CSS. The preview updates as you go; save, then press Ctrl+F5 to see it live.</p>
+      <h4>Filling missing artwork automatically</h4>
+      <p>Pick <b>Missing poster</b> (or another type) in the Show filter, click <b>Select → Select page</b>, then <b>Apply artwork → Fill from online</b>. Each item gets the best-rated image from Jellyfin's online providers.</p>
       <h4>Library backgrounds</h4>
       <p>Under <b>Library artwork</b> you'll also find <b>Home page</b> and <b>Login page</b> — add images there for those screens. Backdrops added to a library become the background of that library's page (Settings → Library backgrounds). This works in the browser and in apps built on the web app (Jellyfin Media Player, the Android/iOS phone apps). Native TV apps keep their own behaviour.</p>
       <h4>Backdrops</h4>
@@ -426,7 +566,8 @@
         b.addEventListener('click', function () {
             $$('.as-tab').forEach(function (x) { x.classList.toggle('active', x === b); });
             $$('section[data-section]').forEach(function (s) { s.style.display = s.dataset.section === b.dataset.tab ? '' : 'none'; });
-            if (b.dataset.tab === 'settings') loadSettings();
+            if ((b.dataset.tab === 'settings' || b.dataset.tab === 'design') && !S.config) loadSettings();
+            if (b.dataset.tab === 'design') loadBrandSlots();
         });
     });
 
@@ -651,40 +792,53 @@
             '<div class="as-field" id="asBulkModeWrap"><label>For backdrops</label><div class="as-seg" id="asBulkMode"><button data-v="add" class="active">Add as another backdrop</button><button data-v="replace">Replace the main backdrop</button></div></div>' +
             '<div class="as-field"><label>Only items that don\'t have one yet</label><label class="as-row" style="font-weight:normal"><input type="checkbox" id="asBulkSkip"> Skip items that already have this artwork</label></div>' +
             '<div id="asBulkProg" style="display:none"><div class="as-progress"><div></div></div><div class="as-hint" id="asBulkMsg"></div></div>' +
-            '</div><div class="as-modal-foot"><button class="as-btn" data-close>Cancel</button><button class="as-btn primary" id="asBulkGo">' + icon('image') + 'Choose image…</button></div>', 'narrow');
+            '</div><div class="as-modal-foot"><button class="as-btn" data-close>Cancel</button><button class="as-btn" id="asBulkOnline" title="Use the best-rated image from Jellyfin\'s online providers for each item">' + icon('travel_explore') + 'Fill from online</button><button class="as-btn primary" id="asBulkGo">' + icon('image') + 'Choose image…</button></div>', 'narrow');
         var close = ov._close = function () { ov.remove(); };
         $$('[data-close]', ov).forEach(function (b) { b.onclick = close; });
         var mode = 'add';
         function syncMode() { $('#asBulkModeWrap', ov).style.display = SLOT[$('#asBulkType', ov).value].multi ? '' : 'none'; }
         $('#asBulkType', ov).onchange = syncMode; syncMode();
         $('#asBulkMode', ov).onclick = function (e) { var b = e.target.closest('button'); if (!b) return; mode = b.dataset.v; $$('button', this).forEach(function (x) { x.classList.toggle('active', x === b); }); };
+        // Best-rated online image for one item (null if none)
+        function bestOnline(id, type) {
+            return api('GET', 'Items/' + id + '/RemoteImages', { query: { type: type, limit: 60, includeAllLanguages: false } }).then(function (r) {
+                var imgs = (r.Images || []).slice().sort(function (a, b) { return (b.CommunityRating || 0) - (a.CommunityRating || 0) || (b.VoteCount || 0) - (a.VoteCount || 0); });
+                return imgs.length ? { kind: 'remote', url: imgs[0].Url } : null;
+            });
+        }
+        $('#asBulkOnline', ov).onclick = function () { run(function (id, type) { return bestOnline(id, type); }); };
         $('#asBulkGo', ov).onclick = function () {
             var type = $('#asBulkType', ov).value;
-            var skip = $('#asBulkSkip', ov).checked;
             var firstItem = findItem(ids[0]) || {};
             openSource({ title: SLOT[type].label + ' for ' + ids.length + ' items', type: type, itemId: null, guess: firstItem.SeriesName || firstItem.Name, stack: 2 }).then(function (src) {
-                if (!src) return;
-                var go = $('#asBulkGo', ov); go.disabled = true;
+                if (src) run(function () { return Promise.resolve(src); });
+            });
+        };
+        function run(getSrc) {
+                var type = $('#asBulkType', ov).value;
+                var skip = $('#asBulkSkip', ov).checked;
+                var none = 0;
+                var go = $('#asBulkGo', ov); go.disabled = true; $('#asBulkOnline', ov).disabled = true;
                 $('#asBulkProg', ov).style.display = '';
                 var bar = $('.as-progress div', ov), msg = $('#asBulkMsg', ov);
                 var done = 0, ok = 0, skipped = 0, fails = [];
                 var index = SLOT[type].multi && mode === 'replace' ? 0 : null;
                 (function next(i) {
                     if (i >= ids.length) {
-                        msg.innerHTML = '✅ ' + ok + ' updated' + (skipped ? ' · ' + skipped + ' skipped' : '') + (fails.length ? '<br>❌ ' + fails.length + ' failed: ' + fails.map(esc).join('; ') : '');
+                        msg.innerHTML = '✅ ' + ok + ' updated' + (skipped ? ' · ' + skipped + ' skipped' : '') + (none ? ' · ' + none + ' had nothing online' : '') + (fails.length ? '<br>❌ ' + fails.length + ' failed: ' + fails.map(esc).join('; ') : '');
                         go.disabled = false; go.innerHTML = icon('done') + 'Close'; go.onclick = close;
                         ids.forEach(refreshCard);
                         return;
                     }
                     var id = ids[i], it = findItem(id) || { Name: id };
                     msg.textContent = 'Working on ' + it.Name + '…';
-                    var p = (skip && itemHas(it, type)) ? Promise.resolve('skip') : applySource(id, type, index, src);
-                    p.then(function (r) { if (r === 'skip') skipped++; else ok++; })
+                    var p = (skip && itemHas(it, type)) ? Promise.resolve('skip')
+                        : getSrc(id, type).then(function (src) { return src ? applySource(id, type, index, src) : 'none'; });
+                    p.then(function (r) { if (r === 'skip') skipped++; else if (r === 'none') none++; else ok++; })
                         .catch(function (e) { fails.push(it.Name + ' (' + e.message + ')'); })
                         .then(function () { done++; bar.style.width = (done / ids.length * 100) + '%'; next(i + 1); });
                 })(0);
-            });
-        };
+        }
     }
 
     // ============================================================ ITEM EDITOR
@@ -1141,8 +1295,9 @@
             '<span class="as-status"></span><button class="as-btn small danger" data-del title="Remove">' + icon('delete') + '</button></div>';
     }
     function loadSettings() {
-        ApiClient.getPluginConfiguration(PLUGIN_ID).then(function (cfg) {
+        return ApiClient.getPluginConfiguration(PLUGIN_ID).then(function (cfg) {
             S.config = cfg;
+            fillDesign(cfg.Theme || {});
             $('#asRoots').innerHTML = (cfg.NasRoots || []).map(rootRow).join('') || '';
             if (!(cfg.NasRoots || []).length) $('#asRoots').innerHTML = rootRow({ Name: 'NAS Artwork', Path: '' });
             $('#asNasMode').value = cfg.DefaultNasMode || 'copy';
@@ -1179,7 +1334,7 @@
     $('#asDim').addEventListener('input', syncDim);
     $('#asAddRoot').addEventListener('click', function () { $('#asRoots').insertAdjacentHTML('beforeend', rootRow({ Name: '', Path: '' })); });
     $('#asRoots').addEventListener('click', function (e) { var d = e.target.closest('[data-del]'); if (d) d.closest('.as-rootrow').remove(); });
-    $('#asSave').addEventListener('click', function () {
+    function saveConfig() {
         var cfg = S.config || {};
         cfg.NasRoots = $$('.as-rootrow').map(function (row) {
             return { Name: $('[data-k="Name"]', row).value.trim(), Path: $('[data-k="Path"]', row).value.trim().replace(/\/+$/, '') || '' };
@@ -1192,12 +1347,227 @@
         cfg.BackdropRotateSeconds = Math.max(5, Math.min(600, parseInt($('#asRotate').value, 10) || 12));
         cfg.BackdropDimPercent = parseInt($('#asDim').value, 10) || 0;
         cfg.DimAllBackdrops = $('#asDimAll').checked;
-        ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function (res) {
+        cfg.Theme = collectDesign();
+        return ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function () {
             S.roots = null;
-            if (window.Dashboard && Dashboard.processPluginConfigurationUpdateResult) Dashboard.processPluginConfigurationUpdateResult(res);
-            else toast('Settings saved');
-            loadSettings();
+            toast('Saved — refresh the browser (Ctrl+F5) to see changes');
+            return loadSettings();
         }).catch(function (e) { toast('Couldn\'t save: ' + (e && e.message || e), true); });
+    }
+    $('#asSave').addEventListener('click', saveConfig);
+    $('#asSaveDesign').addEventListener('click', saveConfig);
+
+    // ---------- backup
+    $('#asExport').addEventListener('click', function () {
+        (S.config ? Promise.resolve(S.config) : loadSettings().then(function () { return S.config; })).then(function (cfg) {
+            var blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'artwork-studio-settings-' + new Date().toISOString().slice(0, 10) + '.json';
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+        });
+    });
+    $('#asImport').addEventListener('click', function () { $('#asImportFile').click(); });
+    $('#asImportFile').addEventListener('change', function () {
+        var f = this.files[0]; this.value = '';
+        if (!f) return;
+        f.text().then(function (txt) {
+            var data = JSON.parse(txt);
+            if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Not an Artwork Studio settings file');
+            if (!confirm('Replace your current Artwork Studio settings with the ones in "' + f.name + '"?')) return;
+            var cfg = Object.assign({}, S.config || {}, data);
+            return ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function () { toast('Settings imported'); S.roots = null; return loadSettings(); });
+        }).catch(function (e) { toast('Couldn\'t import: ' + e.message, true); });
+    });
+
+    // ============================================================ DESIGN
+    var BRAND = [
+        { slot: 'logo', label: 'Header logo', hint: 'Replaces the Jellyfin logo in the top bar. A transparent PNG, wide and short, works best.', square: false },
+        { slot: 'loginlogo', label: 'Login page logo', hint: 'Shown above the sign-in box. Uses the header logo if empty.', square: false },
+        { slot: 'favicon', label: 'Browser tab icon', hint: 'Square PNG, 192×192 or larger.', square: true }
+    ];
+    S.brand = {};
+    function loadBrandSlots() {
+        var host = $('#asBrandSlots');
+        if (!host.children.length) {
+            host.innerHTML = BRAND.map(function (b) {
+                return '<div class="as-brand-row" data-slot="' + b.slot + '"><div class="as-brand-thumb' + (b.square ? ' square' : '') + '">…</div>' +
+                    '<div class="as-brand-info"><b>' + b.label + '</b><span class="as-hint">' + b.hint + '</span></div>' +
+                    '<div class="as-row"><button class="as-btn small" data-bact="set">' + icon('add_photo_alternate') + 'Choose…</button><button class="as-btn small danger" data-bact="del" style="display:none">' + icon('delete') + '</button></div></div>';
+            }).join('');
+        }
+        return Promise.all(BRAND.map(function (b) {
+            return api('GET', 'ArtworkStudio/Backdrops/' + b.slot).catch(function () { return { Files: [] }; }).then(function (r) {
+                var f = (r.Files || [])[0];
+                S.brand[b.slot] = f ? pageImgUrl(b.slot, f.Name) + '?v=' + encodeURIComponent(f.Name) : null;
+                S.brand[b.slot + 'File'] = f ? f.Name : null;
+                var row = $('[data-slot="' + b.slot + '"]', host);
+                $('.as-brand-thumb', row).innerHTML = f ? '<img src="' + S.brand[b.slot] + '" alt="">' : 'Default';
+                $('[data-bact="del"]', row).style.display = f ? '' : 'none';
+            });
+        })).then(updatePreview);
+    }
+    $('#asBrandSlots').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-bact]'); if (!btn) return;
+        var row = btn.closest('[data-slot]'), slot = row.dataset.slot;
+        var meta = BRAND.filter(function (b) { return b.slot === slot; })[0];
+        if (btn.dataset.bact === 'del') {
+            if (!confirm('Remove the ' + meta.label.toLowerCase() + '?')) return;
+            api('DELETE', 'ArtworkStudio/Backdrops/' + slot + '/' + encodeURIComponent(S.brand[slot + 'File']))
+                .then(function () { toast(meta.label + ' removed'); return loadBrandSlots(); })
+                .catch(function (err) { toast(err.message, true); });
+            return;
+        }
+        openSource({ title: meta.label, type: 'Logo', itemId: null, guess: 'logo', stack: 2 }).then(function (src) {
+            if (!src) return;
+            var done = busy(row, 'Saving…');
+            applyPageSource(slot, src).then(function () { toast(meta.label + ' updated — refresh the browser to see it'); done(); return loadBrandSlots(); })
+                .catch(function (err) { done(); toast(err.message, true); });
+        });
+    });
+
+    function setColor(id, val) {
+        var on = /^#[0-9a-f]{6}$/i.test(val || '');
+        $('#' + id + 'On').checked = on;
+        if (on) $('#' + id).value = val;
+    }
+    function fillDesign(t) {
+        $('#tEnabled').checked = t.Enabled !== false;
+        $('#tSiteName').value = t.SiteName || '';
+        $('#tLogoH').value = t.LogoHeight || 0;
+        setColor('tAccent', t.AccentColor);
+        setColor('tBg', t.BackgroundColor);
+        $('#tHeader').value = t.HeaderStyle || 'default';
+        $('#tBodyFont').value = t.BodyFont || '';
+        $('#tHeadFont').value = t.HeadingFont || '';
+        $('#tRadius').value = t.CardRadius == null ? -1 : t.CardRadius;
+        $('#tHover').checked = !!t.CardHover;
+        $('#tBlur').value = t.BackdropBlur || 0;
+        $('#tLoginMsg').value = t.LoginMessage || '';
+        $('#tLoginGlass').checked = !!t.LoginGlass;
+        $('#tHideForgot').checked = !!t.HideForgotPassword;
+        $('#tHideQuick').checked = !!t.HideQuickConnect;
+        $('#tAnn').value = t.Announcement || '';
+        $('#tAnnStyle').value = t.AnnouncementStyle || 'info';
+        $('#tAnnDismiss').checked = t.AnnouncementDismissible !== false;
+        $('#tCss').value = t.CustomCss || '';
+        updatePreview();
+    }
+    function collectDesign() {
+        return {
+            Enabled: $('#tEnabled').checked,
+            SiteName: $('#tSiteName').value.trim(),
+            LogoHeight: parseFloat($('#tLogoH').value) || 0,
+            AccentColor: $('#tAccentOn').checked ? $('#tAccent').value : '',
+            BackgroundColor: $('#tBgOn').checked ? $('#tBg').value : '',
+            HeaderStyle: $('#tHeader').value,
+            BodyFont: $('#tBodyFont').value.trim(),
+            HeadingFont: $('#tHeadFont').value.trim(),
+            CardRadius: parseInt($('#tRadius').value, 10),
+            CardHover: $('#tHover').checked,
+            BackdropBlur: parseInt($('#tBlur').value, 10) || 0,
+            LoginMessage: $('#tLoginMsg').value.trim(),
+            LoginGlass: $('#tLoginGlass').checked,
+            HideForgotPassword: $('#tHideForgot').checked,
+            HideQuickConnect: $('#tHideQuick').checked,
+            Announcement: $('#tAnn').value.trim(),
+            AnnouncementStyle: $('#tAnnStyle').value,
+            AnnouncementDismissible: $('#tAnnDismiss').checked,
+            CustomCss: $('#tCss').value
+        };
+    }
+
+    var pvFonts = {};
+    function loadFont(name) {
+        if (!name || pvFonts[name]) return;
+        pvFonts[name] = true;
+        var l = document.createElement('link'); l.rel = 'stylesheet';
+        l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name).replace(/%20/g, '+') + ':wght@400;600;700&display=swap';
+        document.head.appendChild(l);
+    }
+    var pvMode = 'home';
+    function updatePreview() {
+        var t = collectDesign();
+        var accent = t.AccentColor || '#00a4dc', bg = t.BackgroundColor || '#101010';
+        var annColors = { info: '#1e6fd9', success: '#2e9d57', warning: '#c98a14', accent: accent };
+        $('#tLogoHVal').textContent = t.LogoHeight > 0 ? t.LogoHeight + 'em' : 'Jellyfin default';
+        $('#tRadiusVal').textContent = t.CardRadius < 0 ? 'Jellyfin default' : t.CardRadius + 'px';
+        $('#tBlurVal').textContent = t.BackdropBlur ? t.BackdropBlur + 'px' : 'None';
+        var on = t.Enabled;
+        $('#asPv').style.opacity = on ? 1 : .5;
+        var body = on && t.BodyFont ? '"' + t.BodyFont + '", sans-serif' : '';
+        var head = on && t.HeadingFont ? '"' + t.HeadingFont + '", sans-serif' : body;
+        loadFont(t.BodyFont); loadFont(t.HeadingFont);
+        $('#asPv').style.fontFamily = body;
+        $('#asPvH').style.fontFamily = head;
+
+        var logo = S.brand && S.brand.logo;
+        var pl = $('#asPvLogo');
+        pl.style.backgroundImage = logo ? 'url("' + logo + '")' : '';
+        pl.textContent = logo ? '' : (t.SiteName || 'Jellyfin');
+        pl.style.height = (on && t.LogoHeight > 0 ? Math.min(t.LogoHeight, 3) * .8 : 1.6) + 'em';
+        var hdr = $('#asPvHeader');
+        hdr.style.background = !on || t.HeaderStyle === 'default' ? '#101010' : t.HeaderStyle === 'solid' ? bg : t.HeaderStyle === 'glass' ? 'rgba(16,16,16,.55)' : 'linear-gradient(rgba(0,0,0,.6),transparent)';
+        hdr.style.backdropFilter = on && t.HeaderStyle === 'glass' ? 'blur(10px)' : '';
+        hdr.style.position = on && (t.HeaderStyle === 'glass' || t.HeaderStyle === 'transparent') ? 'absolute' : 'relative';
+        hdr.style.left = hdr.style.right = '0';
+        $('.as-pv-tab.on', hdr).style.color = on ? accent : '#00a4dc';
+
+        var stage = $('#asPvStage');
+        stage.style.background = on ? bg : '#101010';
+        stage.style.paddingTop = hdr.style.position === 'absolute' ? '2.6em' : '0';
+        var dim = (parseInt($('#asDim').value, 10) || 45) / 100;
+        $('#asPvShade').style.opacity = dim;
+        $('#asPvBd').style.filter = on && t.BackdropBlur ? 'blur(' + Math.min(t.BackdropBlur, 30) / 2 + 'px)' : '';
+        $('#asPvBd').style.transform = on && t.BackdropBlur ? 'scale(1.08)' : '';
+
+        var ann = $('#asPvAnn');
+        ann.style.display = on && t.Announcement ? '' : 'none';
+        ann.textContent = t.Announcement;
+        ann.style.background = annColors[t.AnnouncementStyle] || annColors.info;
+        var radius = on && t.CardRadius >= 0 ? t.CardRadius + 'px' : '4px';
+        var grads = ['linear-gradient(160deg,#7b4397,#dc2430)', 'linear-gradient(160deg,#1d976c,#2c3e50)', 'linear-gradient(160deg,#f7971e,#7a2e0e)'];
+        $('#asPvCards').innerHTML = grads.map(function (g, i) {
+            return '<div class="as-pv-card" style="background:' + g + ';border-radius:' + radius + '">' + (i === 0 ? '<div class="bar"><i style="background:' + (on ? accent : '#00a4dc') + '"></i></div>' : '') + '</div>';
+        }).join('');
+        $$('.as-pv-card', $('#asPvCards')).forEach(function (c) {
+            c.onmouseenter = function () { if (on && t.CardHover) c.style.transform = 'scale(1.06)'; };
+            c.onmouseleave = function () { c.style.transform = ''; };
+        });
+        $('#asPvBtn').style.background = on ? accent : '#00a4dc';
+        $('#asPvLink').style.color = on ? accent : '#00a4dc';
+
+        var ll = (S.brand && (S.brand.loginlogo || S.brand.logo)) || '';
+        $('#asPvLoginLogo').style.display = on && ll ? '' : 'none';
+        if (ll) $('#asPvLoginLogo').src = ll;
+        $('#asPvMsg').textContent = on ? t.LoginMessage : '';
+        var form = $('#asPvForm');
+        form.style.background = on && t.LoginGlass ? 'rgba(20,20,20,.55)' : 'transparent';
+        form.style.backdropFilter = on && t.LoginGlass ? 'blur(10px)' : '';
+        form.style.border = on && t.LoginGlass ? '1px solid rgba(255,255,255,.1)' : '0';
+        $('#asPvGo').style.background = on ? accent : '#00a4dc';
+        $('#asPvHome').style.display = pvMode === 'home' ? '' : 'none';
+        $('#asPvLogin').style.display = pvMode === 'login' ? 'flex' : 'none';
+        $('#asPvHeader').style.visibility = pvMode === 'login' ? 'hidden' : '';
+    }
+    $('#asPvMode').addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        pvMode = b.dataset.v;
+        $$('button', this).forEach(function (x) { x.classList.toggle('active', x === b); });
+        updatePreview();
+    });
+    $$('section[data-section="design"] input, section[data-section="design"] select, section[data-section="design"] textarea').forEach(function (el) {
+        el.addEventListener('input', debounce(updatePreview, 120));
+        el.addEventListener('change', updatePreview);
+    });
+    // Picking a colour turns "Custom" on; swatches set the colour
+    ['tAccent', 'tBg'].forEach(function (id) { $('#' + id).addEventListener('input', function () { $('#' + id + 'On').checked = true; }); });
+    $$('.as-swatches').forEach(function (sw) {
+        sw.addEventListener('click', function (e) {
+            var b = e.target.closest('[data-c]'); if (!b) return;
+            var id = sw.dataset.for; $('#' + id).value = b.dataset.c; $('#' + id + 'On').checked = true; updatePreview();
+        });
     });
 
     // ============================================================ START

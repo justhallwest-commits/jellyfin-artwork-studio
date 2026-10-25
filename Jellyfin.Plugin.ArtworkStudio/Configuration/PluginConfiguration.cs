@@ -15,8 +15,59 @@ public class NasRoot
     public string Path { get; set; } = string.Empty;
 }
 
+/// <summary>Look-and-feel changes applied to the Jellyfin web app. Empty / default values leave Jellyfin unchanged.</summary>
+public class ThemeSettings
+{
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>Gets or sets the name shown in the browser tab instead of "Jellyfin".</summary>
+    public string SiteName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the header logo height in em (0 = Jellyfin default).</summary>
+    public double LogoHeight { get; set; }
+
+    public string AccentColor { get; set; } = string.Empty;
+
+    public string BackgroundColor { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the header style: "default", "glass" (blurred) or "solid".</summary>
+    public string HeaderStyle { get; set; } = "default";
+
+    public string BodyFont { get; set; } = string.Empty;
+
+    public string HeadingFont { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets card corner roundness in px (-1 = Jellyfin default).</summary>
+    public int CardRadius { get; set; } = -1;
+
+    public bool CardHover { get; set; }
+
+    /// <summary>Gets or sets backdrop blur in px.</summary>
+    public int BackdropBlur { get; set; }
+
+    public string LoginMessage { get; set; } = string.Empty;
+
+    public bool LoginGlass { get; set; }
+
+    public bool HideForgotPassword { get; set; }
+
+    public bool HideQuickConnect { get; set; }
+
+    public string Announcement { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the announcement colour style: info, success, warning, accent.</summary>
+    public string AnnouncementStyle { get; set; } = "info";
+
+    public bool AnnouncementDismissible { get; set; } = true;
+
+    public string CustomCss { get; set; } = string.Empty;
+}
+
 public class PluginConfiguration : BasePluginConfiguration
 {
+    /// <summary>Gets or sets the site design settings.</summary>
+    public ThemeSettings Theme { get; set; } = new ThemeSettings();
+
     /// <summary>Gets or sets the folders available in the NAS picker.</summary>
     public NasRoot[] NasRoots { get; set; } = Array.Empty<NasRoot>();
 
