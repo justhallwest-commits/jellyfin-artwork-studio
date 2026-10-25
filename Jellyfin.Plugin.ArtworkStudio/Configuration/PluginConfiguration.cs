@@ -37,4 +37,10 @@ public class PluginConfiguration : BasePluginConfiguration
 
     /// <summary>Gets or sets how often library backdrops rotate, in seconds.</summary>
     public int BackdropRotateSeconds { get; set; } = 12;
+
+    /// <summary>Gets or sets how dark the overlay on top of backdrops is (0 = none, 100 = black).</summary>
+    public int BackdropDimPercent { get; set; } = 45;
+
+    /// <summary>Gets or sets a value indicating whether the darkness setting also applies to Jellyfin's normal backdrops.</summary>
+    public bool DimAllBackdrops { get; set; }
 }

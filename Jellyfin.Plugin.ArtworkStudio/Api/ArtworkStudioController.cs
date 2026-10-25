@@ -102,8 +102,16 @@ public class ArtworkStudioController : ControllerBase
 
         using var reader = new StreamReader(stream);
         var cfg = Config;
-        var prefix = "window.__artworkStudioCfg={enabled:" + (cfg.LibraryBackdrops ? "true" : "false")
-            + ",interval:" + Math.Clamp(cfg.BackdropRotateSeconds, 5, 600).ToString(System.Globalization.CultureInfo.InvariantCulture) + "};\n";
+        var clientCfg = new
+        {
+            enabled = cfg.LibraryBackdrops,
+            interval = Math.Clamp(cfg.BackdropRotateSeconds, 5, 600),
+            dim = Math.Clamp(cfg.BackdropDimPercent, 0, 100),
+            dimAll = cfg.DimAllBackdrops,
+            home = ListPageFiles("home"),
+            login = ListPageFiles("login")
+        };
+        var prefix = "window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
         Response.Headers.CacheControl = "no-cache";
         return Content(prefix + reader.ReadToEnd(), "application/javascript; charset=utf-8");
     }
@@ -119,6 +127,199 @@ public class ArtworkStudioController : ControllerBase
             Installed = plugin?.ClientScriptInstalled ?? false,
             Status = plugin?.ClientScriptStatus ?? "Plugin not loaded."
         });
+    }
+
+    // ---------------------------------------------------------------- Home & login page backdrops
+
+    private static readonly string[] Pages = { "home", "login" };
+
+    /// <summary>Lists the backdrops for the home or login page.</summary>
+    [HttpGet("Backdrops/{page}")]
+    [AllowAnonymous]
+    public ActionResult ListPageBackdrops([FromRoute] string page)
+    {
+        if (!IsPage(page))
+        {
+            return NotFound();
+        }
+
+        var dir = PageDir(page);
+        var files = Directory.Exists(dir)
+            ? new DirectoryInfo(dir).EnumerateFiles()
+                .Where(f => ImageExtensions.Contains(f.Extension))
+                .OrderBy(f => f.Name, StringComparer.Ordinal)
+                .Select(f => new { f.Name, Size = f.Length, Modified = f.LastWriteTimeUtc })
+                .ToList<object>()
+            : new List<object>();
+        return Ok(new { Page = page, Files = files });
+    }
+
+    /// <summary>Serves one home/login backdrop (public, so the login page can show it).</summary>
+    [HttpGet("Backdrops/{page}/{file}")]
+    [AllowAnonymous]
+    public ActionResult GetPageBackdrop([FromRoute] string page, [FromRoute] string file)
+    {
+        if (!IsPage(page) || !SafeFileName(file))
+        {
+            return NotFound();
+        }
+
+        var full = System.IO.Path.Combine(PageDir(page), file);
+        if (!System.IO.File.Exists(full))
+        {
+            return NotFound();
+        }
+
+        Response.Headers.CacheControl = "public, max-age=86400";
+        return PhysicalFile(full, MimeFromExtension(full) ?? "image/jpeg");
+    }
+
+    /// <summary>Adds a home/login backdrop from an uploaded file.</summary>
+    [HttpPost("Backdrops/{page}/Upload")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(MaxUploadBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = MaxUploadBytes)]
+    public async Task<ActionResult> UploadPageBackdrop([FromRoute] string page, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (!IsPage(page))
+        {
+            return NotFound();
+        }
+
+        if (file is null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No file was received." });
+        }
+
+        if (file.Length > MaxBytes)
+        {
+            return BadRequest(new { message = $"That image is larger than the {Config.MaxImageSizeMb} MB limit." });
+        }
+
+        var temp = TempPath();
+        try
+        {
+            await using (var output = System.IO.File.Create(temp))
+            {
+                await file.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
+            }
+
+            return StorePageBackdrop(page, temp);
+        }
+        finally
+        {
+            TryDelete(temp);
+        }
+    }
+
+    /// <summary>Adds a home/login backdrop from a web link.</summary>
+    [HttpPost("Backdrops/{page}/FromUrl")]
+    public async Task<ActionResult> PageBackdropFromUrl([FromRoute] string page, [FromBody] UrlImageRequest request, CancellationToken cancellationToken)
+    {
+        if (!IsPage(page))
+        {
+            return NotFound();
+        }
+
+        var temp = TempPath();
+        try
+        {
+            var (error, _, _) = await DownloadToTempAsync(request.Url, temp, cancellationToken).ConfigureAwait(false);
+            return error is not null ? BadRequest(new { message = error }) : StorePageBackdrop(page, temp);
+        }
+        finally
+        {
+            TryDelete(temp);
+        }
+    }
+
+    /// <summary>Adds a home/login backdrop by copying a NAS image.</summary>
+    [HttpPost("Backdrops/{page}/FromNas")]
+    public ActionResult PageBackdropFromNas([FromRoute] string page, [FromBody] NasImageRequest request)
+    {
+        if (!IsPage(page))
+        {
+            return NotFound();
+        }
+
+        if (!TryResolve(request.Root, request.Path, out var full, out _, out var error))
+        {
+            return BadRequest(new { message = error });
+        }
+
+        if (!System.IO.File.Exists(full))
+        {
+            return NotFound(new { message = "That file no longer exists on the NAS." });
+        }
+
+        return StorePageBackdrop(page, full);
+    }
+
+    /// <summary>Removes a home/login backdrop.</summary>
+    [HttpDelete("Backdrops/{page}/{file}")]
+    public ActionResult DeletePageBackdrop([FromRoute] string page, [FromRoute] string file)
+    {
+        if (!IsPage(page) || !SafeFileName(file))
+        {
+            return NotFound();
+        }
+
+        var full = System.IO.Path.Combine(PageDir(page), file);
+        if (System.IO.File.Exists(full))
+        {
+            System.IO.File.Delete(full);
+        }
+
+        return Ok(new { success = true });
+    }
+
+    private ActionResult StorePageBackdrop(string page, string source)
+    {
+        var mime = SniffFile(source);
+        if (mime is null)
+        {
+            return BadRequest(new { message = "That file doesn't look like a supported image (JPG, PNG, WebP, GIF or BMP)." });
+        }
+
+        var ext = mime switch
+        {
+            "image/png" => ".png",
+            "image/webp" => ".webp",
+            "image/gif" => ".gif",
+            "image/bmp" => ".bmp",
+            _ => ".jpg"
+        };
+        var dir = PageDir(page);
+        Directory.CreateDirectory(dir);
+        var name = DateTime.UtcNow.ToString("yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture) + "-" + Guid.NewGuid().ToString("N")[..8] + ext;
+        System.IO.File.Copy(source, System.IO.Path.Combine(dir, name));
+        _logger.LogInformation("Artwork Studio: added {Page} page backdrop {Name}", page, name);
+        return Ok(new { success = true, Name = name });
+    }
+
+    private static bool IsPage(string page) => Pages.Contains(page, StringComparer.Ordinal);
+
+    private static bool SafeFileName(string file) => Regex.IsMatch(file, "^[A-Za-z0-9][A-Za-z0-9._-]{0,120}$") && !file.Contains("..", StringComparison.Ordinal);
+
+    private static string PageDir(string page)
+    {
+        var root = Plugin.Instance?.DataFolderPath ?? System.IO.Path.GetTempPath();
+        return System.IO.Path.Combine(root, "backdrops", page);
+    }
+
+    private static string[] ListPageFiles(string page)
+    {
+        var dir = PageDir(page);
+        if (!Directory.Exists(dir))
+        {
+            return Array.Empty<string>();
+        }
+
+        return new DirectoryInfo(dir).EnumerateFiles()
+            .Where(f => ImageExtensions.Contains(f.Extension))
+            .OrderBy(f => f.Name, StringComparer.Ordinal)
+            .Select(f => f.Name)
+            .ToArray();
     }
 
     // ---------------------------------------------------------------- NAS browsing
@@ -315,13 +516,34 @@ public class ArtworkStudioController : ControllerBase
             return fail!;
         }
 
-        var normalized = NormalizeShareLink(request.Url?.Trim() ?? string.Empty);
+        var temp = TempPath();
+        try
+        {
+            var (error, mime, host) = await DownloadToTempAsync(request.Url, temp, cancellationToken).ConfigureAwait(false);
+            if (error is not null)
+            {
+                return BadRequest(new { message = error });
+            }
+
+            await SaveCopyAsync(item!, temp, mime!, imageType, request.Index, cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation("Artwork Studio: saved {Type} for {Item} from {Url}", imageType, item!.Name, host);
+            return Ok(new { success = true });
+        }
+        finally
+        {
+            TryDelete(temp);
+        }
+    }
+
+    /// <summary>Downloads a web image into <paramref name="temp"/>. Returns an error message, or the detected MIME type.</summary>
+    private async Task<(string? Error, string? Mime, string? Host)> DownloadToTempAsync(string? rawUrl, string temp, CancellationToken cancellationToken)
+    {
+        var normalized = NormalizeShareLink(rawUrl?.Trim() ?? string.Empty);
         if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
-            return BadRequest(new { message = "Please paste a full web link starting with http:// or https://" });
+            return ("Please paste a full web link starting with http:// or https://", null, null);
         }
 
-        var temp = TempPath();
         try
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -335,12 +557,13 @@ public class ArtworkStudioController : ControllerBase
             using var response = await client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cts.Token).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                return BadRequest(new { message = $"The website answered with an error ({(int)response.StatusCode} {response.ReasonPhrase}). The link may be private or expired." });
+                return ($"The website answered with an error ({(int)response.StatusCode} {response.ReasonPhrase}). The link may be private or expired.", null, null);
             }
 
+            var tooBig = $"That image is larger than the {Config.MaxImageSizeMb} MB limit.";
             if (response.Content.Headers.ContentLength is long len && len > MaxBytes)
             {
-                return BadRequest(new { message = $"That image is larger than the {Config.MaxImageSizeMb} MB limit." });
+                return (tooBig, null, null);
             }
 
             await using (var input = await response.Content.ReadAsStreamAsync(cts.Token).ConfigureAwait(false))
@@ -354,7 +577,7 @@ public class ArtworkStudioController : ControllerBase
                     total += read;
                     if (total > MaxBytes)
                     {
-                        return BadRequest(new { message = $"That image is larger than the {Config.MaxImageSizeMb} MB limit." });
+                        return (tooBig, null, null);
                     }
 
                     await output.WriteAsync(buffer.AsMemory(0, read), cts.Token).ConfigureAwait(false);
@@ -368,24 +591,18 @@ public class ArtworkStudioController : ControllerBase
                 var hint = got.Contains("html", StringComparison.OrdinalIgnoreCase)
                     ? " That's a web page, not the image itself — right-click the picture and choose \"Copy image address\", then paste that."
                     : string.Empty;
-                return BadRequest(new { message = $"That link didn't return a supported image (got {got}).{hint}" });
+                return ($"That link didn't return a supported image (got {got}).{hint}", null, null);
             }
 
-            await SaveCopyAsync(item!, temp, mime, imageType, request.Index, cancellationToken).ConfigureAwait(false);
-            _logger.LogInformation("Artwork Studio: saved {Type} for {Item} from {Url}", imageType, item!.Name, uri.Host);
-            return Ok(new { success = true });
+            return (null, mime, uri.Host);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return BadRequest(new { message = "The website took too long to respond." });
+            return ("The website took too long to respond.", null, null);
         }
         catch (HttpRequestException ex)
         {
-            return BadRequest(new { message = "Couldn't reach that website from the Jellyfin server: " + ex.Message });
-        }
-        finally
-        {
-            TryDelete(temp);
+            return ("Couldn't reach that website from the Jellyfin server: " + ex.Message, null, null);
         }
     }
 

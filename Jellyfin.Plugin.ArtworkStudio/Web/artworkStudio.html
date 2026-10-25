@@ -217,9 +217,16 @@
       </div>
     </div>
     <div class="as-panel">
-      <h3>Library backgrounds</h3>
-      <div class="as-hint">Jellyfin normally shows random backdrops from titles inside a library. With this on, a library that has its own backdrops (set under <b>Library artwork</b>) shows those instead on its page. Several backdrops rotate.</div>
+      <h3>Page backgrounds</h3>
+      <div class="as-hint">Set backdrops for each library, the <b>Home page</b> and the <b>Login page</b> under <b>Browse → Library artwork</b>. Jellyfin normally shows random backdrops from titles inside a library; with the option below on, a library's own backdrops are shown instead. Several images rotate.</div>
       <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="asLibBg"> Show each library's own backdrops on its page</label></div>
+      <div class="as-field">
+        <label for="asDim">Backdrop darkness: <span id="asDimVal"></span></label>
+        <input id="asDim" type="range" min="0" max="95" step="5" style="width:100%">
+        <div id="asDimPreview" style="height:90px;border-radius:8px;background:linear-gradient(120deg,#c9762b,#3a7bd5 55%,#2bb39a);position:relative;overflow:hidden"><div id="asDimShade" style="position:absolute;inset:0;background:#000"></div><div style="position:absolute;left:12px;bottom:10px;color:#fff;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.6)">Preview · Movies</div></div>
+        <div class="as-hint">Lower is brighter. Jellyfin's own default is quite dark (around 85%).</div>
+        <label class="as-row" style="font-weight:normal;margin-top:.3em"><input type="checkbox" id="asDimAll"> Also use this darkness for Jellyfin's normal backdrops (title pages etc.)</label>
+      </div>
       <div class="as-field">
         <label for="asRotate">Rotate every (seconds)</label>
         <input class="as-in" id="asRotate" type="number" min="5" max="600">
@@ -251,7 +258,7 @@
         <li><b>Online</b> — Jellyfin's own providers (TMDB, Fanart.tv, etc., whichever you have enabled).</li>
       </ul>
       <h4>Library backgrounds</h4>
-      <p>Backdrops added to a library under <b>Library artwork</b> become the background of that library's page (Settings → Library backgrounds). This works in the browser and in apps built on the web app (Jellyfin Media Player, the Android/iOS phone apps). Native TV apps keep their own behaviour.</p>
+      <p>Under <b>Library artwork</b> you'll also find <b>Home page</b> and <b>Login page</b> — add images there for those screens. Backdrops added to a library become the background of that library's page (Settings → Library backgrounds). This works in the browser and in apps built on the web app (Jellyfin Media Player, the Android/iOS phone apps). Native TV apps keep their own behaviour.</p>
       <h4>Backdrops</h4>
       <p>Items can have several backdrops. The first one is the "main" one most apps show. Use the star button to make any backdrop the main one, the arrows to reorder, and the + tile to add more.</p>
       <h4>Doing many at once</h4>
@@ -482,8 +489,11 @@
                         var i = byId[l.ItemId] || {};
                         return { Id: l.ItemId, Name: l.Name, Type: 'CollectionFolder', ImageTags: i.ImageTags || {}, BackdropImageTags: i.BackdropImageTags || [], _lib: true, _ct: l.CollectionType };
                     });
-                    if (S.search) items = items.filter(function (i) { return i.Name.toLowerCase().indexOf(S.search.toLowerCase()) >= 0; });
-                    return { Items: items, TotalRecordCount: items.length, done: true };
+                    return Promise.all(PAGES.map(loadPageCard)).then(function (pages) {
+                        items = pages.concat(items);
+                        if (S.search) items = items.filter(function (i) { return i.Name.toLowerCase().indexOf(S.search.toLowerCase()) >= 0; });
+                        return { Items: items, TotalRecordCount: items.length, done: true };
+                    });
                 });
         } else {
             var limit = S.missing ? MISSING_PAGE_SIZE : PAGE_SIZE;
@@ -521,6 +531,33 @@
         });
     }
 
+    // ---- Home & login page backgrounds (stored by the plugin, not on an item)
+    var PAGES = [
+        { page: 'home', name: 'Home page', hint: 'Background of the home screen. Several images rotate.' },
+        { page: 'login', name: 'Login page', hint: 'Background of the sign-in screen. Several images rotate.' }
+    ];
+    function pageImgUrl(page, file) { return ApiClient.getUrl('ArtworkStudio/Backdrops/' + page + '/' + encodeURIComponent(file)); }
+    function loadPageCard(p) {
+        return api('GET', 'ArtworkStudio/Backdrops/' + p.page).catch(function () { return { Files: [] }; }).then(function (r) {
+            var files = (r && r.Files) || [];
+            return {
+                Id: 'page-' + p.page, Name: p.name, Type: 'Page', _lib: true, _page: p.page, _hint: p.hint,
+                ImageTags: {}, BackdropImageTags: files.map(function (f) { return f.Name; }),
+                _thumb: files.length ? pageImgUrl(p.page, files[0].Name) : null
+            };
+        });
+    }
+    function applyPageSource(page, src) {
+        var base = 'ArtworkStudio/Backdrops/' + page + '/';
+        if (src.kind === 'upload') {
+            var fd = new FormData(); fd.append('file', src.file, src.file.name || 'pasted-image.png');
+            return api('POST', base + 'Upload', { form: fd });
+        }
+        if (src.kind === 'url' || src.kind === 'remote') return api('POST', base + 'FromUrl', { json: { Url: src.url } });
+        if (src.kind === 'nas') return api('POST', base + 'FromNas', { json: { Root: src.root, Path: src.path } });
+        return Promise.reject(new Error('Unknown source'));
+    }
+
     function isWide(item) { return item._lib || item.Type === 'Episode' || item.Type === 'Video' || item.Type === 'MusicVideo'; }
 
     function cardHtml(item) {
@@ -528,15 +565,18 @@
         var tag = item.ImageTags && item.ImageTags.Primary;
         var bg = '';
         if (tag) bg = 'background-image:url(\'' + imgUrl(item.Id, 'Primary', null, tag, wide ? 420 : 300) + '\')';
-        var sub = item._lib ? (item._ct || 'library') : [item.Type === 'BoxSet' ? 'Collection' : item.Type, item.ProductionYear].filter(Boolean).join(' · ');
+        if (item._page && item._thumb) { bg = 'background-image:url(\'' + item._thumb + '\')'; tag = true; }
+        var sub = item._page ? 'Page background' : item._lib ? (item._ct || 'library') : [item.Type === 'BoxSet' ? 'Collection' : item.Type, item.ProductionYear].filter(Boolean).join(' · ');
         if (item.SeriesName) sub = item.SeriesName + (item.Type === 'Season' ? '' : ' · ' + sub);
-        var badges = BADGES.map(function (b) {
+        var badges = item._page
+            ? '<span class="as-badge' + (item.BackdropImageTags.length ? '' : ' off') + '" title="Backdrops">' + (item.BackdropImageTags.length ? item.BackdropImageTags.length + ' image' + (item.BackdropImageTags.length > 1 ? 's' : '') : 'Jellyfin default') + '</span>'
+            : BADGES.map(function (b) {
             var has = itemHas(item, b[0]);
             var n = b[0] === 'Backdrop' ? (item.BackdropImageTags || []).length : 0;
             return '<span class="as-badge' + (has ? '' : ' off') + '" title="' + SLOT[b[0]].label + (has ? '' : ' missing') + '">' + b[1] + (n > 1 ? n : '') + '</span>';
         }).join('');
         return '<div class="as-card' + (wide ? ' wide' : '') + (S.selected[item.Id] ? ' selected' : '') + '" data-id="' + esc(item.Id) + '">' +
-            '<div class="as-poster" style="' + bg + '">' + (tag ? '' : icon(item._lib ? 'folder' : 'image_not_supported')) + '</div>' +
+            '<div class="as-poster" style="' + bg + '">' + (tag ? '' : icon(item._page ? (item._page === 'login' ? 'login' : 'home') : item._lib ? 'folder' : 'image_not_supported')) + '</div>' +
             (item._lib ? '' : '<div class="as-check" title="Select">' + icon('check') + '</div>') +
             '<div class="as-meta"><div class="as-name" title="' + esc(item.Name) + '">' + esc(item.Name) + '</div><div class="as-sub">' + esc(sub) + '</div><div class="as-badges">' + badges + '</div></div></div>';
     }
@@ -550,7 +590,11 @@
 
     function refreshCard(id) {
         var item = findItem(id); if (!item) return;
-        var p = item._lib
+        var p = item._page
+            ? loadPageCard(PAGES.filter(function (x) { return x.page === item._page; })[0]).then(function (fresh) {
+                item.BackdropImageTags = fresh.BackdropImageTags; item._thumb = fresh._thumb;
+            })
+            : item._lib
             ? api('GET', 'Items/' + id + '/Images').then(function (infos) {
                 item.ImageTags = {}; item.BackdropImageTags = [];
                 (infos || []).forEach(function (i) { if (i.ImageType === 'Backdrop') item.BackdropImageTags.push(i.ImageTag); else item.ImageTags[i.ImageType] = i.ImageTag; });
@@ -648,15 +692,15 @@
 
     function openEditor(item) {
         var ov = modal(
-            '<div class="as-modal-head">' + icon(item._lib ? 'folder' : 'movie') + '<h3>' + esc(item.Name) + '</h3>' +
+            '<div class="as-modal-head">' + icon(item._page ? 'wallpaper' : item._lib ? 'folder' : 'movie') + '<h3>' + esc(item.Name) + '</h3>' +
             (item._lib ? '' : '<a class="as-btn small" target="_blank" href="#/details?id=' + esc(item.Id) + '">' + icon('open_in_new') + 'Open</a>') +
-            '<button class="as-btn small" id="asEdExtra">' + icon('tune') + 'More types</button>' +
+            (item._page ? '' : '<button class="as-btn small" id="asEdExtra">' + icon('tune') + 'More types</button>') +
             '<button class="as-x" data-close title="Close">' + icon('close') + '</button></div>' +
             '<div class="as-modal-body"><div class="as-hint" style="margin-bottom:.9em">Drag an image (or a picture from another browser tab) onto any slot · click a slot then Ctrl+V to paste · or use the buttons.</div><div class="as-slots" id="asSlots"><div class="as-spin"></div></div></div>');
         editor = { ov: ov, item: item, infos: [], last: { type: 'Primary', index: null }, extra: false };
         ov._close = function () { ov.remove(); document.removeEventListener('paste', onPaste); editor = null; refreshCard(item.Id); };
         $('[data-close]', ov).onclick = ov._close;
-        $('#asEdExtra', ov).onclick = function () { editor.extra = !editor.extra; this.classList.toggle('primary', editor.extra); renderSlots(); };
+        if ($('#asEdExtra', ov)) $('#asEdExtra', ov).onclick = function () { editor.extra = !editor.extra; this.classList.toggle('primary', editor.extra); renderSlots(); };
         document.addEventListener('paste', onPaste);
         (S.roots ? Promise.resolve() : api('GET', 'ArtworkStudio/Roots').then(function (r) { S.roots = r; }).catch(function () {})).then(loadInfos);
     }
@@ -664,7 +708,12 @@
     function loadInfos() {
         if (!editor) return Promise.resolve();
         var ed = editor;
-        return api('GET', 'Items/' + ed.item.Id + '/Images').then(function (infos) {
+        var req = ed.item._page
+            ? api('GET', 'ArtworkStudio/Backdrops/' + ed.item._page).then(function (r) {
+                return (r.Files || []).map(function (f, i) { return { ImageType: 'Backdrop', ImageIndex: i, Size: f.Size, _file: f.Name, _url: pageImgUrl(ed.item._page, f.Name) }; });
+            })
+            : api('GET', 'Items/' + ed.item.Id + '/Images');
+        return req.then(function (infos) {
             if (ed !== editor) return;
             ed.infos = infos || [];
             if (!ed.extra && ed.infos.some(function (i) { return SLOT[i.ImageType] && SLOT[i.ImageType].extra; })) {
@@ -696,7 +745,7 @@
 
     function renderSlots() {
         var ed = editor; if (!ed) return;
-        var html = SLOTS.filter(function (s) { return ed.extra || !s.extra; }).map(function (slot) {
+        var html = SLOTS.filter(function (s) { return ed.item._page ? s.type === 'Backdrop' : (ed.extra || !s.extra); }).map(function (slot) {
             var imgs = ed.infos.filter(function (i) { return i.ImageType === slot.type; }).sort(function (a, b) { return (a.ImageIndex || 0) - (b.ImageIndex || 0); });
             var sz = tileSize(slot);
             var style = 'width:' + sz.w + 'px;height:' + sz.h + 'px';
@@ -704,14 +753,14 @@
                 var idx = slot.multi ? (info.ImageIndex != null ? info.ImageIndex : n) : null;
                 var linked = isLinked(info.Path);
                 return '<div class="as-tile' + (slot.clear ? ' checker' : '') + '" style="' + style + '" data-type="' + slot.type + '" data-index="' + (idx == null ? '' : idx) + '" tabindex="0" title="' + esc(info.Path || '') + '">' +
-                    '<img loading="lazy" src="' + imgUrl(ed.item.Id, slot.type, idx, info.ImageTag, 700) + '" alt="">' +
-                    (slot.multi && n === 0 ? '<span class="as-mainflag">MAIN</span>' : '') +
+                    '<img loading="lazy" src="' + (info._url || imgUrl(ed.item.Id, slot.type, idx, info.ImageTag, 700)) + '" alt="">' +
+                    (slot.multi && n === 0 && !ed.item._page ? '<span class="as-mainflag">MAIN</span>' : '') +
                     (linked ? '<span class="as-linkflag" title="Linked to a file outside Jellyfin\'s own folders">NAS</span>' : '') +
                     '<div class="as-tile-tools">' +
-                    (slot.multi && n > 0 ? '<button class="as-ibtn" data-act="main" title="Make main">' + icon('star') + '</button><button class="as-ibtn" data-act="left" title="Move left">' + icon('chevron_left') + '</button>' : '') +
-                    (slot.multi && n < imgs.length - 1 ? '<button class="as-ibtn" data-act="right" title="Move right">' + icon('chevron_right') + '</button>' : '') +
+                    (!ed.item._page && slot.multi && n > 0 ? '<button class="as-ibtn" data-act="main" title="Make main">' + icon('star') + '</button><button class="as-ibtn" data-act="left" title="Move left">' + icon('chevron_left') + '</button>' : '') +
+                    (!ed.item._page && slot.multi && n < imgs.length - 1 ? '<button class="as-ibtn" data-act="right" title="Move right">' + icon('chevron_right') + '</button>' : '') +
                     '<button class="as-ibtn" data-act="view" title="View full size">' + icon('zoom_in') + '</button>' +
-                    '<button class="as-ibtn" data-act="replace" title="Replace">' + icon('swap_horiz') + '</button>' +
+                    (ed.item._page ? '' : '<button class="as-ibtn" data-act="replace" title="Replace">' + icon('swap_horiz') + '</button>') +
                     '<button class="as-ibtn danger" data-act="delete" title="Remove">' + icon('delete') + '</button>' +
                     '</div>' +
                     '<div class="as-tile-info"><span>' + (info.Width ? info.Width + '×' + info.Height : '') + '</span><span>' + fmtSize(info.Size) + '</span></div></div>';
@@ -722,7 +771,7 @@
                     icon(imgs.length ? 'add_photo_alternate' : 'add_photo_alternate') + '<span>' + (slot.multi && imgs.length ? 'Add another' : 'Add ' + slot.label.toLowerCase()) + '</span><span style="opacity:.6">drop · paste · click</span></div>';
             }
             return '<div class="as-slot' + (slot.wide ? ' wide' : '') + '" data-slot="' + slot.type + '">' +
-                '<div class="as-slot-title"><b>' + slot.label + (slot.multi && imgs.length ? ' (' + imgs.length + ')' : '') + '</b><span>' + slot.hint + '</span></div>' +
+                '<div class="as-slot-title"><b>' + slot.label + (slot.multi && imgs.length ? ' (' + imgs.length + ')' : '') + '</b><span>' + (ed.item._page ? ed.item._hint + ' With none, Jellyfin\'s normal background is used.' : slot.hint) + '</span></div>' +
                 '<div class="as-tiles">' + tiles + '</div></div>';
         }).join('');
         var wrap = $('#asSlots', ed.ov);
@@ -752,7 +801,7 @@
             if (!act) return;
             if (act === 'add' || act === 'replace') chooseFor(tg.type, act === 'add' ? null : tg.index);
             else if (act === 'delete') removeImage(tg);
-            else if (act === 'view') window.open(imgUrl(editor.item.Id, tg.type, tg.index, null, null), '_blank');
+            else if (act === 'view') window.open(editor.item._page ? pageInfo(tg)._url : imgUrl(editor.item.Id, tg.type, tg.index, null, null), '_blank');
             else if (act === 'main') moveImage(tg, 0);
             else if (act === 'left') moveImage(tg, tg.index - 1);
             else if (act === 'right') moveImage(tg, tg.index + 1);
@@ -795,7 +844,8 @@
     function run(type, index, src, el) {
         var ed = editor; if (!ed) return;
         var done = busy(el, src.kind === 'url' ? 'Downloading…' : 'Saving…');
-        return applySource(ed.item.Id, type, index, src).then(function () {
+        var p = ed.item._page ? applyPageSource(ed.item._page, src) : applySource(ed.item.Id, type, index, src);
+        return p.then(function () {
             toast(SLOT[type].label + ' updated');
             return loadInfos();
         }).catch(function (e) { done(); toast(e.message, true); });
@@ -811,11 +861,16 @@
             });
     }
 
+    function pageInfo(tg) { return editor.infos.filter(function (i) { return i.ImageIndex === tg.index; })[0] || {}; }
+
     function removeImage(tg) {
         if (!confirm('Remove this ' + SLOT[tg.type].label.toLowerCase() + '?')) return;
         var done = busy(tg.el, 'Removing…');
         var idx = tg.index == null ? 0 : tg.index;
-        api('DELETE', 'Items/' + editor.item.Id + '/Images/' + tg.type + '/' + idx)
+        var url = editor.item._page
+            ? 'ArtworkStudio/Backdrops/' + editor.item._page + '/' + encodeURIComponent(pageInfo(tg)._file)
+            : 'Items/' + editor.item.Id + '/Images/' + tg.type + '/' + idx;
+        api('DELETE', url)
             .then(function () { toast('Removed'); return loadInfos(); })
             .catch(function (e) { done(); toast(e.message, true); });
     }
@@ -1096,11 +1151,14 @@
             $('#asTimeout').value = cfg.DownloadTimeoutSeconds || 45;
             $('#asLibBg').checked = cfg.LibraryBackdrops !== false;
             $('#asRotate').value = cfg.BackdropRotateSeconds || 12;
+            $('#asDim').value = cfg.BackdropDimPercent == null ? 45 : cfg.BackdropDimPercent;
+            $('#asDimAll').checked = !!cfg.DimAllBackdrops;
+            syncDim();
             checkRoots();
             api('GET', 'ArtworkStudio/ClientStatus').then(function (r) {
                 var st = $('#asClientStatus');
                 st.className = 'as-status ' + (r.Installed ? 'ok' : 'bad');
-                st.innerHTML = (r.Installed ? icon('check_circle') : icon('error')) + esc(r.Status) + (r.Installed ? ' Refresh the browser (Ctrl+F5) after installing or updating.' : '');
+                st.innerHTML = (r.Installed ? icon('check_circle') : icon('error')) + esc(r.Status) + (r.Installed ? ' After saving, refresh the browser (Ctrl+F5) to see changes.' : '');
                 $('#asClientHelp').style.display = r.Installed ? 'none' : '';
             }).catch(function () { $('#asClientStatus').textContent = 'Restart Jellyfin to finish installing the plugin.'; });
         });
@@ -1117,6 +1175,8 @@
             });
         }).catch(function () { /* plugin not loaded yet */ });
     }
+    function syncDim() { var v = parseInt($('#asDim').value, 10) || 0; $('#asDimVal').textContent = v + '%'; $('#asDimShade').style.opacity = v / 100; }
+    $('#asDim').addEventListener('input', syncDim);
     $('#asAddRoot').addEventListener('click', function () { $('#asRoots').insertAdjacentHTML('beforeend', rootRow({ Name: '', Path: '' })); });
     $('#asRoots').addEventListener('click', function (e) { var d = e.target.closest('[data-del]'); if (d) d.closest('.as-rootrow').remove(); });
     $('#asSave').addEventListener('click', function () {
@@ -1130,6 +1190,8 @@
         cfg.DownloadTimeoutSeconds = Math.max(5, Math.min(600, parseInt($('#asTimeout').value, 10) || 45));
         cfg.LibraryBackdrops = $('#asLibBg').checked;
         cfg.BackdropRotateSeconds = Math.max(5, Math.min(600, parseInt($('#asRotate').value, 10) || 12));
+        cfg.BackdropDimPercent = parseInt($('#asDim').value, 10) || 0;
+        cfg.DimAllBackdrops = $('#asDimAll').checked;
         ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function (res) {
             S.roots = null;
             if (window.Dashboard && Dashboard.processPluginConfigurationUpdateResult) Dashboard.processPluginConfigurationUpdateResult(res);

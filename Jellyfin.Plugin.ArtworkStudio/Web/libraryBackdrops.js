@@ -1,47 +1,60 @@
-/* Artwork Studio — show a library's own backdrop(s) behind that library's pages.
- * Jellyfin's web app normally rotates random backdrops from items inside the library;
- * when a library has backdrops set, this shows those instead. */
+/* Artwork Studio — custom page backgrounds for the Jellyfin web app.
+ *  - Library pages show the library's own backdrop(s) instead of random item backdrops.
+ *  - The home page and the login page can have their own backdrop(s).
+ *  - The darkness of the overlay on top of backdrops is adjustable. */
 (function () {
     'use strict';
     if (window.__artworkStudioLibBg) { return; }
     window.__artworkStudioLibBg = true;
 
     var cfg = window.__artworkStudioCfg || {};
-    if (cfg.enabled === false) { return; }
     var ROTATE_MS = Math.max(5, cfg.interval || 12) * 1000;
+    var DIM = Math.min(100, Math.max(0, cfg.dim == null ? 45 : cfg.dim)) / 100;
+    var LOGIN_ROUTES = ['login', 'selectserver', 'forgotpassword', 'forgotpasswordpin', 'wizardstart'];
+    var LIBRARY_ROUTES = ['movies', 'tv', 'music', 'list', 'livetv', 'books', 'homevideos', 'musicvideos', 'photos'];
+
+    // Where the plugin lives, taken from this script's own address (works with a base URL / reverse proxy).
+    var me = document.currentScript;
+    var base = me && me.src ? me.src.replace(/ArtworkStudio\/ClientScript.*$/i, '') : null;
+    function pluginUrl(path) {
+        if (base) { return base + path; }
+        var api = window.ApiClient;
+        return api ? api.getUrl(path) : '../' + path;
+    }
+    function pageUrls(page) {
+        return (cfg[page] || []).map(function (f) { return pluginUrl('ArtworkStudio/Backdrops/' + page + '/' + encodeURIComponent(f)); });
+    }
 
     var cache = {};          // libraryId -> [urls]
-    var current = null;      // libraryId being shown (or null)
+    var currentKey = null;   // what's being shown ('home', 'login', 'lib:<id>' or null)
     var lastHref = null;
     var host = null, layers = [], urls = [], idx = 0, rotateTimer = null, addedWithBackdrop = false;
 
+    var dimCss = 'rgba(0,0,0,' + DIM + ')';
     var style = document.createElement('style');
     style.textContent =
         '#asLibBackdrop{position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;overflow:hidden}' +
         '#asLibBackdrop>div{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease}' +
         '#asLibBackdrop>div.as-on{opacity:1}' +
-        'body.as-libbg .backdropContainer{display:none!important}';
+        'body.as-libbg .backdropContainer{display:none!important}' +
+        'body.as-libbg .backgroundContainer{background:' + dimCss + '!important}' +
+        (cfg.dimAll ? '.backgroundContainer.withBackdrop{background:' + dimCss + '!important}' : '');
     document.head.appendChild(style);
 
-    function client() { return window.ApiClient; }
-
-    function libraryIdFromUrl() {
+    function routeInfo() {
         var h = location.hash || '';
         var q = h.indexOf('?');
-        if (q < 0) { return null; }
-        // Only library landing pages: #/movies, #/tv, #/music, #/list … (with or without .html)
-        var route = h.substring(0, q).toLowerCase().replace(/^#!?\/?/, '').replace(/\.html$/, '');
-        if (['movies', 'tv', 'music', 'list', 'livetv', 'books', 'homevideos', 'musicvideos', 'photos'].indexOf(route) < 0) { return null; }
-        var p = new URLSearchParams(h.substring(q + 1));
-        return p.get('topParentId') || p.get('parentId') || null;
+        var route = (q < 0 ? h : h.substring(0, q)).toLowerCase().replace(/^#!?\/?/, '').replace(/\.html$/, '');
+        var params = new URLSearchParams(q < 0 ? '' : h.substring(q + 1));
+        return { route: route, params: params };
     }
 
-    function backdropsFor(id) {
+    function backdropsForLibrary(id) {
         if (cache[id]) { return Promise.resolve(cache[id]); }
-        var api = client();
+        var api = window.ApiClient;
         if (!api || !api.getCurrentUserId()) { return Promise.resolve([]); }
         return api.getItem(api.getCurrentUserId(), id).then(function (item) {
-            var isLibrary = item && (item.Type === 'CollectionFolder' || item.Type === 'UserView' || item.Type === 'Folder' && item.CollectionType);
+            var isLibrary = item && (item.Type === 'CollectionFolder' || item.Type === 'UserView' || (item.Type === 'Folder' && item.CollectionType));
             var tags = isLibrary ? (item.BackdropImageTags || []) : [];
             var list = tags.map(function (tag, i) {
                 return api.getUrl('Items/' + id + '/Images/Backdrop/' + i, { tag: tag, maxWidth: 1920, quality: 85 });
@@ -49,6 +62,22 @@
             cache[id] = list;
             return list;
         }).catch(function () { cache[id] = []; return []; });
+    }
+
+    // Decide what (if anything) should be shown for the current page.
+    function target() {
+        var r = routeInfo();
+        if (r.route === 'home') {
+            return cfg.home && cfg.home.length ? { key: 'home', load: function () { return Promise.resolve(pageUrls('home')); } } : null;
+        }
+        if (LOGIN_ROUTES.indexOf(r.route) >= 0) {
+            return cfg.login && cfg.login.length ? { key: 'login', load: function () { return Promise.resolve(pageUrls('login')); } } : null;
+        }
+        if (cfg.enabled !== false && LIBRARY_ROUTES.indexOf(r.route) >= 0) {
+            var id = r.params.get('topParentId') || r.params.get('parentId');
+            if (id) { return { key: 'lib:' + id, load: function () { return backdropsForLibrary(id); } }; }
+        }
+        return null;
     }
 
     function ensureHost() {
@@ -76,16 +105,16 @@
     }
 
     function assertDim() {
-        // Jellyfin dims the page over backdrops with .backgroundContainer.withBackdrop
         var bg = document.querySelector('.backgroundContainer');
         if (bg && !bg.classList.contains('withBackdrop')) { bg.classList.add('withBackdrop'); addedWithBackdrop = true; }
         document.body.classList.add('as-libbg');
     }
 
     function start(list) {
-        urls = list; idx = 0;
+        urls = list;
+        idx = Math.floor(Math.random() * list.length);
         assertDim();
-        showImage(urls[0]);
+        showImage(urls[idx]);
         clearInterval(rotateTimer);
         if (urls.length > 1) {
             rotateTimer = setInterval(function () { idx = (idx + 1) % urls.length; showImage(urls[idx]); }, ROTATE_MS);
@@ -106,16 +135,17 @@
 
     function check() {
         if (location.href === lastHref) {
-            if (current && urls.length) { assertDim(); ensureHost(); }
+            if (currentKey && urls.length) { assertDim(); ensureHost(); }
             return;
         }
         lastHref = location.href;
-        var id = libraryIdFromUrl();
-        if (id === current) { return; }
-        current = id;
-        if (!id) { stop(); return; }
-        backdropsFor(id).then(function (list) {
-            if (current !== id) { return; }
+        var t = target();
+        var key = t ? t.key : null;
+        if (key === currentKey) { return; }
+        currentKey = key;
+        if (!t) { stop(); return; }
+        t.load().then(function (list) {
+            if (currentKey !== key) { return; }
             if (list.length) { start(list); } else { stop(); }
         });
     }
