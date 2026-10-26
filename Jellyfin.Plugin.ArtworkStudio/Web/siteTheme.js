@@ -19,6 +19,11 @@
 
     function cssString(v) { return '"' + String(v).replace(/["\\\n\r]/g, '') + '"'; }
     function safeColor(v) { return /^#[0-9a-f]{3,8}$/i.test(v || '') ? v : ''; }
+    // Black text on light accents (e.g. white / pastel), white text otherwise
+    function onAccent(h) {
+        var c = hexToRgb(h).split(',').map(function (v) { v = v / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+        return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) > 0.5 ? '#000' : '#fff';
+    }
     function hexToRgb(h) {
         h = h.replace('#', '');
         if (h.length === 3) { h = h.split('').map(function (c) { return c + c; }).join(''); }
@@ -55,7 +60,7 @@
         var rgb = hexToRgb(accent);
         css.push(':root{--as-accent:' + accent + ';--as-accent-rgb:' + rgb + '}');
         css.push(
-            '.button-submit:not([disabled]),.raised.button-submit,.emby-button.button-submit{background-color:' + accent + '!important;color:#fff!important}' +
+            '.button-submit:not([disabled]),.raised.button-submit,.emby-button.button-submit{background-color:' + accent + '!important;color:' + onAccent(accent) + '!important}' +
             '.itemProgressBarForeground,.playedIndicator,.countIndicator,.mdl-slider-background-lower,.sliderBubble,.emby-select-withcolor>option:checked{background-color:' + accent + '!important}' +
             '.emby-checkbox:checked+span+.checkboxOutline{background-color:' + accent + '!important;border-color:' + accent + '!important}' +
             '.emby-checkbox:focus+span+.checkboxOutline{border-color:' + accent + '!important}' +
@@ -172,6 +177,12 @@
         '.as-announce a{color:#fff;text-decoration:underline}.as-announce .as-announce-text{flex:1;white-space:pre-line}' +
         '.as-announce button{background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:50%;width:2em;height:2em;cursor:pointer;font-size:1em;flex:0 0 auto}');
 
+    // Theme preset (style layer that follows the final accent / background colours)
+    var presets = window.__artworkStudioPresets;
+    if (t.Preset && presets && presets.list[t.Preset]) {
+        css.push(presets.css(t.Preset, accent, bg, t.CardRadius, { loginGlass: t.LoginGlass }));
+    }
+
     if (t.CustomCss) { css.push(t.CustomCss); }
 
     var style = document.createElement('style');
@@ -179,14 +190,16 @@
     style.textContent = css.join('\n');
     document.head.appendChild(style);
 
-    if (fonts.length) {
-        var fam = fonts.filter(function (f, i) { return fonts.indexOf(f) === i; })
-            .map(function (f) { return 'family=' + encodeURIComponent(f.trim()).replace(/%20/g, '+') + ':wght@400;500;600;700'; }).join('&');
+    // One request per font, so a font with a single weight (e.g. Bebas Neue) can't break the others
+    var SINGLE_WEIGHT = ['bebas neue', 'anton'];
+    fonts.filter(function (f, i) { return fonts.indexOf(f) === i; }).forEach(function (f) {
+        var name = f.trim();
         var link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'https://fonts.googleapis.com/css2?' + fam + '&display=swap';
+        link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name).replace(/%20/g, '+') +
+            (SINGLE_WEIGHT.indexOf(name.toLowerCase()) >= 0 ? '' : ':wght@300;400;500;600;700;800') + '&display=swap';
         document.head.appendChild(link);
-    }
+    });
 
     // ---------------------------------------------------------------- favicon & tab title
     if (favicon) {

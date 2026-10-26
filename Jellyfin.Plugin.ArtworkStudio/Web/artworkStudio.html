@@ -145,6 +145,19 @@
 #artworkStudioPage .as-brand-thumb img { max-width:100%; max-height:100%; object-fit:contain; }
 #artworkStudioPage .as-brand-info { flex:1 1 180px; min-width:0; }
 #artworkStudioPage .as-brand-info b { display:block; }
+#artworkStudioPage .as-presets { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:.8em; margin-top:.6em; }
+#artworkStudioPage .as-preset { text-align:left; border:2px solid transparent; border-radius:12px; padding:0; background:var(--as-soft); color:inherit; cursor:pointer; overflow:hidden; font:inherit; transition:transform .15s,border-color .15s; }
+#artworkStudioPage .as-preset:hover { transform:translateY(-2px); border-color:var(--as-line); }
+#artworkStudioPage .as-preset.on { border-color:var(--as-accent); box-shadow:0 0 0 2px var(--as-accent); }
+#artworkStudioPage .as-preset-sw { height:84px; position:relative; overflow:hidden; }
+#artworkStudioPage .as-preset-sw .hd { position:absolute; left:0; right:0; top:0; height:16px; }
+#artworkStudioPage .as-preset-sw .t { position:absolute; left:10px; top:24px; height:6px; width:46px; border-radius:3px; }
+#artworkStudioPage .as-preset-sw .c { position:absolute; top:36px; width:30px; height:42px; }
+#artworkStudioPage .as-preset-sw .b { position:absolute; right:10px; bottom:10px; width:38px; height:12px; }
+#artworkStudioPage .as-preset-txt { padding:.55em .7em .7em; }
+#artworkStudioPage .as-preset-txt b { display:block; font-size:.95em; }
+#artworkStudioPage .as-preset-txt small { display:block; opacity:.6; font-size:.72em; margin:.1em 0 .3em; }
+#artworkStudioPage .as-preset-txt span { display:block; font-size:.76em; opacity:.85; line-height:1.35; }
 #artworkStudioPage .as-size { display:flex; align-items:center; gap:.6em; margin-top:.5em; font-size:.88em; }
 #artworkStudioPage .as-size label { white-space:nowrap; min-width:9.5em; }
 #artworkStudioPage .as-size input { flex:1; min-width:120px; }
@@ -239,6 +252,18 @@
       <div class="as-row" style="justify-content:space-between"><h3 style="margin:0">Site design</h3>
         <label class="as-row" style="gap:.4em"><input type="checkbox" id="tEnabled"> Apply design changes</label></div>
       <div class="as-hint">Changes show in the browser and apps built on the Jellyfin web app after you save and refresh (Ctrl+F5). Native TV apps use their own look. Leave anything blank to keep Jellyfin's default.</div>
+    </div>
+
+    <div class="as-panel">
+      <div class="as-row" style="justify-content:space-between"><h3 style="margin:0">Theme presets</h3>
+        <button class="as-btn small" id="asPresetReset" style="display:none"><span class="material-icons">undo</span>Reset to my design</button></div>
+      <div class="as-hint">One-click looks inspired by popular community themes, rebuilt for Artwork Studio. A preset only changes colours, fonts, glass, buttons, titles and hover effects. Your logos, icon, backgrounds, artwork, sizes, announcement and custom CSS are never touched, and you can fine-tune everything below afterwards.</div>
+      <div class="as-row" style="margin:.8em 0 .2em;gap:1.2em">
+        <label class="as-row" style="gap:.35em;font-weight:normal"><input type="checkbox" id="asBlendBg" checked> Tint backgrounds to match my backdrops</label>
+        <label class="as-row" style="gap:.35em;font-weight:normal"><input type="checkbox" id="asBlendAccent"> Use my logo's colour as the accent</label>
+      </div>
+      <div class="as-presets" id="asPresets"></div>
+      <div class="as-hint" id="asPresetNote" style="margin-top:.6em"></div>
     </div>
 
     <div class="as-panel">
@@ -437,6 +462,8 @@
       </ul>
       <h4>Design</h4>
       <p>The <b>Design</b> tab changes how the whole site looks: your own logo in the top bar and on the login page, the browser-tab icon and name, accent and background colours, fonts, poster corners and hover zoom, backdrop blur, the top bar style, a welcome message and frosted sign-in box on the login page, a home-page announcement banner, and your own CSS. The preview updates as you go; save, then press Ctrl+F5 to see it live.</p>
+      <h4>Theme presets</h4>
+      <p>Design → <b>Theme presets</b> has 13 one-click looks inspired by popular community themes (JellyFlix, ElegantFin, Ultrachromic, Catppuccin and more), rebuilt for Artwork Studio so they work on any supported Jellyfin version. Presets only change colours, fonts, glass, buttons, titles and hover effects. Your uploads, sizes, announcement and custom CSS stay exactly as they are. <b>Tint backgrounds to match my backdrops</b> borrows the colour of your home/login backdrop; <b>Use my logo's colour</b> makes the accent match your logo. <b>Reset to my design</b> puts your own settings back.</p>
       <h4>Filling missing artwork automatically</h4>
       <p>Pick <b>Missing poster</b> (or another type) in the Show filter, click <b>Select → Select page</b>, then <b>Apply artwork → Fill from online</b>. Each item gets the best-rated image from Jellyfin's online providers.</p>
       <h4>Library backgrounds</h4>
@@ -1451,6 +1478,11 @@
                 var f = (r.Files || [])[0];
                 S.loginBd = f ? pageImgUrl('login', f.Name) : null;
             }).catch(function () {});
+        }).then(function () {
+            return api('GET', 'ArtworkStudio/Backdrops/home').then(function (r) {
+                var f = (r.Files || [])[0];
+                S.homeBd = f ? pageImgUrl('home', f.Name) : null;
+            }).catch(function () {});
         }).then(updatePreview);
     }
     $('#asBrandSlots').addEventListener('click', function (e) {
@@ -1508,6 +1540,9 @@
         $('#tAnnStyle').value = t.AnnouncementStyle || 'info';
         $('#tAnnDismiss').checked = t.AnnouncementDismissible !== false;
         $('#tCss').value = t.CustomCss || '';
+        S.preset = t.Preset || '';
+        S.beforePreset = t.BeforePreset || '';
+        ensurePresets().then(renderPresets);
         updatePreview();
     }
     function collectDesign() {
@@ -1541,16 +1576,180 @@
             Announcement: $('#tAnn').value.trim(),
             AnnouncementStyle: $('#tAnnStyle').value,
             AnnouncementDismissible: $('#tAnnDismiss').checked,
-            CustomCss: $('#tCss').value
+            CustomCss: $('#tCss').value,
+            Preset: S.preset || '',
+            BeforePreset: S.beforePreset || ''
         };
     }
+
+    // ============================================================ THEME PRESETS
+    function ensurePresets() {
+        if (window.__artworkStudioPresets) return Promise.resolve(window.__artworkStudioPresets);
+        if (S.presetLoad) return S.presetLoad;
+        S.presetLoad = new Promise(function (resolve) {
+            var sc = document.createElement('script');
+            sc.src = ApiClient.getUrl('ArtworkStudio/Presets');
+            sc.onload = function () { resolve(window.__artworkStudioPresets); };
+            sc.onerror = function () { resolve(null); };
+            document.head.appendChild(sc);
+        });
+        return S.presetLoad;
+    }
+    function presetSwatch(p) {
+        var st = p.settings, sy = p.style, P = window.__artworkStudioPresets;
+        var surface = P.mix(st.BackgroundColor, '#ffffff', sy.surfaceLift || 0.07);
+        var br = sy.buttons === 'pill' ? '999px' : sy.buttons === 'square' ? '1px' : '4px';
+        var btn = sy.gradientButtons ? 'linear-gradient(135deg,' + st.AccentColor + ',' + sy.accent2 + ')' : st.AccentColor;
+        var title = sy.titles === 'gradient' ? 'linear-gradient(90deg,' + st.AccentColor + ',' + sy.accent2 + ')' : sy.text;
+        var r = Math.min(8, st.CardRadius) + 'px';
+        var cards = [0, 1, 2, 3].map(function (i) {
+            var g = ['#5b6b8c', '#7a5c8c', '#5c8c7a', '#8c7a5c'][i];
+            return '<div class="c" style="left:' + (10 + i * 36) + 'px;border-radius:' + r + ';background:' + g + ';' + (sy.shadow ? 'box-shadow:0 3px 8px rgba(0,0,0,.5);' : '') +
+                (i === 0 && sy.hover === 'glow' ? 'box-shadow:0 0 0 2px ' + st.AccentColor + ';' : '') + (i === 0 && sy.hover === 'outline' ? 'outline:1px solid ' + st.AccentColor + ';outline-offset:2px;' : '') + '"></div>';
+        }).join('');
+        return '<div class="as-preset-sw" style="background:' + (sy.ambient ? 'radial-gradient(circle at 10% 0%,' + st.AccentColor + '55,transparent 55%),' : '') + st.BackgroundColor + '">' +
+            '<div class="hd" style="background:' + (st.HeaderStyle === 'transparent' ? 'linear-gradient(rgba(0,0,0,.6),transparent)' : surface) + (sy.glass ? ';opacity:.75' : '') + '"></div>' +
+            '<div class="t" style="background:' + title + ';' + (sy.titles === 'upper-bar' ? 'border-left:3px solid ' + st.AccentColor + ';' : '') + '"></div>' + cards +
+            '<div class="b" style="background:' + btn + ';border-radius:' + br + '"></div></div>';
+    }
+    function renderPresets() {
+        var P = window.__artworkStudioPresets;
+        var host = $('#asPresets');
+        if (!P) { host.innerHTML = '<div class="as-hint">Presets need the plugin\'s web script — restart Jellyfin to finish installing it.</div>'; return; }
+        host.innerHTML = Object.keys(P.list).map(function (id) {
+            var p = P.list[id];
+            return '<button type="button" class="as-preset' + (S.preset === id ? ' on' : '') + '" data-preset="' + id + '">' + presetSwatch(p) +
+                '<div class="as-preset-txt"><b>' + esc(p.name) + '</b><small>Inspired by ' + esc(p.name) + (p.credit && p.credit !== 'community' ? ' · ' + esc(p.credit) : '') + '</small><span>' + esc(p.desc) + '</span></div></button>';
+        }).join('');
+        $('#asPresetReset').style.display = S.preset || S.beforePreset ? '' : 'none';
+        $('#asPresetNote').textContent = S.preset ? 'Using ' + P.list[S.preset].name + '. Click Save design to keep it.' : '';
+    }
+
+    // ---- colours from the user's own images, so presets blend with them
+    function imageColors(url) {
+        return new Promise(function (resolve) {
+            if (!url) { resolve(null); return; }
+            var img = new Image();
+            img.onload = function () {
+                try {
+                    var c = document.createElement('canvas'); c.width = 64; c.height = 64;
+                    var g = c.getContext('2d'); g.drawImage(img, 0, 0, 64, 64);
+                    var d = g.getImageData(0, 0, 64, 64).data;
+                    var sum = [0, 0, 0], n = 0, buckets = {};
+                    for (var i = 0; i < d.length; i += 4) {
+                        if (d[i + 3] < 128) continue;             // ignore transparent logo areas
+                        var r = d[i], gg = d[i + 1], b = d[i + 2];
+                        sum[0] += r; sum[1] += gg; sum[2] += b; n++;
+                        var hsl = toHsl(r, gg, b);
+                        if (hsl[1] < 0.25 || hsl[2] < 0.15 || hsl[2] > 0.9) continue;
+                        var k = Math.round(hsl[0] * 24) % 24, w = hsl[1] * (1 - Math.abs(hsl[2] - 0.5));
+                        buckets[k] = buckets[k] || { w: 0, r: 0, g: 0, b: 0 };
+                        buckets[k].w += w; buckets[k].r += r * w; buckets[k].g += gg * w; buckets[k].b += b * w;
+                    }
+                    if (!n) { resolve(null); return; }
+                    var best = null;
+                    Object.keys(buckets).forEach(function (k) { if (!best || buckets[k].w > best.w) best = buckets[k]; });
+                    resolve({
+                        average: [sum[0] / n, sum[1] / n, sum[2] / n],
+                        vivid: best ? [best.r / best.w, best.g / best.w, best.b / best.w] : null
+                    });
+                } catch (e) { resolve(null); }
+            };
+            img.onerror = function () { resolve(null); };
+            img.src = url;
+        });
+    }
+    function toHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b), h = 0, s2 = 0, l = (max + min) / 2;
+        if (max !== min) {
+            var dd = max - min; s2 = l > 0.5 ? dd / (2 - max - min) : dd / (max + min);
+            h = max === r ? (g - b) / dd + (g < b ? 6 : 0) : max === g ? (b - r) / dd + 2 : (r - g) / dd + 4; h /= 6;
+        }
+        return [h, s2, l];
+    }
+    function fromHsl(h, s2, l) {
+        function f(n) { var k = (n + h * 12) % 12, a = s2 * Math.min(l, 1 - l); return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); }
+        return '#' + [f(0), f(8), f(4)].map(function (v) { return (v < 16 ? '0' : '') + v.toString(16); }).join('');
+    }
+    function backdropForBlend() {
+        if (S.homeBd) return Promise.resolve(S.homeBd);
+        if (S.loginBd) return Promise.resolve(S.loginBd);
+        // fall back to the first library backdrop
+        var lib = S.libraries[0];
+        return Promise.resolve(lib ? ApiClient.getUrl('Items/' + lib.ItemId + '/Images/Backdrop/0', { maxWidth: 400 }) : null);
+    }
+
+    function applyPreset(id) {
+        var P = window.__artworkStudioPresets; if (!P || !P.list[id]) return;
+        var p = P.list[id];
+        var t = collectDesign();
+        if (!S.preset && !S.beforePreset) {
+            var snap = {}; P.styleKeys.forEach(function (k) { snap[k] = t[k]; });
+            S.beforePreset = JSON.stringify(snap);
+        }
+        var v = Object.assign({}, p.settings);
+        var jobs = [], seq = S.presetSeq = (S.presetSeq || 0) + 1;
+        if ($('#asBlendBg').checked) {
+            jobs.push(backdropForBlend().then(imageColors).then(function (c) {
+                if (!c) return;
+                // keep the preset's darkness, borrow the backdrop's hue
+                var bgH = toHsl.apply(null, P.mix(v.BackgroundColor, '#000', 0).replace('#', '').match(/../g).map(function (x) { return parseInt(x, 16); }));
+                var img = toHsl(c.average[0], c.average[1], c.average[2]);
+                if (img[1] > 0.08) { v.BackgroundColor = P.mix(v.BackgroundColor, fromHsl(img[0], Math.min(0.45, img[1] + 0.1), Math.max(0.05, Math.min(0.12, bgH[2] + 0.06))), 0.6); }
+            }));
+        }
+        if ($('#asBlendAccent').checked && S.brand.logo) {
+            jobs.push(imageColors(S.brand.logo).then(function (c) {
+                if (!c || !c.vivid) return;
+                var h = toHsl(c.vivid[0], c.vivid[1], c.vivid[2]);
+                v.AccentColor = fromHsl(h[0], Math.max(0.55, h[1]), Math.min(0.62, Math.max(0.45, h[2])));
+            }));
+        }
+        Promise.all(jobs).then(function () {
+            if (seq !== S.presetSeq) return;   // a newer preset was clicked meanwhile
+            setColor('tAccent', v.AccentColor);
+            setColor('tBg', v.BackgroundColor);
+            $('#tHeader').value = v.HeaderStyle;
+            $('#tBodyFont').value = v.BodyFont;
+            $('#tHeadFont').value = v.HeadingFont;
+            $('#tRadius').value = v.CardRadius;
+            $('#tHover').checked = !!v.CardHover;
+            $('#tBlur').value = v.BackdropBlur;
+            $('#tLoginGlass').checked = !!v.LoginGlass;
+            S.preset = id;
+            renderPresets();
+            updatePreview();
+            toast(p.name + ' applied — click Save design to keep it');
+        });
+    }
+    function resetPreset() {
+        var snap = {};
+        try { snap = S.beforePreset ? JSON.parse(S.beforePreset) : {}; } catch (e) { snap = {}; }
+        setColor('tAccent', snap.AccentColor || '');
+        setColor('tBg', snap.BackgroundColor || '');
+        $('#tHeader').value = snap.HeaderStyle || 'default';
+        $('#tBodyFont').value = snap.BodyFont || '';
+        $('#tHeadFont').value = snap.HeadingFont || '';
+        $('#tRadius').value = snap.CardRadius == null ? -1 : snap.CardRadius;
+        $('#tHover').checked = !!snap.CardHover;
+        $('#tBlur').value = snap.BackdropBlur || 0;
+        $('#tLoginGlass').checked = !!snap.LoginGlass;
+        S.preset = ''; S.beforePreset = '';
+        renderPresets(); updatePreview();
+        toast('Back to your own design — click Save design to keep it');
+    }
+    $('#asPresets').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-preset]'); if (b) applyPreset(b.dataset.preset);
+    });
+    $('#asPresetReset').addEventListener('click', resetPreset);
 
     var pvFonts = {};
     function loadFont(name) {
         if (!name || pvFonts[name]) return;
         pvFonts[name] = true;
         var l = document.createElement('link'); l.rel = 'stylesheet';
-        l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name).replace(/%20/g, '+') + ':wght@400;600;700&display=swap';
+        l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name).replace(/%20/g, '+') + (/^(bebas neue|anton)$/i.test(name) ? '' : ':wght@300;400;500;600;700;800') + '&display=swap';
         document.head.appendChild(l);
     }
     var pvMode = 'home';
@@ -1564,7 +1763,7 @@
         $('#tBlurVal').textContent = t.BackdropBlur ? t.BackdropBlur + 'px' : 'None';
         $('#tHeadUserVal').textContent = t.HeaderUserSize > 0 ? t.HeaderUserSize + 'em' : 'Jellyfin default';
         var pvU = $('#asPvUser');
-        if (pvU) { var hs = on && t.HeaderUserSize > 0 ? t.HeaderUserSize * 0.8 : 1.1; pvU.style.width = pvU.style.height = hs + 'em'; }
+        if (pvU) { var hs = t.Enabled && t.HeaderUserSize > 0 ? t.HeaderUserSize * 0.8 : 1.1; pvU.style.width = pvU.style.height = hs + 'em'; }
         $('#tLibSizeVal').textContent = t.LibraryCardSize > 0 ? t.LibraryCardSize + '% of screen width' : 'Jellyfin default';
         $('#tUserSizeVal').textContent = t.LoginUserSize > 0 ? t.LoginUserSize + 'em' : 'Jellyfin default';
         $('#tBoxWVal').textContent = t.LoginBoxWidth > 0 ? t.LoginBoxWidth + 'em' : (t.LoginTidy || t.LoginGlass ? 'Automatic (30em)' : 'Jellyfin default');
@@ -1650,6 +1849,49 @@
         form.style.backdropFilter = on && t.LoginGlass ? 'blur(10px)' : '';
         form.style.border = on && t.LoginGlass ? '1px solid rgba(255,255,255,.1)' : '0';
         $('#asPvGo').style.background = on ? accent : '#00a4dc';
+        // Preset style details in the preview
+        var PR = window.__artworkStudioPresets, ps = on && S.preset && PR && PR.list[S.preset] ? PR.list[S.preset].style : null;
+        var h3 = [$('#asPvH'), $('#asPvLibH')];
+        h3.forEach(function (h) {
+            h.style.textTransform = ps && /upper|light/.test(ps.titles) ? 'uppercase' : '';
+            h.style.letterSpacing = ps && /upper|light/.test(ps.titles) ? '.08em' : '';
+            h.style.fontWeight = ps ? ({ light: 300, medium: 500, bold: 700, large: 800, upper: 700, 'upper-bar': 800, gradient: 700 }[ps.titles] || '') : '';
+            h.style.borderLeft = ps && ps.titles === 'upper-bar' ? '4px solid ' + accent : '';
+            h.style.paddingLeft = ps && ps.titles === 'upper-bar' ? '.5em' : '';
+            var grad = ps && ps.titles === 'gradient';
+            h.style.background = grad ? 'linear-gradient(90deg,' + accent + ',' + ps.accent2 + ')' : '';
+            h.style.webkitBackgroundClip = h.style.backgroundClip = grad ? 'text' : '';
+            h.style.webkitTextFillColor = grad ? 'transparent' : '';
+            h.style.color = ps && !grad ? ps.text : '';
+            h.style.fontFamily = head;
+        });
+        var btnR = ps ? (ps.buttons === 'pill' ? '999px' : ps.buttons === 'square' ? '2px' : '6px') : '6px';
+        [$('#asPvBtn'), $('#asPvGo')].forEach(function (b) {
+            b.style.borderRadius = btnR;
+            if (ps && ps.gradientButtons) b.style.background = 'linear-gradient(135deg,' + accent + ',' + ps.accent2 + ')';
+            if (ps && ps.playWhite && b.id === 'asPvBtn') { b.style.background = '#fff'; b.style.color = '#000'; } else { b.style.color = PR && PR.luminance(accent) > 0.5 ? '#000' : '#fff'; }
+        });
+        $$('.as-pv-card', $('#asPvCards')).forEach(function (c, i) {
+            if (ps && ps.shadow) c.style.boxShadow = '0 6px 16px rgba(0,0,0,.5)';
+            c.onmouseenter = function () {
+                if (!on) return;
+                if (ps && ps.hover === 'lift') { c.style.transform = 'translateY(-5px)'; c.style.boxShadow = '0 14px 28px rgba(0,0,0,.6)'; }
+                else if (ps && ps.hover === 'glow') c.style.boxShadow = '0 0 0 2px ' + accent + ',0 10px 26px ' + accent + '73';
+                else if (ps && ps.hover === 'outline') { c.style.outline = '2px solid ' + accent; c.style.outlineOffset = '3px'; }
+                else if (ps && ps.hover === 'subtle') c.style.filter = 'brightness(1.12)';
+                else if (t.CardHover) c.style.transform = 'scale(1.06)';
+            };
+            c.onmouseleave = function () { c.style.transform = ''; c.style.outline = ''; c.style.filter = ''; c.style.boxShadow = ps && ps.shadow ? '0 6px 16px rgba(0,0,0,.5)' : ''; };
+        });
+        if (ps) {
+            $('#asPv').style.color = ps.text;
+            $('#asPvBd').style.boxShadow = 'inset 0 -120px 80px -40px ' + bg;   // backdrop fades into the theme colour
+            if (ps.glass) hdr.style.backdropFilter = 'blur(' + (ps.glassBlur || 18) / 2 + 'px)';
+            if (t.LoginGlass) form.style.background = 'rgba(' + PR.mix(bg, '#ffffff', ps.surfaceLift || .07).replace('#', '').match(/../g).map(function (x) { return parseInt(x, 16); }).join(',') + ',' + (ps.glass ? '.55' : '.82') + ')';
+        } else {
+            $('#asPv').style.color = '';
+            $('#asPvBd').style.boxShadow = '';
+        }
         $('#asPvHome').style.display = pvMode === 'home' ? '' : 'none';
         $('#asPvLogin').style.display = pvMode === 'login' ? 'flex' : 'none';
         $('#asPvHeader').style.visibility = pvMode === 'login' ? 'hidden' : '';

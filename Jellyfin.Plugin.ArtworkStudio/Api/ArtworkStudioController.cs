@@ -95,7 +95,7 @@ public class ArtworkStudioController : ControllerBase
     {
         var asm = typeof(Plugin).Assembly;
         var script = new System.Text.StringBuilder();
-        foreach (var name in new[] { "libraryBackdrops.js", "siteTheme.js" })
+        foreach (var name in new[] { "libraryBackdrops.js", "presets.js", "siteTheme.js" })
         {
             using var stream = asm.GetManifestResourceStream(typeof(Plugin).Namespace + ".Web." + name);
             if (stream is null)
@@ -127,6 +127,22 @@ public class ArtworkStudioController : ControllerBase
         var prefix = "window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
         Response.Headers.CacheControl = "no-cache";
         return Content(prefix + script, "application/javascript; charset=utf-8");
+    }
+
+    /// <summary>Serves the theme preset definitions (used by the Design tab).</summary>
+    [HttpGet("Presets")]
+    [AllowAnonymous]
+    public ActionResult GetPresets()
+    {
+        using var stream = typeof(Plugin).Assembly.GetManifestResourceStream(typeof(Plugin).Namespace + ".Web.presets.js");
+        if (stream is null)
+        {
+            return NotFound();
+        }
+
+        using var reader = new StreamReader(stream);
+        Response.Headers.CacheControl = "no-cache";
+        return Content(reader.ReadToEnd(), "application/javascript; charset=utf-8");
     }
 
     /// <summary>Reports whether the browser script is installed, and retries installing it.</summary>

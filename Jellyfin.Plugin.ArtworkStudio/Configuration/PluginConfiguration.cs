@@ -92,6 +92,12 @@ public class ThemeSettings
     public bool AnnouncementDismissible { get; set; } = true;
 
     public string CustomCss { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the active theme preset id (empty = none).</summary>
+    public string Preset { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the user's own style settings saved before a preset was applied (JSON), for "Reset to my design".</summary>
+    public string BeforePreset { get; set; } = string.Empty;
 }
 
 public class PluginConfiguration : BasePluginConfiguration
