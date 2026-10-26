@@ -45,6 +45,31 @@ public class ThemeSettings
 
     public bool CardHover { get; set; }
 
+    /// <summary>Gets or sets the width of library covers on the home screen, in % of screen width (0 = Jellyfin default).</summary>
+    public double LibraryCardSize { get; set; }
+
+    /// <summary>Gets or sets the library cover shape: default, wide, ultrawide, square, poster.</summary>
+    public string LibraryCardShape { get; set; } = "default";
+
+    public bool LibraryHideNames { get; set; }
+
+    /// <summary>Gets or sets the size of user pictures on the login screen, in em (0 = Jellyfin default).</summary>
+    public double LoginUserSize { get; set; }
+
+    public bool LoginUserRound { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the login window gets cleaner spacing.</summary>
+    public bool LoginTidy { get; set; } = true;
+
+    /// <summary>Gets or sets the login window width in em (0 = automatic).</summary>
+    public double LoginBoxWidth { get; set; }
+
+    /// <summary>Gets or sets the space between login fields in em (0 = automatic).</summary>
+    public double LoginSpacing { get; set; }
+
+    /// <summary>Gets or sets the login text size in percent.</summary>
+    public int LoginTextSize { get; set; } = 100;
+
     /// <summary>Gets or sets backdrop blur in px.</summary>
     public int BackdropBlur { get; set; }
 

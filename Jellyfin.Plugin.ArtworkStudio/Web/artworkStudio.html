@@ -169,6 +169,13 @@
 #artworkStudioPage .as-pv-card { flex:1; aspect-ratio:2/3; border-radius:4px; position:relative; overflow:hidden; transition:transform .2s; }
 #artworkStudioPage .as-pv-card .bar { position:absolute; left:6%; right:6%; bottom:6%; height:4px; background:rgba(255,255,255,.25); border-radius:2px; }
 #artworkStudioPage .as-pv-card .bar i { display:block; height:100%; width:60%; border-radius:2px; }
+#artworkStudioPage .as-pv-libs { display:flex; gap:.5em; overflow:hidden; margin-bottom:.8em; }
+#artworkStudioPage .as-pv-lib { flex:0 0 auto; }
+#artworkStudioPage .as-pv-lib div { border-radius:4px; background-size:cover; }
+#artworkStudioPage .as-pv-lib span { display:block; font-size:.7em; text-align:center; margin-top:.25em; opacity:.85; }
+#artworkStudioPage .as-pv-users { display:flex; gap:.8em; justify-content:center; margin:.3em 0 .7em; }
+#artworkStudioPage .as-pv-user { text-align:center; font-size:.7em; }
+#artworkStudioPage .as-pv-user div { background:linear-gradient(160deg,#4b6cb7,#182848); display:flex; align-items:center; justify-content:center; margin:0 auto .3em; }
 #artworkStudioPage .as-pv-btn { border:0; color:#fff; border-radius:6px; padding:.45em 1.1em; font:inherit; font-size:.85em; }
 #artworkStudioPage .as-pv-login { display:none; flex-direction:column; align-items:center; padding:1.2em; position:relative; }
 #artworkStudioPage .as-pv-login img { max-height:3.5em; max-width:70%; margin-bottom:.4em; }
@@ -280,12 +287,29 @@
     </div>
 
     <div class="as-panel">
+      <h3>Home screen library covers</h3>
+      <div class="as-hint">The tiles in "My Media" on the home screen. Set their cover pictures under Browse → Library artwork.</div>
+      <div class="as-field" style="max-width:none"><label for="tLibSize">Cover size: <span id="tLibSizeVal"></span></label><input id="tLibSize" type="range" min="0" max="45" step="0.5" style="width:100%"></div>
+      <div class="as-field"><label for="tLibShape">Cover shape</label>
+        <select class="as-in" id="tLibShape"><option value="default">Jellyfin default</option><option value="wide">Wide (16:9)</option><option value="ultrawide">Extra wide (21:9)</option><option value="square">Square</option><option value="poster">Poster (2:3)</option></select></div>
+      <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tLibNames"> Hide library names under the covers</label></div>
+    </div>
+
+    <div class="as-panel">
       <h3>Login page</h3>
       <div class="as-hint">The login logo uses the header logo unless you set a separate one above. Login backgrounds are under Browse → Library artwork → Login page.</div>
       <div class="as-field" style="max-width:none"><label for="tLoginMsg">Welcome message</label><textarea class="as-in" id="tLoginMsg" placeholder="e.g. Welcome to HallFlix — sign in to start watching."></textarea></div>
       <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tLoginGlass"> Frosted-glass sign-in box</label>
         <label class="as-row" style="font-weight:normal"><input type="checkbox" id="tHideForgot"> Hide "Forgot password" button</label>
         <label class="as-row" style="font-weight:normal"><input type="checkbox" id="tHideQuick"> Hide "Quick Connect" button</label></div>
+      <h4 style="margin:1.2em 0 .2em">User pictures</h4>
+      <div class="as-field" style="max-width:none"><label for="tUserSize">Picture size: <span id="tUserSizeVal"></span></label><input id="tUserSize" type="range" min="0" max="20" step="0.5" style="width:100%"></div>
+      <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tUserRound"> Round user pictures</label></div>
+      <h4 style="margin:1.2em 0 .2em">Sign-in window layout</h4>
+      <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tTidy"> Clean up spacing (stops text and fields bunching up or overlapping)</label></div>
+      <div class="as-field" style="max-width:none"><label for="tBoxW">Window width: <span id="tBoxWVal"></span></label><input id="tBoxW" type="range" min="0" max="60" step="1" style="width:100%"></div>
+      <div class="as-field" style="max-width:none"><label for="tGap">Space between fields: <span id="tGapVal"></span></label><input id="tGap" type="range" min="0" max="3" step="0.1" style="width:100%"></div>
+      <div class="as-field" style="max-width:none"><label for="tLoginText">Text size: <span id="tLoginTextVal"></span></label><input id="tLoginText" type="range" min="80" max="160" step="5" style="width:100%"></div>
     </div>
 
     <div class="as-panel">
@@ -314,11 +338,13 @@
           <div class="as-pv-bd" id="asPvBd"></div><div class="as-pv-shade" id="asPvShade"></div>
           <div class="as-pv-body" id="asPvHome">
             <div class="as-pv-ann" id="asPvAnn"></div>
+            <h3 class="as-pv-h" id="asPvLibH">My Media</h3>
+            <div class="as-pv-libs" id="asPvLibs"></div>
             <h3 class="as-pv-h" id="asPvH">Continue Watching</h3>
             <div class="as-pv-cards" id="asPvCards"></div>
             <button class="as-pv-btn" id="asPvBtn">Play</button> <span id="asPvLink" style="font-size:.85em;margin-left:.6em">More info</span>
           </div>
-          <div class="as-pv-login" id="asPvLogin"><img id="asPvLoginLogo" alt=""><div class="msg" id="asPvMsg"></div><div class="as-pv-form" id="asPvForm"><div></div><div></div><div class="go" id="asPvGo"></div></div></div>
+          <div class="as-pv-login" id="asPvLogin"><img id="asPvLoginLogo" alt=""><div class="msg" id="asPvMsg"></div><div class="as-pv-users" id="asPvUsers"></div><div class="as-pv-form" id="asPvForm"><div></div><div></div><div class="go" id="asPvGo"></div></div></div>
         </div>
       </div>
       <div class="as-hint" style="margin-top:.5em">A rough preview — the real result also depends on the page.</div>
@@ -1461,6 +1487,15 @@
         $('#tHeadFont').value = t.HeadingFont || '';
         $('#tRadius').value = t.CardRadius == null ? -1 : t.CardRadius;
         $('#tHover').checked = !!t.CardHover;
+        $('#tLibSize').value = t.LibraryCardSize || 0;
+        $('#tLibShape').value = t.LibraryCardShape || 'default';
+        $('#tLibNames').checked = !!t.LibraryHideNames;
+        $('#tUserSize').value = t.LoginUserSize || 0;
+        $('#tUserRound').checked = !!t.LoginUserRound;
+        $('#tTidy').checked = t.LoginTidy !== false;
+        $('#tBoxW').value = t.LoginBoxWidth || 0;
+        $('#tGap').value = t.LoginSpacing || 0;
+        $('#tLoginText').value = t.LoginTextSize || 100;
         $('#tBlur').value = t.BackdropBlur || 0;
         $('#tLoginMsg').value = t.LoginMessage || '';
         $('#tLoginGlass').checked = !!t.LoginGlass;
@@ -1485,6 +1520,15 @@
             HeadingFont: $('#tHeadFont').value.trim(),
             CardRadius: parseInt($('#tRadius').value, 10),
             CardHover: $('#tHover').checked,
+            LibraryCardSize: parseFloat($('#tLibSize').value) || 0,
+            LibraryCardShape: $('#tLibShape').value,
+            LibraryHideNames: $('#tLibNames').checked,
+            LoginUserSize: parseFloat($('#tUserSize').value) || 0,
+            LoginUserRound: $('#tUserRound').checked,
+            LoginTidy: $('#tTidy').checked,
+            LoginBoxWidth: parseFloat($('#tBoxW').value) || 0,
+            LoginSpacing: parseFloat($('#tGap').value) || 0,
+            LoginTextSize: parseInt($('#tLoginText').value, 10) || 100,
             BackdropBlur: parseInt($('#tBlur').value, 10) || 0,
             LoginMessage: $('#tLoginMsg').value.trim(),
             LoginGlass: $('#tLoginGlass').checked,
@@ -1514,6 +1558,11 @@
         $('#tLoginLogoHVal').textContent = t.LoginLogoHeight > 0 ? t.LoginLogoHeight + 'em tall' : 'Default (6em)';
         $('#tRadiusVal').textContent = t.CardRadius < 0 ? 'Jellyfin default' : t.CardRadius + 'px';
         $('#tBlurVal').textContent = t.BackdropBlur ? t.BackdropBlur + 'px' : 'None';
+        $('#tLibSizeVal').textContent = t.LibraryCardSize > 0 ? t.LibraryCardSize + '% of screen width' : 'Jellyfin default';
+        $('#tUserSizeVal').textContent = t.LoginUserSize > 0 ? t.LoginUserSize + 'em' : 'Jellyfin default';
+        $('#tBoxWVal').textContent = t.LoginBoxWidth > 0 ? t.LoginBoxWidth + 'em' : (t.LoginTidy || t.LoginGlass ? 'Automatic (30em)' : 'Jellyfin default');
+        $('#tGapVal').textContent = t.LoginSpacing > 0 ? t.LoginSpacing + 'em' : 'Automatic';
+        $('#tLoginTextVal').textContent = t.LoginTextSize + '%';
         var on = t.Enabled;
         $('#asPv').style.opacity = on ? 1 : .5;
         var body = on && t.BodyFont ? '"' + t.BodyFont + '", sans-serif' : '';
@@ -1559,6 +1608,26 @@
             c.onmouseleave = function () { c.style.transform = ''; };
         });
         $('#asPvBtn').style.background = on ? accent : '#00a4dc';
+
+        var stageW = $('#asPvStage').clientWidth || 400;
+        var libW = (on && t.LibraryCardSize > 0 ? t.LibraryCardSize : 23.3) / 100 * stageW;
+        var shapeRatio = { wide: 9 / 16, ultrawide: 9 / 21, square: 1, poster: 1.5 }[on ? t.LibraryCardShape : ''] || 9 / 16;
+        var libGrads = ['linear-gradient(135deg,#283c86,#45a247)', 'linear-gradient(135deg,#8e2de2,#4a00e0)', 'linear-gradient(135deg,#f12711,#f5af19)', 'linear-gradient(135deg,#00c6ff,#0072ff)'];
+        var libNames = ['Movies', 'Shows', 'Music', 'Kids'];
+        $('#asPvLibs').innerHTML = libGrads.map(function (g, i) {
+            return '<div class="as-pv-lib" style="width:' + libW.toFixed(0) + 'px"><div style="height:' + (libW * shapeRatio).toFixed(0) + 'px;background:' + g + ';border-radius:' + radius + '"></div>' +
+                (on && t.LibraryHideNames ? '' : '<span>' + libNames[i] + '</span>') + '</div>';
+        }).join('');
+
+        var uSize = (on && t.LoginUserSize > 0 ? t.LoginUserSize : 7) * 0.45;
+        $('#asPvUsers').innerHTML = ['Jus', 'Guest'].map(function (n) {
+            return '<div class="as-pv-user"><div style="width:' + uSize + 'em;height:' + uSize + 'em;border-radius:' + (on && t.LoginUserRound ? '50%' : '4px') + '"><span class="material-icons" style="font-size:' + (uSize * 0.5) + 'em;opacity:.7">person</span></div>' + n + '</div>';
+        }).join('');
+        var tidy = on && t.LoginTidy;
+        var pvForm = $('#asPvForm');
+        pvForm.style.width = Math.min(95, (on && t.LoginBoxWidth > 0 ? t.LoginBoxWidth : 30) * 2.6) + '%';
+        $$('div', pvForm).forEach(function (d) { if (!d.classList.contains('go')) d.style.marginBottom = (tidy ? (t.LoginSpacing > 0 ? t.LoginSpacing : 1.3) * 0.45 : 0.2) + 'em'; });
+        $('#asPvLogin').style.fontSize = (on ? t.LoginTextSize : 100) + '%';
         $('#asPvLink').style.color = on ? accent : '#00a4dc';
 
         var ll = (S.brand && (S.brand.loginlogo || S.brand.logo)) || '';

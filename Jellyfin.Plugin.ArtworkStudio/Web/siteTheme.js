@@ -97,6 +97,19 @@
     if (t.CardHover) {
         css.push('@media (hover:hover){.cardScalable{transition:transform .2s ease,box-shadow .2s ease}.card:hover .cardScalable{transform:scale(1.05);box-shadow:0 10px 28px rgba(0,0,0,.55);z-index:2}}');
     }
+    // Home screen library covers ("My Media")
+    var libSel = ['CollectionFolder', 'UserView', 'Folder', 'ManualPlaylistsFolder'].map(function (ty) { return '.homeSectionsContainer .card[data-type="' + ty + '"]'; });
+    function libCss(suffix, body) { return libSel.map(function (x) { return x + suffix; }).join(',') + '{' + body + '}'; }
+    if (t.LibraryCardSize > 0) {
+        css.push(libCss('', 'width:clamp(110px,' + Math.min(95, t.LibraryCardSize) + 'vw,95vw)!important;max-width:none!important;flex:0 0 auto!important'));
+    }
+    var shapes = { wide: 56.25, ultrawide: 42.86, square: 100, poster: 150 };
+    if (shapes[t.LibraryCardShape]) {
+        css.push(libCss(' .cardPadder', 'padding-bottom:' + shapes[t.LibraryCardShape] + '%!important'));
+        css.push(libCss(' .cardImageContainer', 'background-size:cover!important;background-position:center!important'));
+    }
+    if (t.LibraryHideNames) { css.push(libCss(' .cardFooter', 'display:none!important')); }
+
     if (t.BackdropBlur > 0) {
         css.push('#asLibBackdrop>div,.backdropImage,.as-loginbg::before{filter:blur(' + Math.min(40, t.BackdropBlur) + 'px);transform:scale(1.08)}');
     }
@@ -106,8 +119,39 @@
     css.push('.as-login-brand{text-align:center;margin:1.5em auto 1em;max-width:min(92vw,' + Math.max(30, lh * 4) + 'em)}' +
         '.as-login-brand img{height:' + lh + 'em;max-height:40vh;max-width:min(90vw,' + (lh * 6) + 'em);width:auto;object-fit:contain;display:block;margin:0 auto .8em}' +
         '.as-login-brand p{margin:.3em 0;font-size:1.05em;opacity:.9;white-space:pre-line}');
+    // .as-login-box is added to the column that holds the whole sign-in window
+    var B = '.as-login-box';
+    var boxW = t.LoginBoxWidth > 0 ? Math.min(70, Math.max(18, t.LoginBoxWidth)) : ((t.LoginTidy !== false || t.LoginGlass) ? 30 : 0);
+    if (boxW) { css.push(B + '{max-width:min(94vw,' + boxW + 'em)!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}'); }
+    if (t.LoginTextSize && t.LoginTextSize !== 100) { css.push(B + '{font-size:' + Math.min(180, Math.max(70, t.LoginTextSize)) + '%}'); }
+    if (t.LoginTidy !== false) {
+        var gap = t.LoginSpacing > 0 ? Math.min(4, t.LoginSpacing) : 1.3;
+        css.push(
+            B + ' h1,' + B + ' h2{line-height:1.3!important;margin:.3em 0 .9em!important;text-align:center;white-space:normal!important}' +
+            B + ' .inputContainer,' + B + ' .checkboxContainer,' + B + ' .selectContainer{margin:0 0 ' + gap + 'em!important}' +
+            B + ' .inputLabel{display:block!important;position:static!important;transform:none!important;line-height:1.35!important;margin:0 0 .4em!important}' +
+            B + ' .emby-input{line-height:1.4!important;height:auto!important;padding:.65em .8em!important;box-sizing:border-box}' +
+            B + ' .checkboxContainer label{display:flex!important;align-items:center;gap:.4em;line-height:1.35}' +
+            B + ' .button-submit,' + B + ' .readOnlyContent .emby-button,' + B + ' .readOnlyContent .raised{display:block!important;width:100%!important;margin:' + (gap * 0.55).toFixed(2) + 'em 0 0!important;line-height:1.3!important;white-space:normal!important}' +
+            B + ' .readOnlyContent{margin-top:' + gap + 'em!important}' +
+            B + ' .disclaimerContainer,' + B + ' .disclaimer{margin-top:1em;line-height:1.5;white-space:normal}' +
+            B + ' .cardText{line-height:1.35!important;white-space:normal!important;overflow:visible!important;height:auto!important;padding:.45em .2em .2em!important;text-align:center}' +
+            B + ' .cardFooter{position:static!important}' +
+            B + ' #divUsers{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:1em;margin-bottom:.5em}');
+    }
+    if (t.LoginUserSize > 0) {
+        var us = Math.min(24, Math.max(3, t.LoginUserSize));
+        css.push('#loginPage #divUsers .card,.loginPage #divUsers .card{width:' + us + 'em!important;max-width:42vw!important;margin:0!important;flex:0 0 auto}' +
+            '#loginPage #divUsers .cardImageIcon{font-size:' + (us * 0.45).toFixed(2) + 'em!important}');
+        if (t.LoginTidy === false) { css.push('#loginPage #divUsers{display:flex!important;flex-wrap:wrap;justify-content:center;gap:1em}'); }
+    }
+    if (t.LoginUserRound) {
+        css.push('#loginPage #divUsers .cardScalable,#loginPage #divUsers .cardImageContainer,#loginPage #divUsers .cardContent,#loginPage #divUsers .cardPadder{border-radius:50%!important;overflow:hidden}' +
+            '#loginPage #divUsers .cardBox{box-shadow:none!important;background:transparent!important}');
+    }
     if (t.LoginGlass) {
-        css.push('#loginPage .manualLoginForm,#loginPage .readOnlyContent,.loginPage .manualLoginForm{background:rgba(20,20,20,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:16px;padding:1.5em!important;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.45)}');
+        css.push(B + '{background:rgba(20,20,20,.58);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:18px;padding:2em 2.2em!important;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.45);margin-top:2em!important;margin-bottom:2em!important}' +
+            '@media (max-width:600px){' + B + '{padding:1.3em 1.1em!important}}');
     }
     if (t.HideForgotPassword) { css.push('#loginPage .btnForgotPassword,.loginPage .btnForgotPassword{display:none!important}'); }
     if (t.HideQuickConnect) { css.push('#loginPage .btnQuick,.loginPage .btnQuick{display:none!important}'); }
@@ -162,10 +206,12 @@
 
     // ---------------------------------------------------------------- login branding
     function loginBrand() {
-        if (!loginLogo && !t.LoginMessage) { return; }
         var page = document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide)');
-        if (!page || page.querySelector('.as-login-brand')) { return; }
+        if (!page) { return; }
         var holder = page.querySelector('.padded-left') || page.firstElementChild || page;
+        if (!holder.classList.contains('as-login-box')) { holder.classList.add('as-login-box'); }
+        if (!loginLogo && !t.LoginMessage) { return; }
+        if (page.querySelector('.as-login-brand')) { return; }
         var box = document.createElement('div');
         box.className = 'as-login-brand';
         if (loginLogo) {
