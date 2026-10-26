@@ -26,6 +26,9 @@ public class ThemeSettings
     /// <summary>Gets or sets the header logo height in em (0 = Jellyfin default).</summary>
     public double LogoHeight { get; set; }
 
+    /// <summary>Gets or sets the login page logo height in em (0 = default, 6em).</summary>
+    public double LoginLogoHeight { get; set; }
+
     public string AccentColor { get; set; } = string.Empty;
 
     public string BackgroundColor { get; set; } = string.Empty;

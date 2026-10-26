@@ -27,8 +27,7 @@
 
     var cache = {};          // libraryId -> [urls]
     var currentKey = null;   // what's being shown ('home', 'login', 'lib:<id>' or null)
-    var lastHref = null;
-    var host = null, layers = [], urls = [], idx = 0, rotateTimer = null, addedWithBackdrop = false;
+    var host = null, layers = [], urls = [], idx = 0, rotateTimer = null, addedWithBackdrop = false, curUrl = null;
 
     var dimCss = 'rgba(0,0,0,' + DIM + ')';
     var style = document.createElement('style');
@@ -38,7 +37,11 @@
         '#asLibBackdrop>div.as-on{opacity:1}' +
         'body.as-libbg .backdropContainer{display:none!important}' +
         'body.as-libbg .backgroundContainer{background:' + dimCss + '!important}' +
-        (cfg.dimAll ? '.backgroundContainer.withBackdrop{background:' + dimCss + '!important}' : '');
+        (cfg.dimAll ? '.backgroundContainer.withBackdrop{background:' + dimCss + '!important}' : '') +
+        // Login: the image is attached to the sign-in page itself, so nothing else can cover it
+        '.as-loginbg{isolation:isolate;min-height:100vh;min-height:100dvh;background:transparent!important}' +
+        '.as-loginbg::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;z-index:-2;background-image:var(--as-login-img);background-size:cover;background-position:center;transition:background-image 1s ease}' +
+        '.as-loginbg::after{content:"";position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;background:' + dimCss + '}';
     document.head.appendChild(style);
 
     function routeInfo() {
@@ -64,9 +67,25 @@
         }).catch(function () { cache[id] = []; return []; });
     }
 
+    function loginPageEl() {
+        return document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide),#selectServerPage:not(.hide),#forgotPasswordPage:not(.hide)');
+    }
+
+    function applyLogin() {
+        if (currentKey !== 'login' || !curUrl) { return; }
+        var lp = loginPageEl() || document.querySelector('.standalonePage:not(.hide)');
+        if (!lp) { return; }
+        lp.classList.add('as-loginbg');
+        var v = 'url("' + curUrl + '")';
+        if (lp.style.getPropertyValue('--as-login-img') !== v) { lp.style.setProperty('--as-login-img', v); }
+    }
+
     // Decide what (if anything) should be shown for the current page.
     function target() {
         var r = routeInfo();
+        if (loginPageEl() && cfg.login && cfg.login.length) {
+            return { key: 'login', load: function () { return Promise.resolve(pageUrls('login')); } };
+        }
         if (r.route === 'home') {
             return cfg.home && cfg.home.length ? { key: 'home', load: function () { return Promise.resolve(pageUrls('home')); } } : null;
         }
@@ -100,6 +119,8 @@
             next.style.backgroundImage = 'url("' + url + '")';
             next.classList.add('as-on');
             prev.classList.remove('as-on');
+            curUrl = url;
+            applyLogin();
         };
         img.src = url;
     }
@@ -122,8 +143,9 @@
     }
 
     function stop() {
-        clearInterval(rotateTimer); rotateTimer = null; urls = [];
+        clearInterval(rotateTimer); rotateTimer = null; urls = []; curUrl = null;
         document.body.classList.remove('as-libbg');
+        Array.prototype.forEach.call(document.querySelectorAll('.as-loginbg'), function (el) { el.classList.remove('as-loginbg'); el.style.removeProperty('--as-login-img'); });
         if (host) { host.remove(); host = null; }
         if (addedWithBackdrop) {
             var bg = document.querySelector('.backgroundContainer');
@@ -134,14 +156,14 @@
     }
 
     function check() {
-        if (location.href === lastHref) {
-            if (currentKey && urls.length) { assertDim(); ensureHost(); }
-            return;
-        }
-        lastHref = location.href;
         var t = target();
         var key = t ? t.key : null;
-        if (key === currentKey) { return; }
+        if (key === currentKey) {
+            // Jellyfin re-renders pages; keep our background attached
+            if (currentKey && urls.length) { assertDim(); ensureHost(); applyLogin(); }
+            return;
+        }
+        stop();
         currentKey = key;
         if (!t) { stop(); return; }
         t.load().then(function (list) {

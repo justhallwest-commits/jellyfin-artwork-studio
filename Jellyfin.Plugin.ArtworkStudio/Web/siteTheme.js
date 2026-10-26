@@ -34,9 +34,21 @@
     if (logo) {
         css.push('.pageTitleWithDefaultLogo,.pageTitleWithLogo{background-image:url(' + cssString(logo) + ')!important;background-size:contain!important;background-repeat:no-repeat!important;background-position:left center!important}');
     }
+    var logoRule = null;
     if (t.LogoHeight > 0) {
-        var h = Math.min(6, Math.max(1, t.LogoHeight));
-        css.push('.pageTitleWithDefaultLogo,.pageTitleWithLogo{height:' + h + 'em!important;width:' + (h * 5) + 'em!important;max-width:55vw!important}');
+        var h = Math.min(8, Math.max(0.5, t.LogoHeight));
+        css.push('.pageTitleWithDefaultLogo,.pageTitleWithLogo{height:' + h + 'em!important;width:' + (h * 5) + 'em!important;max-width:55vw!important;flex-shrink:0}');
+        // Once the logo has loaded, size the box to the logo's own shape so it isn't letterboxed
+        if (logo) {
+            var probe = new Image();
+            probe.onload = function () {
+                if (!probe.naturalHeight) { return; }
+                var w = (h * probe.naturalWidth / probe.naturalHeight).toFixed(2);
+                logoRule = logoRule || document.head.appendChild(document.createElement('style'));
+                logoRule.textContent = '.pageTitleWithDefaultLogo,.pageTitleWithLogo{width:' + w + 'em!important}';
+            };
+            probe.src = logo;
+        }
     }
 
     if (accent) {
@@ -56,7 +68,8 @@
     }
 
     if (bg) {
-        css.push('html,body{background-color:' + bg + '!important}.backgroundContainer:not(.withBackdrop){background-color:' + bg + '!important}');
+        // Only on <html>: colouring <body> would paint over the backdrop layers
+        css.push('html{background-color:' + bg + '!important}.backgroundContainer:not(.withBackdrop){background-color:' + bg + '!important}');
     }
 
     if (t.HeaderStyle === 'glass') {
@@ -85,11 +98,14 @@
         css.push('@media (hover:hover){.cardScalable{transition:transform .2s ease,box-shadow .2s ease}.card:hover .cardScalable{transform:scale(1.05);box-shadow:0 10px 28px rgba(0,0,0,.55);z-index:2}}');
     }
     if (t.BackdropBlur > 0) {
-        css.push('#asLibBackdrop>div,.backdropImage{filter:blur(' + Math.min(40, t.BackdropBlur) + 'px);transform:scale(1.08)}');
+        css.push('#asLibBackdrop>div,.backdropImage,.as-loginbg::before{filter:blur(' + Math.min(40, t.BackdropBlur) + 'px);transform:scale(1.08)}');
     }
 
     // Login page
-    css.push('.as-login-brand{text-align:center;margin:1.5em auto 1em;max-width:30em}.as-login-brand img{max-width:min(80vw,22em);max-height:9em;object-fit:contain;display:block;margin:0 auto .8em}.as-login-brand p{margin:.3em 0;font-size:1.05em;opacity:.9;white-space:pre-line}');
+    var lh = t.LoginLogoHeight > 0 ? Math.min(30, Math.max(1, t.LoginLogoHeight)) : 6;
+    css.push('.as-login-brand{text-align:center;margin:1.5em auto 1em;max-width:min(92vw,' + Math.max(30, lh * 4) + 'em)}' +
+        '.as-login-brand img{height:' + lh + 'em;max-height:40vh;max-width:min(90vw,' + (lh * 6) + 'em);width:auto;object-fit:contain;display:block;margin:0 auto .8em}' +
+        '.as-login-brand p{margin:.3em 0;font-size:1.05em;opacity:.9;white-space:pre-line}');
     if (t.LoginGlass) {
         css.push('#loginPage .manualLoginForm,#loginPage .readOnlyContent,.loginPage .manualLoginForm{background:rgba(20,20,20,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:16px;padding:1.5em!important;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.45)}');
     }
