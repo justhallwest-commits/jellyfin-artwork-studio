@@ -36,6 +36,9 @@ public class ThemeSettings
     /// <summary>Gets or sets the header style: "default", "glass" (blurred) or "solid".</summary>
     public string HeaderStyle { get; set; } = "default";
 
+    /// <summary>Gets or sets the size of the profile picture in the top bar, in em (0 = Jellyfin default).</summary>
+    public double HeaderUserSize { get; set; }
+
     public string BodyFont { get; set; } = string.Empty;
 
     public string HeadingFont { get; set; } = string.Empty;

@@ -273,6 +273,7 @@
         </div></div></div>
       <div class="as-field"><label for="tHeader">Top bar style</label>
         <select class="as-in" id="tHeader"><option value="default">Jellyfin default</option><option value="glass">Frosted glass</option><option value="solid">Solid</option><option value="transparent">Transparent (fade)</option></select></div>
+      <div class="as-field" style="max-width:none"><label for="tHeadUser">Profile picture size (top right): <span id="tHeadUserVal"></span></label><input id="tHeadUser" type="range" min="0" max="4" step="0.1" style="width:100%"></div>
       <div class="as-field"><label for="tBodyFont">Text font <span class="as-hint">(any Google Font name)</span></label><input class="as-in" id="tBodyFont" list="asFontList" placeholder="Jellyfin default"></div>
       <div class="as-field"><label for="tHeadFont">Heading font</label><input class="as-in" id="tHeadFont" list="asFontList" placeholder="Same as text"></div>
       <datalist id="asFontList"><option>Inter</option><option>Poppins</option><option>Montserrat</option><option>Roboto</option><option>Open Sans</option><option>Lato</option><option>Nunito</option><option>Outfit</option><option>DM Sans</option><option>Manrope</option><option>Work Sans</option><option>Raleway</option><option>Quicksand</option><option>Oswald</option><option>Bebas Neue</option><option>Anton</option><option>Playfair Display</option><option>Merriweather</option></datalist>
@@ -333,7 +334,7 @@
       <div class="as-row" style="justify-content:space-between;margin-bottom:.5em"><b>Preview</b>
         <div class="as-seg" id="asPvMode"><button data-v="home" class="active">Home</button><button data-v="login">Login</button></div></div>
       <div class="as-pv" id="asPv">
-        <div class="as-pv-header" id="asPvHeader"><div class="as-pv-logo" id="asPvLogo"></div><span class="as-pv-tab on">Home</span><span class="as-pv-tab">Favorites</span></div>
+        <div class="as-pv-header" id="asPvHeader"><div class="as-pv-logo" id="asPvLogo"></div><span class="as-pv-tab on">Home</span><span class="as-pv-tab">Favorites</span><span id="asPvUser" style="margin-left:auto;border-radius:50%;background:linear-gradient(160deg,#4b6cb7,#182848);display:inline-block;width:1.1em;height:1.1em"></span></div>
         <div class="as-pv-stage" id="asPvStage">
           <div class="as-pv-bd" id="asPvBd"></div><div class="as-pv-shade" id="asPvShade"></div>
           <div class="as-pv-body" id="asPvHome">
@@ -378,8 +379,9 @@
         </select>
       </div>
       <div class="as-field">
-        <label for="asMaxMb">Largest image allowed (MB)</label>
+        <label for="asMaxMb">Largest image allowed (MB, up to 200)</label>
         <input class="as-in" id="asMaxMb" type="number" min="1" max="200">
+        <div class="as-hint">A safety limit so a huge file isn't uploaded by accident. Page backgrounds are downloaded by every visitor, so smaller files load faster — a 4K JPG is usually only 2–10 MB.</div>
       </div>
       <div class="as-field">
         <label for="asTimeout">Web link download timeout (seconds)</label>
@@ -1483,6 +1485,7 @@
         setColor('tAccent', t.AccentColor);
         setColor('tBg', t.BackgroundColor);
         $('#tHeader').value = t.HeaderStyle || 'default';
+        $('#tHeadUser').value = t.HeaderUserSize || 0;
         $('#tBodyFont').value = t.BodyFont || '';
         $('#tHeadFont').value = t.HeadingFont || '';
         $('#tRadius').value = t.CardRadius == null ? -1 : t.CardRadius;
@@ -1516,6 +1519,7 @@
             AccentColor: $('#tAccentOn').checked ? $('#tAccent').value : '',
             BackgroundColor: $('#tBgOn').checked ? $('#tBg').value : '',
             HeaderStyle: $('#tHeader').value,
+            HeaderUserSize: parseFloat($('#tHeadUser').value) || 0,
             BodyFont: $('#tBodyFont').value.trim(),
             HeadingFont: $('#tHeadFont').value.trim(),
             CardRadius: parseInt($('#tRadius').value, 10),
@@ -1558,6 +1562,9 @@
         $('#tLoginLogoHVal').textContent = t.LoginLogoHeight > 0 ? t.LoginLogoHeight + 'em tall' : 'Default (6em)';
         $('#tRadiusVal').textContent = t.CardRadius < 0 ? 'Jellyfin default' : t.CardRadius + 'px';
         $('#tBlurVal').textContent = t.BackdropBlur ? t.BackdropBlur + 'px' : 'None';
+        $('#tHeadUserVal').textContent = t.HeaderUserSize > 0 ? t.HeaderUserSize + 'em' : 'Jellyfin default';
+        var pvU = $('#asPvUser');
+        if (pvU) { var hs = on && t.HeaderUserSize > 0 ? t.HeaderUserSize * 0.8 : 1.1; pvU.style.width = pvU.style.height = hs + 'em'; }
         $('#tLibSizeVal').textContent = t.LibraryCardSize > 0 ? t.LibraryCardSize + '% of screen width' : 'Jellyfin default';
         $('#tUserSizeVal').textContent = t.LoginUserSize > 0 ? t.LoginUserSize + 'em' : 'Jellyfin default';
         $('#tBoxWVal').textContent = t.LoginBoxWidth > 0 ? t.LoginBoxWidth + 'em' : (t.LoginTidy || t.LoginGlass ? 'Automatic (30em)' : 'Jellyfin default');

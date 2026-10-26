@@ -80,6 +80,16 @@
         css.push('.skinHeader{background:transparent!important;box-shadow:none!important}.skinHeader.semiTransparent{background:linear-gradient(rgba(0,0,0,.6),transparent)!important}');
     }
 
+    // Profile picture / icon at the top right of the top bar
+    if (t.HeaderUserSize > 0) {
+        var hu = Math.min(5, Math.max(0.8, t.HeaderUserSize));
+        css.push('.skinHeader .headerUserButton{width:auto!important;height:auto!important;min-width:0!important;padding:.25em!important;overflow:visible!important}' +
+            '.skinHeader .headerUserButton>div,.skinHeader .headerUserButton>.headerUserButtonRound,.skinHeader .headerUserButton>img{width:' + hu + 'em!important;height:' + hu + 'em!important;' +
+            'min-width:' + hu + 'em!important;background-size:cover!important;background-position:center!important;border-radius:50%!important;margin:0!important;padding:0!important;font-size:1em!important}' +
+            '.skinHeader .headerUserButton>.material-icons,.skinHeader .headerUserButton>span{font-size:' + hu + 'em!important;width:auto!important;height:auto!important}' +
+            '.skinHeader .headerRight{align-items:center!important}');
+    }
+
     var fonts = [];
     if (t.BodyFont) {
         fonts.push(t.BodyFont);

@@ -209,7 +209,7 @@ public class ArtworkStudioController : ControllerBase
 
         if (file.Length > MaxBytes)
         {
-            return BadRequest(new { message = $"That image is larger than the {Config.MaxImageSizeMb} MB limit." });
+            return BadRequest(new { message = $"That image is larger than the {Config.MaxImageSizeMb} MB limit. You can raise it under Artwork Studio → Settings → Largest image allowed (up to 200 MB)." });
         }
 
         var temp = TempPath();
@@ -504,7 +504,7 @@ public class ArtworkStudioController : ControllerBase
 
         if (file.Length > MaxBytes)
         {
-            return BadRequest(new { message = $"That image is larger than the {Config.MaxImageSizeMb} MB limit set in Artwork Studio settings." });
+            return BadRequest(new { message = $"That image is larger than the {Config.MaxImageSizeMb} MB limit. You can raise it under Artwork Studio → Settings → Largest image allowed (up to 200 MB)." });
         }
 
         var temp = TempPath();
@@ -584,7 +584,7 @@ public class ArtworkStudioController : ControllerBase
                 return ($"The website answered with an error ({(int)response.StatusCode} {response.ReasonPhrase}). The link may be private or expired.", null, null);
             }
 
-            var tooBig = $"That image is larger than the {Config.MaxImageSizeMb} MB limit.";
+            var tooBig = $"That image is larger than the {Config.MaxImageSizeMb} MB limit. You can raise it under Artwork Studio → Settings → Largest image allowed (up to 200 MB).";
             if (response.Content.Headers.ContentLength is long len && len > MaxBytes)
             {
                 return (tooBig, null, null);
