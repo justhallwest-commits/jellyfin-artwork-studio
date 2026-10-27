@@ -325,7 +325,9 @@
       <h3>Posters &amp; backdrops</h3>
       <div class="as-field"><label for="tRadius">Poster corner roundness: <span id="tRadiusVal"></span></label><input id="tRadius" type="range" min="-1" max="24" step="1" style="width:100%"></div>
       <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tHover"> Zoom posters slightly on mouse hover</label></div>
-      <div class="as-field"><label for="tBlur">Backdrop blur: <span id="tBlurVal"></span></label><input id="tBlur" type="range" min="0" max="30" step="1" style="width:100%"></div>
+      <div class="as-field"><label for="tBlur">Page background blur: <span id="tBlurVal"></span></label><input id="tBlur" type="range" min="0" max="30" step="1" style="width:100%">
+        <div class="as-hint">Blurs your login, home and library backgrounds. Movie and show backdrops stay sharp unless you tick the box below.</div>
+        <label class="as-row" style="font-weight:normal;margin-top:.4em"><input type="checkbox" id="tBlurItems"> Also blur movie &amp; show backdrops</label></div>
       <div class="as-hint">Backdrop darkness is under Settings → Page backgrounds.</div>
     </div>
 
@@ -1708,6 +1710,7 @@
         $('#tGap').value = t.LoginSpacing || 0;
         $('#tLoginText').value = t.LoginTextSize || 100;
         $('#tBlur').value = t.BackdropBlur || 0;
+        $('#tBlurItems').checked = !!t.BlurItemBackdrops;
         $('#tLoginMsg').value = t.LoginMessage || '';
         $('#tLoginGlass').checked = !!t.LoginGlass;
         $('#tHideForgot').checked = !!t.HideForgotPassword;
@@ -1748,6 +1751,7 @@
             LoginSpacing: parseFloat($('#tGap').value) || 0,
             LoginTextSize: parseInt($('#tLoginText').value, 10) || 100,
             BackdropBlur: parseInt($('#tBlur').value, 10) || 0,
+            BlurItemBackdrops: $('#tBlurItems').checked,
             LoginMessage: $('#tLoginMsg').value.trim(),
             LoginGlass: $('#tLoginGlass').checked,
             HideForgotPassword: $('#tHideForgot').checked,

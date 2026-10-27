@@ -126,7 +126,9 @@
     if (t.LibraryHideNames) { css.push(libCss(' .cardFooter', 'display:none!important')); }
 
     if (t.BackdropBlur > 0) {
-        css.push('#asLibBackdrop>div,#asLoginSplit>div,.backdropImage,.as-loginbg::before{filter:blur(' + Math.min(40, t.BackdropBlur) + 'px);transform:scale(1.08)}');
+        // Page backgrounds (login, home, libraries); movie / show backdrops only when asked
+        css.push('#asLibBackdrop>div,#asLoginSplit>div,.as-loginbg::before' + (t.BlurItemBackdrops ? ',.backdropImage' : '') +
+            '{filter:blur(' + Math.min(40, t.BackdropBlur) + 'px);transform:scale(1.08)}');
     }
 
     // Login page

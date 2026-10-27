@@ -85,6 +85,9 @@ public class ThemeSettings
     /// <summary>Gets or sets backdrop blur in px.</summary>
     public int BackdropBlur { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the blur also applies to movie / show backdrops (not just page backgrounds).</summary>
+    public bool BlurItemBackdrops { get; set; }
+
     public string LoginMessage { get; set; } = string.Empty;
 
     public bool LoginGlass { get; set; }
