@@ -71,8 +71,36 @@
         return document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide),#selectServerPage:not(.hide),#forgotPasswordPage:not(.hide)');
     }
 
+    // Split-screen login: our own fixed element on the image side, outside Jellyfin's page,
+    // so nothing inside the page can clip or cover it.
+    var SPLIT = !!(cfg.theme && /^split/.test(cfg.theme.LoginLayout || ''));
+    var splitEl = null, splitLayers = [], splitShown = null;
+    function showSplit(url) {
+        if (!splitEl || !splitEl.isConnected) {
+            splitEl = document.createElement('div');
+            splitEl.id = 'asLoginSplit';
+            splitEl.innerHTML = '<div></div><div></div>';
+            splitLayers = [splitEl.children[0], splitEl.children[1]];
+            document.body.appendChild(splitEl);
+            splitShown = null;
+        }
+        document.body.classList.add('as-split-login');
+        if (splitShown === url) { return; }
+        splitShown = url;
+        var next = splitLayers[0].classList.contains('as-on') ? splitLayers[1] : splitLayers[0];
+        var prev = next === splitLayers[0] ? splitLayers[1] : splitLayers[0];
+        next.style.backgroundImage = 'url("' + url + '")';
+        next.classList.add('as-on');
+        prev.classList.remove('as-on');
+    }
+    function hideSplit() {
+        document.body.classList.remove('as-split-login');
+        if (splitEl) { splitEl.remove(); splitEl = null; splitShown = null; }
+    }
+
     function applyLogin() {
         if (currentKey !== 'login' || !curUrl) { return; }
+        if (SPLIT) { showSplit(curUrl); return; }
         var lp = loginPageEl() || document.querySelector('.standalonePage:not(.hide)');
         if (!lp) { return; }
         lp.classList.add('as-loginbg');
@@ -146,6 +174,7 @@
 
     function stop() {
         clearInterval(rotateTimer); rotateTimer = null; urls = []; curUrl = null;
+        hideSplit();
         document.body.classList.remove('as-libbg');
         Array.prototype.forEach.call(document.querySelectorAll('.as-loginbg'), function (el) { el.classList.remove('as-loginbg'); el.style.removeProperty('--as-login-img'); });
         if (host) { host.remove(); host = null; }
