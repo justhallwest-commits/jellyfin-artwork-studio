@@ -76,6 +76,9 @@ public class ThemeSettings
     /// <summary>Gets or sets the width of the sign-in panel in split layouts, in % of the screen.</summary>
     public int LoginSplitWidth { get; set; } = 38;
 
+    /// <summary>Gets or sets how wide the blend between the image and the sign-in panel is, in % of the screen.</summary>
+    public int LoginFadeWidth { get; set; } = 24;
+
     /// <summary>Gets or sets the login text size in percent.</summary>
     public int LoginTextSize { get; set; } = 100;
 

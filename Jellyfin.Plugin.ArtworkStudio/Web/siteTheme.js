@@ -198,12 +198,12 @@
         var P = ':is(.as-login-page,#asLogin#asLogin#asLogin).as-login-split:not(.hide)', SB = P + ' .as-login-box';
         var side = right ? 'right' : 'left', other = right ? 'left' : 'right';
         var panelW = 'min(100vw,max(380px,' + sw + 'vw))';
-        var fade = '9vw';
+        var fade = Math.min(60, Math.max(4, t.LoginFadeWidth || 24)) + 'vw';
         var maskDir = right ? '270deg' : '90deg';
         css.push(
             // image side
             '#asLoginSplit{position:fixed;top:0;bottom:0;' + side + ':calc(' + panelW + ' - ' + fade + ');' + other + ':0;z-index:2;pointer-events:none;overflow:hidden;background:rgb(' + pr + ');' +
-                '-webkit-mask-image:linear-gradient(' + maskDir + ',transparent 0,#000 ' + fade + ');mask-image:linear-gradient(' + maskDir + ',transparent 0,#000 ' + fade + ')}' +
+                '-webkit-mask-image:linear-gradient(' + maskDir + ',transparent 0,rgba(0,0,0,.04) calc(var(--as-fade,' + fade + ') * .12),rgba(0,0,0,.14) calc(var(--as-fade,' + fade + ') * .26),rgba(0,0,0,.32) calc(var(--as-fade,' + fade + ') * .42),rgba(0,0,0,.55) calc(var(--as-fade,' + fade + ') * .58),rgba(0,0,0,.78) calc(var(--as-fade,' + fade + ') * .74),rgba(0,0,0,.93) calc(var(--as-fade,' + fade + ') * .88),#000 var(--as-fade,' + fade + '));mask-image:linear-gradient(' + maskDir + ',transparent 0,rgba(0,0,0,.04) calc(var(--as-fade,' + fade + ') * .12),rgba(0,0,0,.14) calc(var(--as-fade,' + fade + ') * .26),rgba(0,0,0,.32) calc(var(--as-fade,' + fade + ') * .42),rgba(0,0,0,.55) calc(var(--as-fade,' + fade + ') * .58),rgba(0,0,0,.78) calc(var(--as-fade,' + fade + ') * .74),rgba(0,0,0,.93) calc(var(--as-fade,' + fade + ') * .88),#000 var(--as-fade,' + fade + '))}' +
             '#asLoginSplit>div{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease}' +
             '#asLoginSplit>div.as-on{opacity:1}' +
             '#asLoginSplit::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,' + dimA + ')}' +

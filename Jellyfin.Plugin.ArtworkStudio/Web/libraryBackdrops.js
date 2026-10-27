@@ -89,6 +89,7 @@
             splitShown = null;
         }
         document.body.classList.add('as-split-login');
+        layoutSplit();
         if (splitShown === url) { return; }
         splitShown = url;
         var next = splitLayers[0].classList.contains('as-on') ? splitLayers[1] : splitLayers[0];
@@ -97,6 +98,34 @@
         next.classList.add('as-on');
         prev.classList.remove('as-on');
     }
+    // Start the image just past the sign-in form so it can fade across the empty part of the panel
+    function layoutSplit() {
+        if (!splitEl) { return; }
+        var right = cfg.theme && cfg.theme.LoginLayout === 'split-right';
+        var vw = window.innerWidth || document.documentElement.clientWidth;
+        var fade = Math.round(vw * Math.min(60, Math.max(4, (cfg.theme && cfg.theme.LoginFadeWidth) || 24)) / 100);
+        splitEl.style.setProperty('--as-fade', fade + 'px');
+        if (vw <= 820) { splitEl.style.left = ''; splitEl.style.right = ''; return; }
+        var page = loginPageEl();
+        if (!page) { return; }
+        var edge = right ? vw : 0;
+        Array.prototype.forEach.call(page.querySelectorAll('input,button,h1,h2,h3,.as-login-brand,.cardBox,label,p'), function (el) {
+            if (!el.offsetParent) { return; }
+            var r = el.getBoundingClientRect();
+            if (!r.width) { return; }
+            edge = right ? Math.min(edge, r.left) : Math.max(edge, r.right);
+        });
+        var gap = 28;
+        if (right) {
+            var rightPx = Math.max(vw * 0.3, vw - edge + gap);
+            splitEl.style.right = Math.round(rightPx) + 'px'; splitEl.style.left = '0px';
+        } else {
+            var leftPx = Math.min(vw * 0.7, edge + gap);
+            splitEl.style.left = Math.round(leftPx) + 'px'; splitEl.style.right = '0px';
+        }
+    }
+    window.addEventListener('resize', function () { layoutSplit(); });
+
     function hideSplit() {
         document.body.classList.remove('as-split-login');
         if (splitEl) { splitEl.remove(); splitEl = null; splitShown = null; }
@@ -104,7 +133,7 @@
 
     function applyLogin() {
         if (currentKey !== 'login' || !curUrl) { return; }
-        if (SPLIT) { showSplit(curUrl); return; }
+        if (SPLIT) { showSplit(curUrl); layoutSplit(); return; }
         var lp = loginPageEl() || document.querySelector('.standalonePage:not(.hide)');
         if (!lp) { return; }
         lp.classList.add('as-loginbg');

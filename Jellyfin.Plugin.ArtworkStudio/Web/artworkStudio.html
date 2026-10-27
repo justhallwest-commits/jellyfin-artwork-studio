@@ -356,7 +356,8 @@
       <div class="as-field"><label for="tLoginLayout">Layout</label>
         <select class="as-in" id="tLoginLayout"><option value="center">Centered window</option><option value="split">Split screen — sign-in on the left, image on the right</option><option value="split-right">Split screen — image on the left, sign-in on the right</option></select>
         <div class="as-hint">Split screen uses your Login page background (or your Home page background if none is set) for the image side.</div></div>
-      <div class="as-field" style="max-width:none" id="tSplitWrap"><label for="tSplitW">Sign-in panel width: <span id="tSplitWVal"></span></label><input id="tSplitW" type="range" min="25" max="60" step="1" style="width:100%"></div>
+      <div class="as-field" style="max-width:none" id="tSplitWrap"><label for="tSplitW">Sign-in panel width: <span id="tSplitWVal"></span></label><input id="tSplitW" type="range" min="25" max="60" step="1" style="width:100%">
+        <label for="tFadeW" style="margin-top:.6em;display:block">Fade width (how gradually the image blends into the panel): <span id="tFadeWVal"></span></label><input id="tFadeW" type="range" min="4" max="50" step="1" style="width:100%"></div>
       <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tTidy"> Clean up spacing (stops text and fields bunching up or overlapping)</label></div>
       <div class="as-field" style="max-width:none"><label for="tBoxW">Window width: <span id="tBoxWVal"></span></label><input id="tBoxW" type="range" min="0" max="60" step="1" style="width:100%"></div>
       <div class="as-field" style="max-width:none"><label for="tGap">Space between fields: <span id="tGapVal"></span></label><input id="tGap" type="range" min="0" max="3" step="0.1" style="width:100%"></div>
@@ -1702,6 +1703,7 @@
         $('#tTidy').checked = t.LoginTidy !== false;
         $('#tLoginLayout').value = t.LoginLayout || 'center';
         $('#tSplitW').value = t.LoginSplitWidth || 38;
+        $('#tFadeW').value = t.LoginFadeWidth || 24;
         $('#tBoxW').value = t.LoginBoxWidth || 0;
         $('#tGap').value = t.LoginSpacing || 0;
         $('#tLoginText').value = t.LoginTextSize || 100;
@@ -1741,6 +1743,7 @@
             LoginTidy: $('#tTidy').checked,
             LoginLayout: $('#tLoginLayout').value,
             LoginSplitWidth: parseInt($('#tSplitW').value, 10) || 38,
+            LoginFadeWidth: parseInt($('#tFadeW').value, 10) || 24,
             LoginBoxWidth: parseFloat($('#tBoxW').value) || 0,
             LoginSpacing: parseFloat($('#tGap').value) || 0,
             LoginTextSize: parseInt($('#tLoginText').value, 10) || 100,
@@ -2076,14 +2079,22 @@
         var split = on && /^split/.test(t.LoginLayout);
         $('#tSplitWrap').style.display = /^split/.test(t.LoginLayout) ? '' : 'none';
         $('#tSplitWVal').textContent = (t.LoginSplitWidth || 38) + '% of the screen';
+        $('#tFadeWVal').textContent = (t.LoginFadeWidth || 24) + '% of the screen';
         var pvL = $('#asPvLogin'), sw = Math.max(32, t.LoginSplitWidth || 38), rightSide = t.LoginLayout === 'split-right';
         var loginBdSrc = S.loginBd || S.homeBd;
         if (pvMode === 'login') $('#asPvBd').style.backgroundImage = loginBdSrc && (split || S.loginBd) ? 'url("' + loginBdSrc + '")' : '';
+        var fw = t.LoginFadeWidth || 24, startPct = Math.max(18, sw - fw * 0.6);
+        var pvMask = split && pvMode === 'login' ? 'linear-gradient(' + (rightSide ? '270deg' : '90deg') + ',transparent 0,rgba(0,0,0,.14) ' + (fw * .26) + '%,rgba(0,0,0,.55) ' + (fw * .58) + '%,rgba(0,0,0,.93) ' + (fw * .88) + '%,#000 ' + fw + '%)' : '';
         ['asPvBd', 'asPvShade'].forEach(function (id) {
             var el = $('#' + id);
-            el.style.left = split && pvMode === 'login' && !rightSide ? sw + '%' : '0';
-            el.style.right = split && pvMode === 'login' && rightSide ? sw + '%' : '0';
+            el.style.left = split && pvMode === 'login' && !rightSide ? startPct + '%' : '0';
+            el.style.right = split && pvMode === 'login' && rightSide ? startPct + '%' : '0';
+            el.style.webkitMaskImage = el.style.maskImage = pvMask;
+            el.style.zIndex = split && pvMode === 'login' ? '2' : '';
+            el.style.pointerEvents = 'none';
         });
+        pvL.style.position = 'relative';
+        pvL.style.zIndex = split ? '1' : '';
         pvL.style.width = split ? sw + '%' : '';
         pvL.style.marginLeft = split && rightSide ? 'auto' : '';
         pvL.style.minHeight = split ? '300px' : '';
