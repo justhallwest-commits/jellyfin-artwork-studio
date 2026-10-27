@@ -68,7 +68,11 @@
     }
 
     function loginPageEl() {
-        return document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide),#selectServerPage:not(.hide),#forgotPasswordPage:not(.hide)');
+        var p = document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide),#selectServerPage:not(.hide),#forgotPasswordPage:not(.hide)');
+        if (p) { return p; }
+        var f = document.querySelector('.manualLoginForm,#divUsers,.visualLoginForm');
+        var pg = f && f.closest('.page,[data-role="page"]');
+        return pg && !pg.classList.contains('hide') && pg.offsetParent !== null ? pg : null;
     }
 
     // Split-screen login: our own fixed element on the image side, outside Jellyfin's page,
