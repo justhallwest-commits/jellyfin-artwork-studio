@@ -145,6 +145,18 @@
 #artworkStudioPage .as-brand-thumb img { max-width:100%; max-height:100%; object-fit:contain; }
 #artworkStudioPage .as-brand-info { flex:1 1 180px; min-width:0; }
 #artworkStudioPage .as-brand-info b { display:block; }
+#artworkStudioPage .as-user-row { display:flex; align-items:center; gap:.9em; padding:.55em 0; border-bottom:1px solid var(--as-line); flex-wrap:wrap; }
+#artworkStudioPage .as-user-row:last-child { border-bottom:0; }
+#artworkStudioPage .as-user-pic { width:52px; height:52px; border-radius:50%; background:var(--as-soft) center/cover no-repeat; display:flex; align-items:center; justify-content:center; flex:0 0 auto; color:rgba(128,128,128,.9); cursor:pointer; position:relative; overflow:hidden; }
+#artworkStudioPage .as-user-pic.over { outline:2px solid var(--as-accent); }
+#artworkStudioPage .as-user-name { flex:1 1 140px; min-width:0; }
+#artworkStudioPage .as-user-name b { display:block; }
+#artworkStudioPage .as-switch { position:relative; display:inline-flex; align-items:center; gap:.5em; cursor:pointer; font-size:.9em; }
+#artworkStudioPage .as-switch input { position:absolute; opacity:0; width:0; height:0; }
+#artworkStudioPage .as-switch i { width:2.6em; height:1.45em; border-radius:1em; background:rgba(128,128,128,.4); position:relative; transition:background .2s; flex:0 0 auto; }
+#artworkStudioPage .as-switch i::after { content:""; position:absolute; top:.2em; left:.2em; width:1.05em; height:1.05em; border-radius:50%; background:#fff; transition:left .2s; }
+#artworkStudioPage .as-switch input:checked + i { background:var(--as-accent); }
+#artworkStudioPage .as-switch input:checked + i::after { left:1.35em; }
 #artworkStudioPage .as-presets { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:.8em; margin-top:.6em; }
 #artworkStudioPage .as-preset { text-align:left; border:2px solid transparent; border-radius:12px; padding:0; background:var(--as-soft); color:inherit; cursor:pointer; overflow:hidden; font:inherit; transition:transform .15s,border-color .15s; }
 #artworkStudioPage .as-preset:hover { transform:translateY(-2px); border-color:var(--as-line); }
@@ -336,6 +348,10 @@
       <h4 style="margin:1.2em 0 .2em">User pictures</h4>
       <div class="as-field" style="max-width:none"><label for="tUserSize">Picture size: <span id="tUserSizeVal"></span></label><input id="tUserSize" type="range" min="0" max="20" step="0.5" style="width:100%"></div>
       <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tUserRound"> Round user pictures</label></div>
+      <h4 style="margin:1.2em 0 .2em">Who's on the sign-in screen</h4>
+      <div class="as-hint">People switched on here appear as pictures to tap on the sign-in screen ("Who's watching?"). People switched off can still sign in with Manual Login. Changes apply straight away — no need to save.</div>
+      <div id="asLoginUsers" style="margin-top:.6em"><span class="as-spin"></span></div>
+      <input type="file" id="asUserPicFile" accept="image/*" style="display:none">
       <h4 style="margin:1.2em 0 .2em">Sign-in window layout</h4>
       <div class="as-field"><label for="tLoginLayout">Layout</label>
         <select class="as-in" id="tLoginLayout"><option value="center">Centered window</option><option value="split">Split screen — sign-in on the left, image on the right</option><option value="split-right">Split screen — image on the left, sign-in on the right</option></select>
@@ -651,7 +667,7 @@
             $$('section[data-section]').forEach(function (s) { s.style.display = s.dataset.section === b.dataset.tab ? '' : 'none'; });
             if ((b.dataset.tab === 'settings' || b.dataset.tab === 'design') && !S.config) loadSettings();
             if (b.dataset.tab === 'settings' || b.dataset.tab === 'design') loadConflicts();
-            if (b.dataset.tab === 'design') loadBrandSlots();
+            if (b.dataset.tab === 'design') { loadBrandSlots(); loadLoginUsers(); }
         });
     });
 
@@ -1465,6 +1481,100 @@
         }).catch(function (e) { toast('Couldn\'t import: ' + e.message, true); });
     });
 
+    // ============================================================ SIGN-IN SCREEN USERS
+    function userPicUrl(u, w) {
+        return ApiClient.getUrl('Users/' + u.Id + '/Images/Primary', { tag: u.PrimaryImageTag, maxWidth: w || 200, quality: 90 });
+    }
+    function loadLoginUsers() {
+        var host = $('#asLoginUsers');
+        return ApiClient.getUsers().then(function (users) {
+            S.loginUsers = users || [];
+            if (!S.loginUsers.length) { host.innerHTML = '<div class="as-hint">No users found.</div>'; return; }
+            host.innerHTML = S.loginUsers.map(function (u) {
+                var p = u.Policy || {};
+                var notes = [];
+                if (p.IsDisabled) notes.push('account is disabled — it can\'t sign in');
+                if (p.EnableRemoteAccess === false) notes.push('only shown on your home network (remote access is off)');
+                if (!u.HasPassword) notes.push('no password set');
+                return '<div class="as-user-row" data-user="' + esc(u.Id) + '">' +
+                    '<div class="as-user-pic" data-upic title="Click or drop an image to change the picture" style="' + (u.PrimaryImageTag ? 'background-image:url(\'' + userPicUrl(u, 120) + '\')' : '') + '">' + (u.PrimaryImageTag ? '' : icon('person')) + '</div>' +
+                    '<div class="as-user-name"><b>' + esc(u.Name) + '</b><span class="as-hint">' + (u.PrimaryImageTag ? 'Has a picture' : 'No picture yet') + (notes.length ? ' · ' + esc(notes.join(' · ')) : '') + '</span></div>' +
+                    '<label class="as-switch" title="Show this person on the sign-in screen"><input type="checkbox" data-show' + (!p.IsHidden ? ' checked' : '') + (p.IsDisabled ? ' disabled' : '') + '><i></i><span>Show on sign-in</span></label>' +
+                    '<button class="as-btn small" data-uact="pic">' + icon('add_photo_alternate') + 'Picture</button>' +
+                    (u.PrimaryImageTag ? '<button class="as-btn small danger" data-uact="delpic" title="Remove picture">' + icon('delete') + '</button>' : '') +
+                    '</div>';
+            }).join('');
+            updatePreview();
+        }).catch(function (e) { host.innerHTML = '<div class="as-hint">Couldn\'t load users: ' + esc(e && e.message || e) + '</div>'; });
+    }
+    function setUserVisible(id, show) {
+        return ApiClient.getUser(id).then(function (u) {
+            var policy = Object.assign({}, u.Policy, { IsHidden: !show });
+            return ApiClient.updateUserPolicy(id, policy);
+        });
+    }
+    // User pictures: Jellyfin expects the image as base64 in the request body
+    function uploadUserPic(id, file) {
+        return new Promise(function (resolve, reject) {
+            var rd = new FileReader();
+            rd.onload = function () { resolve(String(rd.result).split(',')[1]); };
+            rd.onerror = function () { reject(new Error('Couldn\'t read that file')); };
+            rd.readAsDataURL(file);
+        }).then(function (b64) {
+            var send = function (path) {
+                return fetch(ApiClient.getUrl(path), { method: 'POST', headers: { 'X-Emby-Token': ApiClient.accessToken(), 'Content-Type': file.type || 'image/jpeg' }, body: b64 })
+                    .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + r.statusText); });
+            };
+            return send('UserImage?userId=' + encodeURIComponent(id)).catch(function () { return send('Users/' + id + '/Images/Primary'); });
+        });
+    }
+    function deleteUserPic(id) {
+        var del = function (path) {
+            return fetch(ApiClient.getUrl(path), { method: 'DELETE', headers: { 'X-Emby-Token': ApiClient.accessToken() } })
+                .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + r.statusText); });
+        };
+        return del('UserImage?userId=' + encodeURIComponent(id)).catch(function () { return del('Users/' + id + '/Images/Primary'); });
+    }
+    var picTarget = null;
+    function pickPicFor(id) { picTarget = id; $('#asUserPicFile').value = ''; $('#asUserPicFile').click(); }
+    function doUserPic(id, file) {
+        if (!file || !/^image\//.test(file.type)) { toast('Please choose an image file.', true); return; }
+        var row = $('[data-user="' + id + '"]'), done = busy($('.as-user-pic', row), '');
+        uploadUserPic(id, file).then(function () { toast('Picture updated'); return loadLoginUsers(); })
+            .catch(function (e) { done(); toast('Couldn\'t update the picture: ' + e.message, true); });
+    }
+    $('#asUserPicFile').addEventListener('change', function () { if (picTarget && this.files[0]) doUserPic(picTarget, this.files[0]); });
+    $('#asLoginUsers').addEventListener('click', function (e) {
+        var row = e.target.closest('[data-user]'); if (!row) return;
+        var id = row.dataset.user;
+        var a = e.target.closest('[data-uact]');
+        if (e.target.closest('[data-upic]') || (a && a.dataset.uact === 'pic')) { pickPicFor(id); return; }
+        if (a && a.dataset.uact === 'delpic') {
+            if (!confirm('Remove this person\'s picture?')) return;
+            deleteUserPic(id).then(function () { toast('Picture removed'); return loadLoginUsers(); }).catch(function (err) { toast(err.message, true); });
+        }
+    });
+    $('#asLoginUsers').addEventListener('change', function (e) {
+        var cb = e.target.closest('[data-show]'); if (!cb) return;
+        var id = cb.closest('[data-user]').dataset.user, show = cb.checked;
+        cb.disabled = true;
+        setUserVisible(id, show).then(function () {
+            toast(show ? 'Now shown on the sign-in screen' : 'Hidden from the sign-in screen');
+            return loadLoginUsers();
+        }).catch(function (err) { cb.checked = !show; cb.disabled = false; toast('Couldn\'t change that: ' + (err && err.message || err), true); });
+    });
+    ['dragover', 'dragenter'].forEach(function (ev) {
+        $('#asLoginUsers').addEventListener(ev, function (e) { var p = e.target.closest('[data-upic]'); if (p) { e.preventDefault(); p.classList.add('over'); } });
+    });
+    $('#asLoginUsers').addEventListener('dragleave', function (e) { var p = e.target.closest('[data-upic]'); if (p) p.classList.remove('over'); });
+    $('#asLoginUsers').addEventListener('drop', function (e) {
+        var p = e.target.closest('[data-upic]'); if (!p) return;
+        e.preventDefault(); p.classList.remove('over');
+        var src = readTransfer(e.dataTransfer);
+        if (src && src.kind === 'upload') doUserPic(p.closest('[data-user]').dataset.user, src.file);
+        else toast('Drop an image file from your computer here.', true);
+    });
+
     // ============================================================ CONFLICTS
     function loadConflicts() {
         return api('GET', 'ArtworkStudio/Conflicts').then(function (r) {
@@ -1892,9 +2002,13 @@
         }).join('');
 
         var uSize = (on && t.LoginUserSize > 0 ? t.LoginUserSize : 7) * 0.45;
-        $('#asPvUsers').innerHTML = ['Jus', 'Guest'].map(function (n) {
-            return '<div class="as-pv-user"><div style="width:' + uSize + 'em;height:' + uSize + 'em;border-radius:' + (on && t.LoginUserRound ? '50%' : '4px') + '"><span class="material-icons" style="font-size:' + (uSize * 0.5) + 'em;opacity:.7">person</span></div>' + n + '</div>';
-        }).join('');
+        var pvUsers = (S.loginUsers || []).filter(function (u) { return !u.Policy || !u.Policy.IsHidden; }).slice(0, 4);
+        if (!S.loginUsers) pvUsers = [{ Name: 'Jus' }, { Name: 'Guest' }];
+        $('#asPvUsers').innerHTML = pvUsers.length ? pvUsers.map(function (u) {
+            var pic = u.PrimaryImageTag ? userPicUrl(u) : '';
+            return '<div class="as-pv-user"><div style="width:' + uSize + 'em;height:' + uSize + 'em;border-radius:' + (on && t.LoginUserRound ? '50%' : '4px') + ';' + (pic ? 'background:center/cover url(' + pic + ')' : '') + '">' +
+                (pic ? '' : '<span style="font-size:' + (uSize * 0.45) + 'em;opacity:.8;font-weight:600">' + esc(u.Name.charAt(0)) + '</span>') + '</div>' + esc(u.Name) + '</div>';
+        }).join('') : '<div class="as-hint" style="text-align:center">No one is switched on for the sign-in screen, so it goes straight to username and password.</div>';
         var tidy = on && t.LoginTidy;
         var pvForm = $('#asPvForm');
         pvForm.style.width = Math.min(95, (on && t.LoginBoxWidth > 0 ? t.LoginBoxWidth : 30) * 2.6) + '%';
