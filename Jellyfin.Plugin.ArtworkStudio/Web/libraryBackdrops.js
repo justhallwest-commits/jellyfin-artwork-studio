@@ -83,8 +83,10 @@
     // Decide what (if anything) should be shown for the current page.
     function target() {
         var r = routeInfo();
-        if (loginPageEl() && cfg.login && cfg.login.length) {
-            return { key: 'login', load: function () { return Promise.resolve(pageUrls('login')); } };
+        var split = cfg.theme && /^split/.test(cfg.theme.LoginLayout || '');
+        var loginSrc = cfg.login && cfg.login.length ? 'login' : (split && cfg.home && cfg.home.length ? 'home' : null);
+        if (loginPageEl() && loginSrc) {
+            return { key: 'login', load: function () { return Promise.resolve(pageUrls(loginSrc)); } };
         }
         if (r.route === 'home') {
             return cfg.home && cfg.home.length ? { key: 'home', load: function () { return Promise.resolve(pageUrls('home')); } } : null;

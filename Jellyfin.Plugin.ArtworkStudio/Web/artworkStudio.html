@@ -332,6 +332,10 @@
       <div class="as-field" style="max-width:none"><label for="tUserSize">Picture size: <span id="tUserSizeVal"></span></label><input id="tUserSize" type="range" min="0" max="20" step="0.5" style="width:100%"></div>
       <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tUserRound"> Round user pictures</label></div>
       <h4 style="margin:1.2em 0 .2em">Sign-in window layout</h4>
+      <div class="as-field"><label for="tLoginLayout">Layout</label>
+        <select class="as-in" id="tLoginLayout"><option value="center">Centered window</option><option value="split">Split screen — sign-in on the left, image on the right</option><option value="split-right">Split screen — image on the left, sign-in on the right</option></select>
+        <div class="as-hint">Split screen uses your Login page background (or your Home page background if none is set) for the image side.</div></div>
+      <div class="as-field" style="max-width:none" id="tSplitWrap"><label for="tSplitW">Sign-in panel width: <span id="tSplitWVal"></span></label><input id="tSplitW" type="range" min="25" max="60" step="1" style="width:100%"></div>
       <div class="as-field"><label class="as-row" style="font-weight:normal"><input type="checkbox" id="tTidy"> Clean up spacing (stops text and fields bunching up or overlapping)</label></div>
       <div class="as-field" style="max-width:none"><label for="tBoxW">Window width: <span id="tBoxWVal"></span></label><input id="tBoxW" type="range" min="0" max="60" step="1" style="width:100%"></div>
       <div class="as-field" style="max-width:none"><label for="tGap">Space between fields: <span id="tGapVal"></span></label><input id="tGap" type="range" min="0" max="3" step="0.1" style="width:100%"></div>
@@ -1528,6 +1532,8 @@
         $('#tUserSize').value = t.LoginUserSize || 0;
         $('#tUserRound').checked = !!t.LoginUserRound;
         $('#tTidy').checked = t.LoginTidy !== false;
+        $('#tLoginLayout').value = t.LoginLayout || 'center';
+        $('#tSplitW').value = t.LoginSplitWidth || 38;
         $('#tBoxW').value = t.LoginBoxWidth || 0;
         $('#tGap').value = t.LoginSpacing || 0;
         $('#tLoginText').value = t.LoginTextSize || 100;
@@ -1565,6 +1571,8 @@
             LoginUserSize: parseFloat($('#tUserSize').value) || 0,
             LoginUserRound: $('#tUserRound').checked,
             LoginTidy: $('#tTidy').checked,
+            LoginLayout: $('#tLoginLayout').value,
+            LoginSplitWidth: parseInt($('#tSplitW').value, 10) || 38,
             LoginBoxWidth: parseFloat($('#tBoxW').value) || 0,
             LoginSpacing: parseFloat($('#tGap').value) || 0,
             LoginTextSize: parseInt($('#tLoginText').value, 10) || 100,
@@ -1891,6 +1899,40 @@
         } else {
             $('#asPv').style.color = '';
             $('#asPvBd').style.boxShadow = '';
+        }
+        // Split-screen login preview
+        var split = on && /^split/.test(t.LoginLayout);
+        $('#tSplitWrap').style.display = /^split/.test(t.LoginLayout) ? '' : 'none';
+        $('#tSplitWVal').textContent = (t.LoginSplitWidth || 38) + '% of the screen';
+        var pvL = $('#asPvLogin'), sw = Math.max(32, t.LoginSplitWidth || 38), rightSide = t.LoginLayout === 'split-right';
+        var loginBdSrc = S.loginBd || S.homeBd;
+        if (pvMode === 'login') $('#asPvBd').style.backgroundImage = loginBdSrc && (split || S.loginBd) ? 'url("' + loginBdSrc + '")' : '';
+        ['asPvBd', 'asPvShade'].forEach(function (id) {
+            var el = $('#' + id);
+            el.style.left = split && pvMode === 'login' && !rightSide ? sw + '%' : '0';
+            el.style.right = split && pvMode === 'login' && rightSide ? sw + '%' : '0';
+        });
+        pvL.style.width = split ? sw + '%' : '';
+        pvL.style.marginLeft = split && rightSide ? 'auto' : '';
+        pvL.style.minHeight = split ? '300px' : '';
+        pvL.style.boxSizing = 'border-box';
+        pvL.style.alignItems = split ? 'flex-start' : 'center';
+        pvL.style.justifyContent = split ? 'center' : '';
+        pvL.style.background = split ? bg : '';
+        pvL.style.boxShadow = split ? '10px 0 30px rgba(0,0,0,.45)' : '';
+        $('#asPvMsg').style.textAlign = split ? 'left' : 'center';
+        if (split) {
+            pvForm.style.width = '100%';
+            pvForm.style.background = 'transparent'; pvForm.style.border = '0'; pvForm.style.backdropFilter = ''; pvForm.style.padding = '0';
+            $$('div', pvForm).forEach(function (d) { if (!d.classList.contains('go')) { d.style.borderRadius = '6px'; d.style.border = '1px solid rgba(255,255,255,.14)'; d.style.background = 'rgba(255,255,255,.04)'; } });
+            $('#asPvGo').style.borderRadius = '999px';
+            $('#asPvGo').style.boxShadow = '0 4px 14px ' + accent + '59';
+            $('#asPvUsers').style.justifyContent = 'flex-start';
+        } else {
+            pvForm.style.padding = '';
+            $$('div', pvForm).forEach(function (d) { if (!d.classList.contains('go')) { d.style.border = ''; d.style.background = ''; } });
+            $('#asPvGo').style.boxShadow = '';
+            $('#asPvUsers').style.justifyContent = 'center';
         }
         $('#asPvHome').style.display = pvMode === 'home' ? '' : 'none';
         $('#asPvLogin').style.display = pvMode === 'login' ? 'flex' : 'none';

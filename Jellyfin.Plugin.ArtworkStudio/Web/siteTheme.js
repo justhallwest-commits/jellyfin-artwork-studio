@@ -183,6 +183,58 @@
         css.push(presets.css(t.Preset, accent, bg, t.CardRadius, { loginGlass: t.LoginGlass }));
     }
 
+    // ---- Split-screen login: sign-in panel on one side, the login image on the other
+    var splitMode = /^split/.test(t.LoginLayout || '');
+    if (splitMode) {
+        var right = t.LoginLayout === 'split-right';
+        var sw = Math.min(70, Math.max(25, t.LoginSplitWidth || 38));
+        var panel = bg || (presets && t.Preset && presets.list[t.Preset] ? presets.list[t.Preset].settings.BackgroundColor : '') || '#0a0a0a';
+        var pr = hexToRgb(panel), ac = accent || '#00a4dc', acr = hexToRgb(ac);
+        var muted = (presets && t.Preset && presets.list[t.Preset]) ? presets.list[t.Preset].style.muted : '#9a9a9a';
+        var P = '#loginPage.as-login-split', SB = P + ' .as-login-box';
+        var side = right ? 'right' : 'left', other = right ? 'left' : 'right';
+        var panelW = 'max(min(100%,380px),' + sw + 'vw)';
+        var fadeDir = right ? '270deg' : '90deg';
+        css.push(
+            P + '{padding:0!important;margin:0!important;display:flex!important;justify-content:' + (right ? 'flex-end' : 'flex-start') + '!important;align-items:stretch!important;min-height:100vh;min-height:100dvh;background:transparent!important}' +
+            // image + dim only on the image side, fading into the panel colour
+            P + '.as-loginbg::before{' + side + ':' + panelW + '!important;' + other + ':0!important}' +
+            P + '.as-loginbg::after{' + side + ':' + panelW + '!important;' + other + ':0!important;background:linear-gradient(' + fadeDir + ',rgb(' + pr + ') 0%,rgba(' + pr + ',.55) 7%,rgba(' + pr + ',0) 22%),linear-gradient(rgba(0,0,0,' + (cfg.dim == null ? 0.45 : cfg.dim / 100) + '),rgba(0,0,0,' + (cfg.dim == null ? 0.45 : cfg.dim / 100) + '))!important}' +
+            // the panel
+            SB + '{width:' + panelW + '!important;max-width:none!important;flex:0 0 auto;min-height:100vh;min-height:100dvh;margin:0!important;box-sizing:border-box;' +
+                'padding:3em clamp(1.5em,5vw,4.5em)!important;display:flex!important;flex-direction:column;justify-content:center;' +
+                'background:rgb(' + pr + ')!important;border:0!important;border-radius:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;' +
+                'box-shadow:' + (right ? '-' : '') + '24px 0 60px rgba(0,0,0,.45)!important;text-align:left}' +
+            SB + '>*{width:100%;max-width:28em;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box}' +
+            SB + ' .padded-left,' + SB + ' .padded-right{padding-left:0!important;padding-right:0!important}' +
+            // brand: logo / site name kicker, left aligned
+            SB + ' .as-login-brand{text-align:left;margin:0 0 1.6em!important}' +
+            SB + ' .as-login-brand img{margin:0 0 .9em!important;height:' + (t.LoginLogoHeight > 0 ? Math.min(30, t.LoginLogoHeight) : 3) + 'em;max-width:100%}' +
+            SB + ' .as-login-brand p{margin:.2em 0 0}' +
+            '.as-login-kicker{display:flex;align-items:center;gap:.9em;font-size:.72em;font-weight:700;letter-spacing:.22em;text-transform:uppercase;margin:0 0 1.4em}' +
+            '.as-login-kicker i{display:block;width:1.9em;height:2px;background:' + ac + '}' +
+            // headings, labels, inputs
+            SB + ' h1,' + SB + ' h2{text-align:left!important;font-size:1.55em!important;font-weight:700!important;margin:0 0 1.1em!important}' +
+            SB + ' .inputLabel{text-transform:uppercase;font-size:.72em!important;letter-spacing:.12em;font-weight:600;color:' + muted + '!important;margin-bottom:.55em!important}' +
+            SB + ' .emby-input{background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:12px!important;padding:.85em 1em!important;font-size:1.05em}' +
+            SB + ' .emby-input:focus{border-color:' + ac + '!important;box-shadow:0 0 0 3px rgba(' + acr + ',.18)}' +
+            // "Remember me" as a switch
+            SB + ' .emby-checkbox-label{position:relative;padding-left:3.3em!important;min-height:1.6em;display:flex!important;align-items:center;font-size:.9em}' +
+            SB + ' .checkboxOutline{width:2.5em!important;height:1.35em!important;border-radius:1em!important;top:50%!important;left:0!important;transform:translateY(-50%);border:0!important;background:rgba(255,255,255,.18)!important;transition:background .2s}' +
+            SB + ' .checkboxOutline .checkboxIcon{display:none!important}' +
+            SB + ' .checkboxOutline::after{content:"";position:absolute;top:.17em;left:.17em;width:1em;height:1em;border-radius:50%;background:#fff;transition:left .2s}' +
+            SB + ' .emby-checkbox:checked+span+.checkboxOutline{background:' + ac + '!important}' +
+            SB + ' .emby-checkbox:checked+span+.checkboxOutline::after{left:1.33em}' +
+            // buttons: primary pill with glow, others outlined, forgot password as a quiet link under a divider
+            SB + ' .button-submit{border-radius:999px!important;padding:.95em 1em!important;font-weight:700!important;width:100%!important;margin-top:1.2em!important;box-shadow:0 10px 26px rgba(' + acr + ',.35)!important}' +
+            SB + ' .readOnlyContent .raised:not(.btnForgotPassword),' + SB + ' .emby-button.raised:not(.button-submit):not(.btnForgotPassword){background:transparent!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:999px!important;padding:.9em 1em!important;width:100%!important;font-weight:600;margin-top:.9em!important}' +
+            SB + ' .btnForgotPassword{background:none!important;border:0!important;border-top:1px solid rgba(255,255,255,.09)!important;border-radius:0!important;box-shadow:none!important;width:100%!important;text-align:left!important;justify-content:flex-start!important;padding:1.3em 0 0!important;margin-top:1.4em!important;font-size:.82em!important;font-weight:400!important;color:' + muted + '!important}' +
+            SB + ' #divUsers{justify-content:flex-start!important}' +
+            // phones: the image fills the screen behind a translucent panel
+            '@media (max-width:820px){' + P + '.as-loginbg::before,' + P + '.as-loginbg::after{left:0!important;right:0!important}' +
+                SB + '{width:100%!important;background:rgba(' + pr + ',.86)!important;box-shadow:none!important}}');
+    }
+
     if (t.CustomCss) { css.push(t.CustomCss); }
 
     var style = document.createElement('style');
@@ -233,10 +285,20 @@
         if (!page) { return; }
         var holder = page.querySelector('.padded-left') || page.firstElementChild || page;
         if (!holder.classList.contains('as-login-box')) { holder.classList.add('as-login-box'); }
-        if (!loginLogo && !t.LoginMessage) { return; }
+        var split = /^split/.test(t.LoginLayout || '');
+        if (split && !page.classList.contains('as-login-split')) { page.classList.add('as-login-split'); }
+        var kicker = split && !loginLogo && t.SiteName;
+        if (!loginLogo && !t.LoginMessage && !kicker) { return; }
         if (page.querySelector('.as-login-brand')) { return; }
         var box = document.createElement('div');
         box.className = 'as-login-brand';
+        if (kicker) {
+            var k = document.createElement('div');
+            k.className = 'as-login-kicker';
+            k.appendChild(document.createElement('i'));
+            k.appendChild(document.createTextNode(t.SiteName));
+            box.appendChild(k);
+        }
         if (loginLogo) {
             var img = document.createElement('img');
             img.src = loginLogo; img.alt = t.SiteName || '';

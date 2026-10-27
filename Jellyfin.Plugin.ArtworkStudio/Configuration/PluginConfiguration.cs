@@ -70,6 +70,12 @@ public class ThemeSettings
     /// <summary>Gets or sets the space between login fields in em (0 = automatic).</summary>
     public double LoginSpacing { get; set; }
 
+    /// <summary>Gets or sets the login layout: "center", "split" (form left, image right) or "split-right" (image left, form right).</summary>
+    public string LoginLayout { get; set; } = "center";
+
+    /// <summary>Gets or sets the width of the sign-in panel in split layouts, in % of the screen.</summary>
+    public int LoginSplitWidth { get; set; } = 38;
+
     /// <summary>Gets or sets the login text size in percent.</summary>
     public int LoginTextSize { get; set; } = 100;
 
