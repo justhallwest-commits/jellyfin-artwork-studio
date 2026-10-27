@@ -215,6 +215,12 @@
                 'padding:3em clamp(1.5em,4.5vw,5em)!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:flex-start!important;' +
                 'background:rgb(' + pr + ')!important;background-image:none!important;overflow-y:auto;text-align:left!important;border:0!important;box-shadow:none!important;transform:none!important}' +
             'body.as-split-login,body.as-split-login .backgroundContainer{background-color:rgb(' + pr + ')!important}' +
+            // leftover decorations from other themes: extra text / splash images drawn with ::before/::after
+            P + '::before,' + P + '::after{content:none!important;display:none!important;background:none!important}' +
+            P + ' :not(.checkboxOutline):not(.as-login-kicker)::before,' + P + ' :not(.checkboxOutline):not(.as-login-kicker)::after{content:none!important;background-image:none!important}' +
+            // splash images other themes put behind the whole sign-in screen
+            'html:has(.as-login-split:not(.hide)),html:has(.as-login-split:not(.hide)) body,html:has(.as-login-split:not(.hide)) .backgroundContainer,html:has(.as-login-split:not(.hide)) .backdropContainer,html:has(.as-login-split:not(.hide)) .mainAnimatedPages,html:has(.as-login-split:not(.hide)) .skinBody{background-image:none!important;background-color:rgb(' + pr + ')!important}' +
+            'html:has(.as-login-split:not(.hide)) body::before,html:has(.as-login-split:not(.hide)) body::after,html:has(.as-login-split:not(.hide)) .backgroundContainer::before,html:has(.as-login-split:not(.hide)) .backgroundContainer::after{background-image:none!important;content:none!important}' +
             // everything inside lines up in one column, whatever the page is built from
             P + '>*{width:100%!important;max-width:30em!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box;position:static!important;transform:none!important;flex:none!important;float:none!important}' +
             P + ' .padded-left,' + P + ' .padded-right{padding-left:0!important;padding-right:0!important}' +

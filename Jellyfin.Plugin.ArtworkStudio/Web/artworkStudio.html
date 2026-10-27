@@ -254,6 +254,11 @@
       <div class="as-hint">Changes show in the browser and apps built on the Jellyfin web app after you save and refresh (Ctrl+F5). Native TV apps use their own look. Leave anything blank to keep Jellyfin's default.</div>
     </div>
 
+    <div class="as-panel" id="asConflictBanner" style="display:none;border-color:var(--as-warn);background:rgba(232,163,61,.1)">
+      <div class="as-row" style="justify-content:space-between;gap:1em"><div><b>Other theme code is active on this server</b><div class="as-hint" id="asConflictBannerText"></div></div>
+      <button class="as-btn small" id="asConflictGo"><span class="material-icons">build</span>Review &amp; fix</button></div>
+    </div>
+
     <div class="as-panel">
       <div class="as-row" style="justify-content:space-between"><h3 style="margin:0">Theme presets</h3>
         <button class="as-btn small" id="asPresetReset" style="display:none"><span class="material-icons">undo</span>Reset to my design</button></div>
@@ -438,6 +443,11 @@
         <div id="asClientHelp" class="as-hint" style="display:none;margin-top:.5em">Jellyfin couldn't add the script itself. If you use the <b>JavaScript Injector</b> plugin, add a new script with this line, then refresh the page:
           <pre style="white-space:pre-wrap;background:var(--as-soft);padding:.6em;border-radius:6px;margin:.4em 0;user-select:all">var s=document.createElement('script');s.src='../ArtworkStudio/ClientScript';document.head.appendChild(s);</pre></div>
       </div>
+    </div>
+    <div class="as-panel" id="asConflicts">
+      <h3>Other theme code on this server</h3>
+      <div class="as-hint">Styling saved elsewhere in Jellyfin (Branding → Custom CSS, or scripts and skins from other plugins) loads alongside Artwork Studio and can override it — for example an old login theme with its own splash image or headings.</div>
+      <div id="asConflictBody" style="margin-top:.8em"><span class="as-spin"></span></div>
     </div>
     <div class="as-panel">
       <h3>Backup</h3>
@@ -640,6 +650,7 @@
             $$('.as-tab').forEach(function (x) { x.classList.toggle('active', x === b); });
             $$('section[data-section]').forEach(function (s) { s.style.display = s.dataset.section === b.dataset.tab ? '' : 'none'; });
             if ((b.dataset.tab === 'settings' || b.dataset.tab === 'design') && !S.config) loadSettings();
+            if (b.dataset.tab === 'settings' || b.dataset.tab === 'design') loadConflicts();
             if (b.dataset.tab === 'design') loadBrandSlots();
         });
     });
@@ -1452,6 +1463,53 @@
             var cfg = Object.assign({}, S.config || {}, data);
             return ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function () { toast('Settings imported'); S.roots = null; return loadSettings(); });
         }).catch(function (e) { toast('Couldn\'t import: ' + e.message, true); });
+    });
+
+    // ============================================================ CONFLICTS
+    function loadConflicts() {
+        return api('GET', 'ArtworkStudio/Conflicts').then(function (r) {
+            S.conflicts = r;
+            var css = r.BrandingCss || {}, items = [];
+            var h = '';
+            // Jellyfin's own Custom CSS
+            h += '<div class="as-brand-row"><div class="as-brand-info"><b>Jellyfin Branding → Custom CSS</b><span class="as-hint">' +
+                (css.Length ? css.Length.toLocaleString() + ' characters' + (css.Markers.length ? ' · changes the sign-in page / backgrounds (' + esc(css.Markers.join(', ')) + ')' : '') : 'Empty — nothing here.') + '</span>' +
+                (css.Length ? '<details style="margin-top:.4em"><summary class="as-hint" style="cursor:pointer">Show the start of it</summary><pre style="white-space:pre-wrap;font-size:.75em;max-height:12em;overflow:auto;background:var(--as-soft);padding:.6em;border-radius:6px">' + esc(css.Preview) + '</pre></details>' : '') + '</div>' +
+                '<div class="as-row">' + (css.Length ? '<button class="as-btn small danger" id="asCssOff"><span class="material-icons">block</span>Turn off (keeps a backup)</button>' : '') +
+                ((r.Backups || []).length ? '<button class="as-btn small" id="asCssRestore"><span class="material-icons">restore</span>Restore backup</button>' : '') + '</div></div>';
+            if (css.Length) items.push('Jellyfin Custom CSS');
+            // Other plugins' saved settings that contain theme / login code
+            (r.OtherPluginSettings || []).forEach(function (o) {
+                items.push(o.Source);
+                h += '<div class="as-brand-row"><div class="as-brand-info"><b>' + esc(o.Source) + ' plugin</b><span class="as-hint">Its saved settings contain theme code (' + esc(o.Markers.join(', ')) +
+                    '). Open <b>Dashboard → Plugins → ' + esc(o.Source) + '</b> and turn off or delete any login / theme script there.</span></div></div>';
+            });
+            var listedFiles = (r.OtherPluginSettings || []).map(function (o) { return o.Source.toLowerCase().replace(/\s/g, ''); });
+            (r.ThemePlugins || []).forEach(function (p) {
+                if (listedFiles.some(function (f) { return p.Name.toLowerCase().replace(/\s/g, '').indexOf(f) >= 0 || f.indexOf(p.Name.toLowerCase().replace(/\s/g, '')) >= 0; })) return;
+                items.push(p.Name);
+                h += '<div class="as-brand-row"><div class="as-brand-info"><b>' + esc(p.Name) + '</b><span class="as-hint">A theme / script plugin is installed. If it applies a skin or login script, switch that off in its settings (or disable the plugin) so it doesn\'t override Artwork Studio.</span></div></div>';
+            });
+            if (!items.length) h = '<div class="as-status ok">' + icon('check_circle') + 'No other theme code found. If the sign-in page still looks different from the preview, refresh with Ctrl+F5 or try a private window.</div>';
+            $('#asConflictBody').innerHTML = h;
+            var off = $('#asCssOff'), rs = $('#asCssRestore');
+            if (off) off.onclick = function () {
+                if (!confirm('Turn off Jellyfin\'s Custom CSS? A copy is saved first, and you can restore it here at any time.')) return;
+                api('POST', 'ArtworkStudio/Conflicts/DisableBrandingCss').then(function (x) { toast('Jellyfin Custom CSS turned off' + (x && x.Backup ? ' — backup saved' : '') + '. Refresh the sign-in page (Ctrl+F5).'); loadConflicts(); })
+                    .catch(function (e) { toast(e.message, true); });
+            };
+            if (rs) rs.onclick = function () {
+                if (!confirm('Put back the most recent Custom CSS backup?')) return;
+                api('POST', 'ArtworkStudio/Conflicts/RestoreBrandingCss').then(function () { toast('Custom CSS restored'); loadConflicts(); })
+                    .catch(function (e) { toast(e.message, true); });
+            };
+            $('#asConflictBanner').style.display = items.length ? '' : 'none';
+            $('#asConflictBannerText').textContent = items.length ? 'Found: ' + items.join(', ') + '. It can override your design (for example an old login theme with its own splash image).' : '';
+        }).catch(function () { $('#asConflictBody').innerHTML = '<div class="as-hint">Restart Jellyfin after updating to use this check.</div>'; });
+    }
+    $('#asConflictGo').addEventListener('click', function () {
+        $('.as-tab[data-tab="settings"]').click();
+        setTimeout(function () { $('#asConflicts').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
     });
 
     // ============================================================ DESIGN
