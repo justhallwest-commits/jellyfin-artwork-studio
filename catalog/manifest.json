@@ -1,0 +1,170 @@
+[
+  {
+    "guid": "7143ab64-23ea-4969-b0b9-672c6893c4b3",
+    "name": "Artwork Studio",
+    "description": "Add and manage posters, backdrops, logos and more for libraries and items \u2014 from uploads, web links, your NAS, or online providers.",
+    "overview": "A friendly artwork manager for Jellyfin.",
+    "owner": "justhallwest-commits",
+    "category": "General",
+    "versions": [
+      {
+        "version": "1.0.30.12",
+        "changelog": "Build for Jellyfin 12.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.30/artwork-studio_1.0.30.12_jellyfin-12.zip",
+        "checksum": "75295e8fa8a1fd430bb4c3c3300b1c99",
+        "timestamp": "2026-10-28T19:12:39Z"
+      },
+      {
+        "version": "1.0.30.11",
+        "changelog": "Build for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.30/artwork-studio_1.0.30.11_jellyfin-10.11.zip",
+        "checksum": "a88f16ed8578cb6107523cf41136cd70",
+        "timestamp": "2026-10-28T19:12:39Z"
+      },
+      {
+        "version": "1.0.30.10",
+        "changelog": "Build for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.30/artwork-studio_1.0.30.10_jellyfin-10.10.zip",
+        "checksum": "e3221dae4649df38120ea6154630be0b",
+        "timestamp": "2026-10-28T19:12:39Z"
+      }
+    ]
+  },
+  {
+    "guid": "52153ac0-2dcf-4319-a322-9c9415665d48",
+    "name": "Bulk Metadata Editor",
+    "description": "Find items across every library and bulk edit genres, tags, studios, ratings, titles, sort titles, years, dates, provider ids and field locks \u2014 with preview, undo, a genre/tag manager and CSV export/import.",
+    "overview": "Bulk edit metadata across all of your libraries",
+    "owner": "justhallwest-commits",
+    "category": "Metadata",
+    "imageUrl": "",
+    "versions": [
+      {
+        "version": "1.0.1.12",
+        "changelog": "Release 1.0.1.0 for Jellyfin 12",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-bulk-metadata/releases/download/v1.0.1.0/bulk-metadata-editor_1.0.1.12_jellyfin-12.zip",
+        "checksum": "2f8ab3853f939a2634c473e2c73f906d",
+        "timestamp": "2026-10-28T19:12:50Z"
+      },
+      {
+        "version": "1.0.1.0",
+        "changelog": "Release 1.0.1.0",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-bulk-metadata/releases/download/v1.0.1.0/bulk-metadata-editor_1.0.1.0.zip",
+        "checksum": "cffaa3762e02715ab42f94bc5d5855db",
+        "timestamp": "2026-10-28T19:12:50Z"
+      },
+      {
+        "version": "1.0.0.0",
+        "changelog": "Release 1.0.0.0",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-bulk-metadata/releases/download/v1.0.0.0/bulk-metadata-editor_1.0.0.0.zip",
+        "checksum": "7ac8429a18c63020216253cad5a119b9",
+        "timestamp": "2026-10-25T01:19:47Z"
+      }
+    ]
+  },
+  {
+    "guid": "a4b2c3d4-e5f6-7890-abcd-ef1234567891",
+    "name": "Pre-Roll Videos",
+    "description": "Plays videos from a selected library before TV episodes or movies \u2014 studio logos, bumpers, custom commercials or broadcast intros.",
+    "overview": "Pick any Jellyfin library as your pre-roll source and clips play before movies and/or TV episodes.",
+    "owner": "justhallwest-commits",
+    "category": "General",
+    "imageUrl": "",
+    "versions": [
+      {
+        "version": "3.0.0.12",
+        "changelog": "Build for Jellyfin 12.x (.NET 10)",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v3.0.0-jf12/jellyfin-preroll-v3.0.0.12-jf12.zip",
+        "checksum": "e2deab03fa9423ddd81ce87dfbc5c0cb",
+        "timestamp": "2026-10-28T19:03:33Z"
+      },
+      {
+        "version": "3.0.0.0",
+        "changelog": "3.0: new tabbed settings page with health check and fixes, genre/studio/rating matching, rules on any detail, seasonal schedules with presets, cinema-style sequence, frequency limit, skip users, clips manager, test tool, backup",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v3.0.0/jellyfin-preroll-v3.0.0.zip",
+        "checksum": "c8d113750cb1189e635e3169c07ea5df",
+        "timestamp": "2026-10-24T15:00:00Z"
+      },
+      {
+        "version": "2.3.0.0",
+        "changelog": "Pre-roll before every movie and episode: web player integration (fixes only-S01E01), recent activity panel, improved server fallback",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.3.0/jellyfin-preroll-v2.3.0.zip",
+        "checksum": "0d1a80f9f8807aeb67d17d4aec10ff2a",
+        "timestamp": "2026-10-24T05:00:00Z"
+      },
+      {
+        "version": "2.2.0.0",
+        "changelog": "Pre-rolls before autoplayed episodes (and apps that skip intros); settings toggle",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.2.0/jellyfin-preroll-v2.2.0.zip",
+        "checksum": "6db44603472b39ed35462d82d4353a06",
+        "timestamp": "2026-10-24T00:00:00Z"
+      },
+      {
+        "version": "2.1.0.0",
+        "changelog": "Tag matching (auto + rules + skip tags), fixed library list on the settings page",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.1.0/jellyfin-preroll-v2.1.0.zip",
+        "checksum": "f8c3aac511039a9ec9a022d46f7e07df",
+        "timestamp": "2026-10-23T00:00:00Z"
+      },
+      {
+        "version": "2.0.0.0",
+        "changelog": "UGREEN-ready release: library exclusions, shuffle/sequential order, loop protection",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.0.0/jellyfin-preroll-v2.0.0.zip",
+        "checksum": "8932237939d3ec828f35e131517e5096",
+        "timestamp": "2026-10-23T00:00:00Z"
+      },
+      {
+        "version": "1.30.0.0",
+        "changelog": "3.0: new tabbed settings page with health check and fixes, genre/studio/rating matching, rules on any detail, seasonal schedules with presets, cinema-style sequence, frequency limit, skip users, clips manager, test tool, backup",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v3.0.0/jellyfin-preroll-v3.0.0-jf10.10.zip",
+        "checksum": "364931a9983df33c6ea6b03003686a6d",
+        "timestamp": "2026-10-24T15:00:00Z"
+      },
+      {
+        "version": "1.23.0.0",
+        "changelog": "Pre-roll before every movie and episode: web player integration (fixes only-S01E01), recent activity panel, improved server fallback",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.3.0/jellyfin-preroll-v2.3.0-jf10.10.zip",
+        "checksum": "f14301e7a5dcbeedb7e35a1b172ff644",
+        "timestamp": "2026-10-24T05:00:00Z"
+      },
+      {
+        "version": "1.22.0.0",
+        "changelog": "Pre-rolls before autoplayed episodes (and apps that skip intros); settings toggle",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.2.0/jellyfin-preroll-v2.2.0-jf10.10.zip",
+        "checksum": "c17f8608090d003baadba81cecb46334",
+        "timestamp": "2026-10-24T00:00:00Z"
+      },
+      {
+        "version": "1.21.0.0",
+        "changelog": "Tag matching (auto + rules + skip tags), fixed library list on the settings page",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.1.0/jellyfin-preroll-v2.1.0-jf10.10.zip",
+        "checksum": "fe3271998d256957982f6e3dd8187835",
+        "timestamp": "2026-10-23T00:00:00Z"
+      },
+      {
+        "version": "1.10.0.0",
+        "changelog": "Jellyfin 10.10.x build: library exclusions, shuffle/sequential order, loop protection",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v1.10.0/jellyfin-preroll-v1.10.0.zip",
+        "checksum": "76e545e96cec385dfadc089adef23396",
+        "timestamp": "2026-10-23T00:00:00Z"
+      }
+    ]
+  }
+]
