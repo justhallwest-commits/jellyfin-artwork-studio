@@ -777,7 +777,8 @@
         if (!X.SurpriseMe || !uid() || playing()) { return; }
         // Legacy / TV layout: the classic header. Modern layout (Jellyfin 10.11+ default in 12): the
         // MUI app bar, where the button joins the group that holds Search.
-        var right = document.querySelector('.skinHeader .headerRight');
+        // (Jellyfin keeps a hidden copy of the classic header in the Modern layout, so it must be on screen.)
+        var right = firstShown('.skinHeader .headerRight');
         var modern = false;
         if (!right) {
             var search = document.querySelector('header.MuiAppBar-root a[href="#/search"], header.MuiAppBar-root [aria-label="Search"]');
@@ -785,6 +786,8 @@
             modern = !!right;
         }
         if (!right || right.querySelector('.as-surprise')) { return; }
+        // A button left behind in the other header (layout switched) goes away
+        Array.prototype.forEach.call(document.querySelectorAll('.as-surprise'), function (old) { if (!shown(old)) { old.remove(); } });
         var b = mk('button', (modern ? 'as-surprise-modern ' : 'headerButton headerButtonRight paper-icon-button-light ') + 'as-surprise', '<span class="material-icons casino" aria-hidden="true">casino</span>');
         b.type = 'button'; b.title = 'Surprise me';
         b.addEventListener('click', function (e) { e.stopPropagation(); if (document.getElementById('asSurpriseMenu')) { closeSurprise(); } else { openSurprise(b); } });

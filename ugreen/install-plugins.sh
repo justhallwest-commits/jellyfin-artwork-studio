@@ -2,7 +2,7 @@
 # Installs or updates the HallFlix plugins (Artwork Studio, Pre-Roll Videos, Bulk Metadata Editor)
 # for Jellyfin 12 into /config/plugins. Run by the "hallflix-plugins" helper in docker-compose.yml
 # before Jellyfin starts; safe to run on every start (it only downloads what's new).
-set -eu
+set -u
 
 CATALOG="${HALLFLIX_CATALOG:-https://raw.githubusercontent.com/justhallwest-commits/jellyfin-artwork-studio/main/catalog/manifest.json}"
 MAJOR="${JELLYFIN_MAJOR:-12}"

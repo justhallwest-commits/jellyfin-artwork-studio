@@ -14,12 +14,13 @@ services:
     image: alpine:3.20
     container_name: hallflix-plugins
     restart: "no"
-    entrypoint: ["/bin/sh", "-c", "wget -qO /tmp/install.sh https://raw.githubusercontent.com/justhallwest-commits/jellyfin-artwork-studio/main/ugreen/install-plugins.sh && sh /tmp/install.sh"]
+    # Never blocks Jellyfin: without internet it just keeps the plugins already installed.
+    entrypoint: ["/bin/sh", "-c", "wget -qO /tmp/install.sh https://raw.githubusercontent.com/justhallwest-commits/jellyfin-artwork-studio/main/ugreen/install-plugins.sh && sh /tmp/install.sh || echo 'HallFlix plugin helper skipped'; exit 0"]
     volumes:
       - /volume1/docker/jellyfin12/config:/config
 
   jellyfin:
-    image: jellyfin/jellyfin:__JELLYFIN_TAG__
+    image: jellyfin/jellyfin:12.4
     container_name: jellyfin12
     depends_on:
       hallflix-plugins:
@@ -27,7 +28,6 @@ services:
     restart: unless-stopped
     ports:
       - "8097:8096"          # web / apps:  http://<NAS-IP>:8097
-      - "7359:7359/udp"      # lets apps on your network find the server
     environment:
       - TZ=America/New_York
       - JELLYFIN_PublishedServerUrl=https://hallflix.net
