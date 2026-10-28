@@ -181,7 +181,7 @@
         // text stays readable without darkening the whole picture.
         var layers = ['linear-gradient(180deg,rgba(' + B + ',0) 0%,rgba(' + B + ',.25) 45%,rgba(' + B + ',' + (s.vignette || 0.88) + ') 100%)'];
         if (s.ambient) { layers.unshift('radial-gradient(circle at 12% 0%,rgba(' + A + ',.20),transparent 45%)', 'radial-gradient(circle at 95% 100%,rgba(' + rgbStr(accent2) + ',.16),transparent 50%)'); }
-        css.push('.backgroundContainer.withBackdrop::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;background:' + layers.join(',') + '}');
+        css.push('.backgroundContainer.withBackdrop:not(.backgroundContainer-transparent)::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;background:' + layers.join(',') + '}');
         css.push('.itemBackdrop::after{content:"";position:absolute;left:0;right:0;bottom:0;height:45%;pointer-events:none;background:linear-gradient(180deg,rgba(' + B + ',0),rgba(' + B + ',.85))}.itemBackdrop{position:relative}');
 
         // Login window follows the theme surface

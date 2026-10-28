@@ -74,7 +74,7 @@
 
     if (bg) {
         // Only on <html>: colouring <body> would paint over the backdrop layers
-        css.push('html{background-color:' + bg + '!important}.backgroundContainer:not(.withBackdrop){background-color:' + bg + '!important}');
+        css.push('html:not(.transparentDocument){background-color:' + bg + '!important}.backgroundContainer:not(.withBackdrop):not(.backgroundContainer-transparent){background-color:' + bg + '!important}');
     }
 
     if (t.HeaderStyle === 'glass') {
@@ -216,7 +216,7 @@
                 (right ? 'left:auto!important;right:0!important;' : 'left:0!important;right:auto!important;') +
                 'padding:3em clamp(1.5em,4.5vw,5em)!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:flex-start!important;' +
                 'background:rgb(' + pr + ')!important;background-image:none!important;overflow-y:auto;text-align:left!important;border:0!important;box-shadow:none!important;transform:none!important}' +
-            'body.as-split-login,body.as-split-login .backgroundContainer{background-color:rgb(' + pr + ')!important}' +
+            'body.as-split-login,body.as-split-login .backgroundContainer:not(.backgroundContainer-transparent){background-color:rgb(' + pr + ')!important}' +
             // leftover decorations from other themes: extra text / splash images drawn with ::before/::after
             P + '::before,' + P + '::after{content:none!important;display:none!important;background:none!important}' +
             P + ' :not(.checkboxOutline):not(.as-login-kicker)::before,' + P + ' :not(.checkboxOutline):not(.as-login-kicker)::after{content:none!important;background-image:none!important}' +
@@ -267,6 +267,14 @@
             '@media (max-width:820px){#asLoginSplit{left:0!important;right:0!important;bottom:auto!important;height:34vh;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent);mask-image:linear-gradient(180deg,#000 55%,transparent)}' +
                 P + '{width:100%!important;padding-top:calc(30vh + 1em)!important;justify-content:flex-start!important}}');
     }
+
+    // Video playback: Jellyfin shows the video behind a see-through page. Whatever else is set,
+    // keep the page, its background layers and our own backdrop layers out of the way.
+    css.push(':is(html.transparentDocument,#asPlay#asPlay#asPlay#asPlay),:is(html.transparentDocument,#asPlay#asPlay#asPlay#asPlay) body,' +
+        ':is(.backgroundContainer-transparent,#asPlay#asPlay#asPlay#asPlay),:is(html.transparentDocument,#asPlay#asPlay#asPlay#asPlay) .backgroundContainer' +
+        '{background:none!important;background-color:transparent!important;background-image:none!important}' +
+        ':is(.backgroundContainer-transparent,#asPlay#asPlay#asPlay#asPlay)::after,:is(.backgroundContainer-transparent,#asPlay#asPlay#asPlay#asPlay)::before{content:none!important;background:none!important}' +
+        'html.transparentDocument #asLibBackdrop,html.transparentDocument #asLoginSplit{display:none!important}');
 
     // Never reveal parts of the login page that Jellyfin has hidden
     css.push(':is(#loginPage,.loginPage,.as-login-page,#asLogin#asLogin#asLogin#asLogin) .hide.hide.hide.hide.hide.hide{display:none!important}');

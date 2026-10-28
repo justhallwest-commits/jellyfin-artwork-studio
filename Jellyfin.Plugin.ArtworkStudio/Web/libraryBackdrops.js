@@ -36,8 +36,9 @@
         '#asLibBackdrop>div{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease}' +
         '#asLibBackdrop>div.as-on{opacity:1}' +
         'body.as-libbg .backdropContainer{display:none!important}' +
-        'body.as-libbg .backgroundContainer{background:' + dimCss + '!important}' +
-        (cfg.dimAll ? '.backgroundContainer.withBackdrop{background:' + dimCss + '!important}' : '') +
+        'body.as-libbg .backgroundContainer:not(.backgroundContainer-transparent){background:' + dimCss + '!important}' +
+        (cfg.dimAll ? '.backgroundContainer.withBackdrop:not(.backgroundContainer-transparent){background:' + dimCss + '!important}' : '') +
+        'html.transparentDocument #asLibBackdrop,html.transparentDocument #asLoginSplit{display:none!important}' +
         // Login: the image is attached to the sign-in page itself, so nothing else can cover it
         '.as-loginbg{isolation:isolate;min-height:100vh;min-height:100dvh;background:transparent!important}' +
         '.as-loginbg::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;z-index:-2;background-image:var(--as-login-img);background-size:cover;background-position:center;transition:background-image 1s ease}' +
