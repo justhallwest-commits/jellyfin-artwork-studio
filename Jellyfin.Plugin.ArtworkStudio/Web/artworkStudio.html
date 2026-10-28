@@ -1635,10 +1635,10 @@
                 { k: 'SpotlightSeconds', type: 'num', label: 'Seconds each', min: 5, max: 60 },
                 { k: 'SpotlightHeight', type: 'num', label: 'Height (% of screen)', min: 35, max: 85 },
                 { k: 'SpotlightTrailers', type: 'bool', label: 'Play a muted preview in the background' }] },
-            { k: 'PreviewSourceRow', noSwitch: true, label: 'Preview source', hint: 'Where spotlight and hover previews come from. "Clips from your server" plays a short muted scene from the movie or show itself — nothing goes to YouTube, and it works for every title. Files the browser can\u2019t play directly are converted on the fly, which uses some of the NAS\u2019s CPU.', sub: [
+            { k: 'PreviewSourceRow', noSwitch: true, label: 'Preview source', hint: 'Where spotlight and hover previews come from. "Clips from your server" plays a short muted scene from the movie or show itself — nothing goes to YouTube, and it works for every title. Clips play straight from the file; titles the browser can\u2019t play just show their backdrop, unless you allow the server to convert them.', sub: [
                 { k: 'PreviewSource', type: 'select', label: 'Use', opts: [['clips', 'Clips from your server'], ['clips-then-trailers', 'Clips, then trailers'], ['trailers-then-clips', 'Trailers, then clips'], ['trailers', 'Trailers only (local trailer files, then YouTube)']] },
                 { k: 'ClipSeconds', type: 'num', label: 'Clip length (seconds)', min: 8, max: 120 },
-                { k: 'ClipTranscode', type: 'bool', label: 'Let the server convert files the browser can\u2019t play' }] },
+                { k: 'ClipTranscode', type: 'bool', label: 'Let the server convert files the browser can\u2019t play (spotlight only, one at a time \u2014 only turn on if hardware transcoding is enabled in Dashboard \u2192 Playback)' }] },
             { k: 'HoverTrailers', label: 'Preview on hover', hint: 'Rest the mouse on a movie or show poster and a small muted preview plays (from the source chosen above). Mouse only — not on touch screens.', sub: [
                 { k: 'HoverDelay', type: 'num', label: 'Delay (ms)', min: 300, max: 3000 }] },
             { k: 'Badges', label: 'Badges on posters', hint: 'Small labels on posters: 4K, HDR / Dolby Vision, Dolby Atmos, NEW for recently added, and the rating.', sub: [
@@ -1697,7 +1697,7 @@
         x = x || {};
         $$('#asExtrasForm [data-xk]').forEach(function (el) {
             var v = x[el.dataset.xk];
-            if (el.type === 'checkbox') el.checked = v !== false && v != null ? !!v : (v === false ? false : true);
+            if (el.type === 'checkbox') el.checked = v == null ? !/^(ClipTranscode|SeasonAccent)$/.test(el.dataset.xk) : !!v;
             else if (v != null) el.value = v;
         });
         S.announcements = (x.Announcements || []).map(function (a) { return Object.assign({}, a); });

@@ -3,6 +3,7 @@
 (function () {
     'use strict';
     if (window.__artworkStudioTheme) { return; }
+    try { if (sessionStorage.getItem('as-safe') === '1') { return; } } catch (e) { /* ignore */ }
     window.__artworkStudioTheme = true;
 
     var cfg = window.__artworkStudioCfg || {};

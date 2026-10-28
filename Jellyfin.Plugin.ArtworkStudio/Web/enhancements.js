@@ -4,6 +4,7 @@
 (function () {
     'use strict';
     if (window.__artworkStudioExtras) { return; }
+    try { if (sessionStorage.getItem('as-safe') === '1') { return; } } catch (e) { /* ignore */ }
     window.__artworkStudioExtras = true;
 
     var cfg = window.__artworkStudioCfg || {};
@@ -239,7 +240,7 @@
         return api().getItems(uid(), { ParentId: item.Id, IncludeItemTypes: 'Episode', Recursive: true, SortBy: 'Random', Limit: 1, IsMissing: false, Fields: 'MediaSources' })
             .then(function (r) { return (r.Items || [])[0] || null; });
     }
-    function clipChain(item) {
+    function clipChain(item, noConvert) {
         return playableFor(item).then(function (it) {
             if (!it || !it.RunTimeTicks) { return null; }
             var run = it.RunTimeTicks / 1e7;
@@ -248,15 +249,15 @@
             var ms = it.MediaSources && it.MediaSources[0];
             var a = api(), token = a.accessToken();
             var direct = { type: 'clip', start: start, src: a.getUrl('Videos/' + it.Id + '/stream', { static: true, mediaSourceId: ms ? ms.Id : it.Id, api_key: token }) + '#t=' + start };
-            if (X.ClipTranscode !== false) {
+            if (X.ClipTranscode !== false && !noConvert) {
                 var session = 'as' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
                 var dev = a.deviceId ? a.deviceId() : 'artworkstudio';
                 direct.next = {
                     type: 'clip', start: 0, transcode: { deviceId: dev, playSessionId: session },
                     src: a.getUrl('Videos/' + it.Id + '/stream.mp4', {
                         mediaSourceId: ms ? ms.Id : it.Id, deviceId: dev, playSessionId: session, api_key: token,
-                        videoCodec: 'h264', audioCodec: 'aac', audioBitRate: 96000, maxAudioChannels: 2,
-                        maxWidth: 1280, videoBitRate: 2500000, startTimeTicks: start * 1e7,
+                        videoCodec: 'h264', audioCodec: 'aac', audioBitRate: 64000, maxAudioChannels: 1,
+                        maxWidth: 854, videoBitRate: 1200000, startTimeTicks: start * 1e7,
                         enableAutoStreamCopy: true, allowVideoStreamCopy: true, allowAudioStreamCopy: false, breakOnNonKeyFrames: true
                     })
                 };
@@ -269,19 +270,21 @@
         var c = first; while (c.next) { c = c.next; } c.next = rest; return first;
     }
     // Where previews come from (Extras -> Preview source)
-    function trailerFor(item) {
+    function trailerFor(item, noConvert) {
         var src = X.PreviewSource || 'clips';
         if (src === 'trailers') { return realTrailers(item); }
-        if (src === 'clips') { return clipChain(item); }
-        if (src === 'trailers-then-clips') { return Promise.all([realTrailers(item), clipChain(item)]).then(function (r) { return appendChain(r[0], r[1]); }); }
-        return Promise.all([clipChain(item), realTrailers(item)]).then(function (r) { return appendChain(r[0], r[1]); });
+        if (src === 'clips') { return clipChain(item, noConvert); }
+        if (src === 'trailers-then-clips') { return Promise.all([realTrailers(item), clipChain(item, noConvert)]).then(function (r) { return appendChain(r[0], r[1]); }); }
+        return Promise.all([clipChain(item, noConvert), realTrailers(item)]).then(function (r) { return appendChain(r[0], r[1]); });
     }
+    function hoverTrailerFor(item) { return trailerFor(item, true); }
 
     // Stop a preview cleanly: stop downloading, and tell the server to end any conversion it started
     function killMedia(root) {
         if (!root) { return; }
         Array.prototype.forEach.call(root.tagName === 'VIDEO' ? [root] : root.querySelectorAll('video'), function (v) {
             if (v.__asKill) { v.__asKill(); v.__asKill = null; }
+            if (activePreview === v) { activePreview = null; }
             try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) { /* ignore */ }
         });
     }
@@ -300,9 +303,21 @@
             else if (state === 1) { f.ready(); }
         });
     });
+    // Only one preview may stream at a time across the whole site
+    var activePreview = null;
+    function claimPreview(v) {
+        var old = activePreview;
+        activePreview = v;
+        if (old && old !== v) {
+            var inSpot = spot.el && spot.el.contains(old);
+            killMedia(old); old.remove();
+            if (inSpot) { stopSpotTrailer(); }
+        }
+    }
     function trailerNode(t, onReady, onFail) {
         if (t.type === 'video' || t.type === 'clip') {
             var v = document.createElement('video'), settled = false;
+            claimPreview(v);
             v.muted = true; v.autoplay = true; v.loop = t.type !== 'clip'; v.playsInline = true; v.preload = 'auto';
             v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
             var fail = function () {
@@ -500,9 +515,9 @@
     function spotlightTick() {
         if (!X.Spotlight || !uid()) { return; }
         var existing = document.getElementById('asSpotlight');
-        if (route().route !== 'home' || playing()) {
-            if (spot.media) { stopSpotTrailer(); }
-            return;
+        if (route().route !== 'home' || playing() || document.hidden || (existing && !existing.offsetParent)) {
+            if (spot.media || spot.tTimer || (spot.el && spot.el.querySelector('.as-spot-trailer video,.as-spot-trailer iframe'))) { stopSpotTrailer(); spot.tTimer = null; }
+            if (route().route !== 'home' || playing()) { return; }
         }
         var container = document.querySelector('.page:not(.hide) .homeSectionsContainer');
         if (!container) { return; }
@@ -541,7 +556,7 @@
         if (hov.el) { var e = hov.el; hov.el = null; killMedia(e); e.classList.remove('as-on'); setTimeout(function () { e.remove(); }, 260); }
     }
     function openHover(card, id) {
-        getItem(id).then(trailerFor).then(function (t) {
+        getItem(id).then(hoverTrailerFor).then(function (t) {
             if (!t || hov.card !== card || playing()) { return; }
             var box = card.querySelector('.cardScalable') || card;
             var r = box.getBoundingClientRect();

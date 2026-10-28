@@ -5,6 +5,10 @@
 (function () {
     'use strict';
     if (window.__artworkStudioLibBg) { return; }
+    // Safe mode: add ?assafe=1 to the address to load Jellyfin without any Artwork Studio changes
+    try { if (/[?&#]assafe/i.test(location.href)) { sessionStorage.setItem('as-safe', '1'); } } catch (e) { /* ignore */ }
+    try { if (sessionStorage.getItem('as-safe') === '1' && !/[?&#]asnormal/i.test(location.href)) { return; } sessionStorage.removeItem('as-safe'); } catch (e) { /* ignore */ }
+
     window.__artworkStudioLibBg = true;
 
     var cfg = window.__artworkStudioCfg || {};

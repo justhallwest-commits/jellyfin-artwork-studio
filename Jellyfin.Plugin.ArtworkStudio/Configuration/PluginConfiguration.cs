@@ -153,7 +153,7 @@ public class ExtrasSettings
     public int ClipSeconds { get; set; } = 30;
 
     /// <summary>Gets or sets a value indicating whether the server may convert files the browser can't play directly (uses CPU).</summary>
-    public bool ClipTranscode { get; set; } = true;
+    public bool ClipTranscode { get; set; }
 
     public bool HoverTrailers { get; set; } = true;
 
