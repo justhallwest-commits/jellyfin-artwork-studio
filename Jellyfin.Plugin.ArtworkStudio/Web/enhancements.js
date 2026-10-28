@@ -58,6 +58,10 @@
     function fmtClock(d) { try { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { return d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2); } }
     function hashStr(s) { var h = 0; for (var i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; } return h; }
     function mk(tag, cls, html) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (html != null) { e.innerHTML = html; } return e; }
+    // Jellyfin keeps recent pages loaded and hides the box *around* them, so a page counts as
+    // showing only if it is actually on screen.
+    function shown(el) { return !!el && el.isConnected && !el.closest('.hide') && el.getClientRects().length > 0; }
+    function firstShown(sel) { var l = document.querySelectorAll(sel); for (var i = 0; i < l.length; i++) { if (shown(l[i])) { return l[i]; } } return null; }
     var itemCache = {};
     function getItem(id) {
         if (itemCache[id]) { return itemCache[id]; }
@@ -519,7 +523,7 @@
             if (spot.media || spot.tTimer || (spot.el && spot.el.querySelector('.as-spot-trailer video,.as-spot-trailer iframe'))) { stopSpotTrailer(); spot.tTimer = null; }
             if (route().route !== 'home' || playing()) { return; }
         }
-        var container = document.querySelector('.page:not(.hide) .homeSectionsContainer');
+        var container = firstShown('.homeSectionsContainer');
         if (!container) { return; }
         if (existing && existing.parentElement === container) { return; }
         if (existing) { existing.remove(); }
@@ -528,7 +532,7 @@
         loadSpot().then(function (items) {
             spot.loading = false;
             if (!items.length || route().route !== 'home') { return; }
-            var c = document.querySelector('.page:not(.hide) .homeSectionsContainer');
+            var c = firstShown('.homeSectionsContainer');
             if (!c || document.getElementById('asSpotlight')) { return; }
             var el = buildSpot(c);
             el.querySelector('.as-spot-dots').innerHTML = items.map(function (_, n) { return '<button type="button" data-i="' + n + '" title="' + esc(items[n].Name) + '"></button>'; }).join('');
@@ -740,11 +744,12 @@
 
     // ------------------------------------------------------------------ Movie & show pages
     var det = { id: null, item: null, amb: null };
-    function detailsPage() { return document.querySelector('.itemDetailPage:not(.hide),#itemDetailPage:not(.hide)'); }
+    function detailsPage() { return firstShown('.itemDetailPage,#itemDetailPage'); }
     function clearDetails() {
         Array.prototype.forEach.call(document.querySelectorAll('.as-detail-logo,.as-endsat'), function (n) { n.remove(); });
         Array.prototype.forEach.call(document.querySelectorAll('.as-hide-title'), function (n) { n.classList.remove('as-hide-title'); });
         var s = document.getElementById('asAmbient'); if (s) { s.remove(); }
+        Array.prototype.forEach.call(document.querySelectorAll('.as-amb-page'), function (n) { n.classList.remove('as-amb-page'); });
         det.id = null; det.item = null;
     }
     function ambientFrom(item) {
@@ -772,8 +777,11 @@
                 var col = [best.r / best.w, best.g / best.w, best.b / best.w].map(Math.round).join(',');
                 var st = document.getElementById('asAmbient') || document.head.appendChild(mk('style'));
                 st.id = 'asAmbient';
-                st.textContent = ':is(.itemDetailPage,#itemDetailPage):not(.hide){background:radial-gradient(120% 85% at 12% 0%,rgba(' + col + ',.34),rgba(' + col + ',0) 62%),linear-gradient(0deg,rgba(' + col + ',.16),rgba(' + col + ',0) 45%)!important;transition:background .8s}' +
-                    ':is(.itemDetailPage,#itemDetailPage):not(.hide) .mainDetailButtons .btnPlay{background:rgb(' + col + ')!important;color:#fff!important}' +
+                var pg = detailsPage();
+                Array.prototype.forEach.call(document.querySelectorAll('.as-amb-page'), function (n) { if (n !== pg) { n.classList.remove('as-amb-page'); } });
+                if (pg) { pg.classList.add('as-amb-page'); }
+                st.textContent = '.as-amb-page{background:radial-gradient(120% 85% at 12% 0%,rgba(' + col + ',.34),rgba(' + col + ',0) 62%),linear-gradient(0deg,rgba(' + col + ',.16),rgba(' + col + ',0) 45%)!important;transition:background .8s}' +
+                    '.as-amb-page .mainDetailButtons .btnPlay{background:rgb(' + col + ')!important;color:#fff!important}' +
                     'html.transparentDocument :is(.itemDetailPage,#itemDetailPage){background:none!important}';
             } catch (e) { /* ignore */ }
         };
@@ -852,7 +860,7 @@
     function showPause() {
         nowPlaying().then(function (item) {
             if (!item || !pb.video || !pb.video.paused || pb.video.ended) { return; }
-            var host = document.querySelector('#videoOsdPage:not(.hide)') || document.body;
+            var host = firstShown('#videoOsdPage') || document.body;
             if (!pb.overlay || !pb.overlay.isConnected) { pb.overlay = mk('div'); pb.overlay.id = 'asPause'; host.insertBefore(pb.overlay, host.firstChild); }
             var logoId = item.ImageTags && item.ImageTags.Logo ? item.Id : item.ParentLogoItemId;
             var logoTag = item.ImageTags && item.ImageTags.Logo ? item.ImageTags.Logo : item.ParentLogoImageTag;
@@ -949,7 +957,7 @@
     function fxAllowed() {
         if (!season || !X.SeasonEffects || reduceMotion || document.hidden || playing()) { return false; }
         var r = route().route;
-        return r === 'home' || !!document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide),.as-login-page:not(.hide)');
+        return r === 'home' || !!firstShown('#loginPage,.loginPage,.as-login-page');
     }
     function makePart(w, h, first) {
         var f = season.fx;
@@ -1074,7 +1082,7 @@
     function announceTick() {
         var list = X.Announcements || [];
         if (!list.length || route().route !== 'home') { return; }
-        var c = document.querySelector('.page:not(.hide) .homeSectionsContainer');
+        var c = firstShown('.homeSectionsContainer');
         if (!c) { return; }
         list.forEach(function (a) {
             var key = 'as-sched-' + hashStr(a.Text + '|' + a.Start + '|' + a.End);

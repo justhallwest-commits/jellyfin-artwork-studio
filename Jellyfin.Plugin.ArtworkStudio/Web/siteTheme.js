@@ -198,7 +198,7 @@
         var dimA = cfg.dim == null ? 0.45 : cfg.dim / 100;
         // :is() takes the specificity of its strongest argument, so this matches by our own class
         // but out-ranks rules from other themes that target #loginPage.
-        var P = ':is(.as-login-page,#asLogin#asLogin#asLogin).as-login-split:not(.hide)', SB = P + ' .as-login-box';
+        var P = ':is(.as-login-page,#asLogin#asLogin#asLogin).as-login-split.as-login-visible', SB = P + ' .as-login-box';
         var side = right ? 'right' : 'left', other = right ? 'left' : 'right';
         var panelW = 'min(100vw,max(380px,' + sw + 'vw))';
         var fade = Math.min(60, Math.max(4, t.LoginFadeWidth || 24)) + 'vw';
@@ -222,8 +222,8 @@
             P + '::before,' + P + '::after{content:none!important;display:none!important;background:none!important}' +
             P + ' :not(.checkboxOutline):not(.as-login-kicker)::before,' + P + ' :not(.checkboxOutline):not(.as-login-kicker)::after{content:none!important;background-image:none!important}' +
             // splash images other themes put behind the whole sign-in screen
-            'html:has(.as-login-split:not(.hide)),html:has(.as-login-split:not(.hide)) body,html:has(.as-login-split:not(.hide)) .backgroundContainer,html:has(.as-login-split:not(.hide)) .backdropContainer,html:has(.as-login-split:not(.hide)) .mainAnimatedPages,html:has(.as-login-split:not(.hide)) .skinBody{background-image:none!important;background-color:rgb(' + pr + ')!important}' +
-            'html:has(.as-login-split:not(.hide)) body::before,html:has(.as-login-split:not(.hide)) body::after,html:has(.as-login-split:not(.hide)) .backgroundContainer::before,html:has(.as-login-split:not(.hide)) .backgroundContainer::after{background-image:none!important;content:none!important}' +
+            'html:has(.as-login-split.as-login-visible),html:has(.as-login-split.as-login-visible) body,html:has(.as-login-split.as-login-visible) .backgroundContainer,html:has(.as-login-split.as-login-visible) .backdropContainer,html:has(.as-login-split.as-login-visible) .mainAnimatedPages,html:has(.as-login-split.as-login-visible) .skinBody{background-image:none!important;background-color:rgb(' + pr + ')!important}' +
+            'html:has(.as-login-split.as-login-visible) body::before,html:has(.as-login-split.as-login-visible) body::after,html:has(.as-login-split.as-login-visible) .backgroundContainer::before,html:has(.as-login-split.as-login-visible) .backgroundContainer::after{background-image:none!important;content:none!important}' +
             // everything inside lines up in one column, whatever the page is built from
             P + '>*{width:100%!important;max-width:30em!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box;position:static!important;transform:none!important;flex:none!important;float:none!important}' +
             P + ' .padded-left,' + P + ' .padded-right{padding-left:0!important;padding-right:0!important}' +
@@ -325,17 +325,27 @@
     }
 
     // ---------------------------------------------------------------- login branding
+    // Jellyfin keeps recent pages loaded and hides the box *around* them, so a page counts as
+    // showing only if it is actually on screen.
+    function shown(el) { return !!el && el.isConnected && !el.closest('.hide') && el.getClientRects().length > 0; }
+    function firstShown(sel) { var l = document.querySelectorAll(sel); for (var i = 0; i < l.length; i++) { if (shown(l[i])) { return l[i]; } } return null; }
     // The visible sign-in page, whatever it is built from
     function findLoginPage() {
-        var p = document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide)');
+        var p = firstShown('#loginPage,.loginPage');
         if (p) { return p; }
-        var f = document.querySelector('.manualLoginForm,#divUsers,.visualLoginForm');
-        var pg = f && f.closest('.page,[data-role="page"]');
-        return pg && !pg.classList.contains('hide') && pg.offsetParent !== null ? pg : null;
+        var forms = document.querySelectorAll('.manualLoginForm,#divUsers,.visualLoginForm');
+        for (var i = 0; i < forms.length; i++) {
+            var pg = forms[i].closest('.page,[data-role="page"]');
+            if (shown(pg)) { return pg; }
+        }
+        return null;
     }
     function loginBrand() {
         var page = findLoginPage();
+        // only the sign-in page that is really on screen gets the sign-in styling
+        Array.prototype.forEach.call(document.querySelectorAll('.as-login-visible'), function (el) { if (el !== page) { el.classList.remove('as-login-visible'); } });
         if (!page) { return; }
+        if (!page.classList.contains('as-login-visible')) { page.classList.add('as-login-visible'); }
         if (!page.classList.contains('as-login-page')) { page.classList.add('as-login-page'); }
         // The column that holds the sign-in forms: walk up from the form to the page's direct child
         var holder = page.querySelector('.manualLoginForm,.visualLoginForm');
@@ -393,7 +403,7 @@
     function announce() {
         if (!t.Announcement) { return; }
         try { if (t.AnnouncementDismissible && localStorage.getItem(announceKey())) { return; } } catch (e) { /* ignore */ }
-        var container = document.querySelector('.page:not(.hide) .homeSectionsContainer');
+        var container = firstShown('.homeSectionsContainer');
         if (!container || container.querySelector('.as-announce')) { return; }
         var box = document.createElement('div');
         box.className = 'as-announce';
