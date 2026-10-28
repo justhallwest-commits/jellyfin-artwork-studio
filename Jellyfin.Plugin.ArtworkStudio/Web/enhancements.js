@@ -211,21 +211,40 @@
 
     // ------------------------------------------------------------------ trailers (shared)
     function ytId(url) { var m = String(url || '').match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m && m[1]; }
+    // Every YouTube trailer of a title, chained so the next one is tried if one can't be embedded
     function youTube(item) {
-        var id = (item.RemoteTrailers || []).map(function (t) { return ytId(t.Url); }).filter(Boolean)[0];
-        return id ? { type: 'yt', id: id } : null;
+        var ids = [];
+        (item.RemoteTrailers || []).forEach(function (t) { var id = ytId(t.Url); if (id && ids.indexOf(id) < 0) { ids.push(id); } });
+        var chain = null;
+        for (var i = Math.min(ids.length, 4) - 1; i >= 0; i--) { chain = { type: 'yt', id: ids[i], next: chain }; }
+        return chain;
     }
     function trailerFor(item) {
         if (item.LocalTrailerCount > 0 && api().getLocalTrailers) {
             return api().getLocalTrailers(uid(), item.Id).then(function (list) {
                 if (list && list[0]) {
-                    return { type: 'video', src: api().getUrl('Videos/' + list[0].Id + '/stream', { static: true, api_key: api().accessToken() }), fallback: youTube(item) };
+                    return { type: 'video', src: api().getUrl('Videos/' + list[0].Id + '/stream', { static: true, api_key: api().accessToken() }), next: youTube(item) };
                 }
                 return youTube(item);
             }).catch(function () { return youTube(item); });
         }
         return Promise.resolve(youTube(item));
     }
+
+    // YouTube reports what its player is doing through postMessage; we only reveal a trailer once
+    // it is actually playing, and move on quietly if YouTube refuses it (embedding disabled, error 153...).
+    var ytFrames = [];
+    window.addEventListener('message', function (e) {
+        if (!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)) { return; }
+        var d; try { d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch (err) { return; }
+        if (!d) { return; }
+        ytFrames.forEach(function (f) {
+            if (!f.iframe.isConnected || f.iframe.contentWindow !== e.source) { return; }
+            var state = d.event === 'onStateChange' ? d.info : (d.event === 'infoDelivery' && d.info ? d.info.playerState : undefined);
+            if (d.event === 'onError' || (d.event === 'infoDelivery' && d.info && d.info.errorCode)) { f.fail(); }
+            else if (state === 1) { f.ready(); }
+        });
+    });
     function trailerNode(t, onReady, onFail) {
         if (t.type === 'video') {
             var v = document.createElement('video');
@@ -233,16 +252,34 @@
             v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
             v.src = t.src;
             v.addEventListener('playing', function () { if (onReady) { onReady(v); } }, { once: true });
-            v.addEventListener('error', function () { if (onFail) { onFail(t.fallback); } }, { once: true });
+            v.addEventListener('error', function () { if (onFail) { onFail(t.next); } }, { once: true });
             var p = v.play(); if (p && p.catch) { p.catch(function () {}); }
             return v;
         }
         var f = document.createElement('iframe');
         f.allow = 'autoplay; encrypted-media; picture-in-picture';
         f.setAttribute('frameborder', '0');
-        f.src = 'https://www.youtube-nocookie.com/embed/' + t.id + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + t.id +
-            '&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1&start=6';
-        f.addEventListener('load', function () { setTimeout(function () { if (onReady) { onReady(f); } }, 1200); }, { once: true });
+        // YouTube needs to know which site is embedding it (otherwise "Error 153"), even though
+        // Jellyfin's pages otherwise send no referrer.
+        f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        f.referrerPolicy = 'strict-origin-when-cross-origin';
+        f.src = 'https://www.youtube.com/embed/' + t.id + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + t.id +
+            '&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1&start=6' +
+            '&origin=' + encodeURIComponent(location.origin) + '&widget_referrer=' + encodeURIComponent(location.origin + location.pathname);
+        var done = false, entry;
+        var finish = function () { done = true; clearTimeout(entry.timer); ytFrames = ytFrames.filter(function (x) { return x !== entry; }); };
+        entry = {
+            iframe: f,
+            ready: function () { if (done) { return; } finish(); if (onReady) { onReady(f); } },
+            fail: function () { if (done) { return; } finish(); f.remove(); if (onFail) { onFail(t.next); } },
+            timer: null
+        };
+        ytFrames.push(entry);
+        f.addEventListener('load', function () {
+            // ask the player to start reporting its state
+            try { f.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*'); } catch (err) { /* ignore */ }
+        }, { once: true });
+        entry.timer = setTimeout(function () { entry.fail(); }, 9000);   // never got going: give up quietly
         return f;
     }
 
