@@ -219,7 +219,7 @@
         for (var i = Math.min(ids.length, 4) - 1; i >= 0; i--) { chain = { type: 'yt', id: ids[i], next: chain }; }
         return chain;
     }
-    function trailerFor(item) {
+    function realTrailers(item) {
         if (item.LocalTrailerCount > 0 && api().getLocalTrailers) {
             return api().getLocalTrailers(uid(), item.Id).then(function (list) {
                 if (list && list[0]) {
@@ -229,6 +229,61 @@
             }).catch(function () { return youTube(item); });
         }
         return Promise.resolve(youTube(item));
+    }
+
+    // ---- Clips from the title itself, streamed from your own server (no YouTube involved)
+    var CLIP_LEN = Math.min(120, Math.max(8, X.ClipSeconds || 30));
+    function playableFor(item) {
+        if (item.Type !== 'Series') { return Promise.resolve(item); }
+        // a show: use a random episode that has a video file
+        return api().getItems(uid(), { ParentId: item.Id, IncludeItemTypes: 'Episode', Recursive: true, SortBy: 'Random', Limit: 1, IsMissing: false, Fields: 'MediaSources' })
+            .then(function (r) { return (r.Items || [])[0] || null; });
+    }
+    function clipChain(item) {
+        return playableFor(item).then(function (it) {
+            if (!it || !it.RunTimeTicks) { return null; }
+            var run = it.RunTimeTicks / 1e7;
+            // somewhere between 15% and 65% of the way in, clear of opening and closing credits
+            var start = Math.round(run * (0.15 + Math.random() * 0.5));
+            var ms = it.MediaSources && it.MediaSources[0];
+            var a = api(), token = a.accessToken();
+            var direct = { type: 'clip', start: start, src: a.getUrl('Videos/' + it.Id + '/stream', { static: true, mediaSourceId: ms ? ms.Id : it.Id, api_key: token }) + '#t=' + start };
+            if (X.ClipTranscode !== false) {
+                var session = 'as' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+                var dev = a.deviceId ? a.deviceId() : 'artworkstudio';
+                direct.next = {
+                    type: 'clip', start: 0, transcode: { deviceId: dev, playSessionId: session },
+                    src: a.getUrl('Videos/' + it.Id + '/stream.mp4', {
+                        mediaSourceId: ms ? ms.Id : it.Id, deviceId: dev, playSessionId: session, api_key: token,
+                        videoCodec: 'h264', audioCodec: 'aac', audioBitRate: 96000, maxAudioChannels: 2,
+                        maxWidth: 1280, videoBitRate: 2500000, startTimeTicks: start * 1e7,
+                        enableAutoStreamCopy: true, allowVideoStreamCopy: true, allowAudioStreamCopy: false, breakOnNonKeyFrames: true
+                    })
+                };
+            }
+            return direct;
+        }).catch(function () { return null; });
+    }
+    function appendChain(first, rest) {
+        if (!first) { return rest; }
+        var c = first; while (c.next) { c = c.next; } c.next = rest; return first;
+    }
+    // Where previews come from (Extras -> Preview source)
+    function trailerFor(item) {
+        var src = X.PreviewSource || 'clips';
+        if (src === 'trailers') { return realTrailers(item); }
+        if (src === 'clips') { return clipChain(item); }
+        if (src === 'trailers-then-clips') { return Promise.all([realTrailers(item), clipChain(item)]).then(function (r) { return appendChain(r[0], r[1]); }); }
+        return Promise.all([clipChain(item), realTrailers(item)]).then(function (r) { return appendChain(r[0], r[1]); });
+    }
+
+    // Stop a preview cleanly: stop downloading, and tell the server to end any conversion it started
+    function killMedia(root) {
+        if (!root) { return; }
+        Array.prototype.forEach.call(root.tagName === 'VIDEO' ? [root] : root.querySelectorAll('video'), function (v) {
+            if (v.__asKill) { v.__asKill(); v.__asKill = null; }
+            try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) { /* ignore */ }
+        });
     }
 
     // YouTube reports what its player is doing through postMessage; we only reveal a trailer once
@@ -246,13 +301,46 @@
         });
     });
     function trailerNode(t, onReady, onFail) {
-        if (t.type === 'video') {
-            var v = document.createElement('video');
-            v.muted = true; v.autoplay = true; v.loop = true; v.playsInline = true;
+        if (t.type === 'video' || t.type === 'clip') {
+            var v = document.createElement('video'), settled = false;
+            v.muted = true; v.autoplay = true; v.loop = t.type !== 'clip'; v.playsInline = true; v.preload = 'auto';
             v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+            var fail = function () {
+                if (settled) { return; }
+                settled = true; clearTimeout(guard); killMedia(v); v.remove();
+                if (onFail) { onFail(t.next); }
+            };
+            if (t.transcode) {
+                v.__asKill = function () {
+                    try {
+                        fetch(api().getUrl('Videos/ActiveEncodings', { deviceId: t.transcode.deviceId, playSessionId: t.transcode.playSessionId }),
+                            { method: 'DELETE', headers: { 'X-Emby-Token': api().accessToken() } }).catch(function () {});
+                    } catch (e) { /* ignore */ }
+                };
+            }
+            v.addEventListener('playing', function () {
+                if (settled) { return; }
+                // a file the browser can only partly decode plays sound with no picture: treat that as a failure
+                setTimeout(function () {
+                    if (settled) { return; }
+                    if (!v.videoWidth) { fail(); return; }
+                    settled = true; clearTimeout(guard);
+                    if (onReady) { onReady(v); }
+                }, 450);
+            });
+            v.addEventListener('error', fail);
+            if (t.type === 'clip') {
+                var began = null;
+                v.addEventListener('timeupdate', function () {
+                    if (began == null && v.currentTime > 0) { began = v.currentTime; }
+                    if (began != null && v.currentTime - began >= CLIP_LEN) {
+                        // clip finished: loop it for hover previews, let the spotlight move on
+                        if (v.__asOnEnd) { v.__asOnEnd(); } else { try { v.currentTime = began; } catch (e) { /* ignore */ } }
+                    }
+                });
+            }
+            var guard = setTimeout(fail, t.transcode ? 14000 : 8000);   // nothing to show in time: try the next source
             v.src = t.src;
-            v.addEventListener('playing', function () { if (onReady) { onReady(v); } }, { once: true });
-            v.addEventListener('error', function () { if (onFail) { onFail(t.next); } }, { once: true });
             var p = v.play(); if (p && p.catch) { p.catch(function () {}); }
             return v;
         }
@@ -263,7 +351,7 @@
         // Jellyfin's pages otherwise send no referrer.
         f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
         f.referrerPolicy = 'strict-origin-when-cross-origin';
-        f.src = 'https://www.youtube.com/embed/' + t.id + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + t.id +
+        f.src = 'https://www.youtube-nocookie.com/embed/' + t.id + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + t.id +
             '&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1&start=6' +
             '&origin=' + encodeURIComponent(location.origin) + '&widget_referrer=' + encodeURIComponent(location.origin + location.pathname);
         var done = false, entry;
@@ -315,6 +403,7 @@
             var box = spot.el.querySelector('.as-spot-trailer');
             box.classList.remove('as-on');
             spot.el.classList.remove('as-has-trailer');
+            killMedia(box);
             setTimeout(function () { if (!box.classList.contains('as-on')) { box.innerHTML = ''; } }, 900);
         }
         spot.media = null;
@@ -325,10 +414,12 @@
             if (!t || !spot.el || spot.items[spot.idx] !== item) { return; }
             var box = spot.el.querySelector('.as-spot-trailer');
             var add = function (tt) {
+                killMedia(box);
                 box.innerHTML = '';
                 var node = trailerNode(tt, function (n) {
-                    if (spot.items[spot.idx] !== item) { return; }
+                    if (spot.items[spot.idx] !== item) { killMedia(n); return; }
                     spot.media = n;
+                    n.__asOnEnd = function () { stopSpotTrailer(); showSpot(spot.idx + 1); scheduleSpot(); };
                     box.classList.add('as-on');
                     spot.el.classList.add('as-has-trailer');
                     spot.muted = true; updateMute();
@@ -447,7 +538,7 @@
     var hov = { card: null, timer: null, el: null };
     function closeHover() {
         clearTimeout(hov.timer); hov.card = null;
-        if (hov.el) { var e = hov.el; hov.el = null; e.classList.remove('as-on'); setTimeout(function () { e.remove(); }, 260); }
+        if (hov.el) { var e = hov.el; hov.el = null; killMedia(e); e.classList.remove('as-on'); setTimeout(function () { e.remove(); }, 260); }
     }
     function openHover(card, id) {
         getItem(id).then(trailerFor).then(function (t) {
@@ -462,6 +553,7 @@
             el.style.cssText = 'left:' + left + 'px;top:' + top + 'px;width:' + w + 'px;height:' + h + 'px';
             var name = (card.querySelector('.cardText') || {}).textContent || '';
             var add = function (tt) {
+                killMedia(el);
                 Array.prototype.forEach.call(el.querySelectorAll('video,iframe'), function (n) { n.remove(); });
                 el.insertBefore(trailerNode(tt, function () { el.classList.add('as-on'); }, function (fb) { if (fb) { add(fb); } else { closeHover(); } }), el.firstChild);
             };

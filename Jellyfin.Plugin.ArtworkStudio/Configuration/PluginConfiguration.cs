@@ -146,6 +146,15 @@ public class ExtrasSettings
 
     public bool SpotlightTrailers { get; set; } = true;
 
+    /// <summary>Gets or sets where previews come from: clips (from the title itself), trailers, clips-then-trailers, trailers-then-clips.</summary>
+    public string PreviewSource { get; set; } = "clips";
+
+    /// <summary>Gets or sets how long each clip plays, in seconds.</summary>
+    public int ClipSeconds { get; set; } = 30;
+
+    /// <summary>Gets or sets a value indicating whether the server may convert files the browser can't play directly (uses CPU).</summary>
+    public bool ClipTranscode { get; set; } = true;
+
     public bool HoverTrailers { get; set; } = true;
 
     public int HoverDelay { get; set; } = 900;
