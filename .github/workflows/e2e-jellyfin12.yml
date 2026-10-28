@@ -1,0 +1,84 @@
+name: Test on Jellyfin 12
+
+# Runs a real Jellyfin 12 server with Artwork Studio, Pre-Roll Videos and Bulk Metadata Editor,
+# drives it with a browser and stores screenshots + results on the "ci-results" branch.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths: [ 'Jellyfin.Plugin.ArtworkStudio/**', 'ci/e2e/**', '.github/workflows/e2e-jellyfin12.yml' ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: e2e-jellyfin12
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: justhallwest-commits/jellyfin-preroll-ugreen
+          path: ext/preroll
+
+      - uses: actions/checkout@v4
+        with:
+          repository: justhallwest-commits/jellyfin-bulk-metadata
+          path: ext/bulk
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build the three plugins for Jellyfin 12
+        id: build
+        run: |
+          set +e
+          JV=""
+          for v in 12.0.0 12.0.1 12.1.0 12.2.0 12.3.0 12.4.0; do
+            if dotnet build Jellyfin.Plugin.ArtworkStudio/Jellyfin.Plugin.ArtworkStudio.csproj -c Release -p:JellyfinVersion=$v -p:JellyfinTfm=net10.0 -o out/as > build-as.log 2>&1; then JV=$v; break; fi
+          done
+          echo "Artwork Studio built against: ${JV:-FAILED}"; tail -20 build-as.log
+          [ -n "$JV" ] || exit 1
+          echo "jv=$JV" >> "$GITHUB_OUTPUT"
+          mkdir -p ci/e2e/plugins/ArtworkStudio ci/e2e/plugins/PreRollVideos ci/e2e/plugins/BulkMetadata ci/e2e/results
+          cp out/as/Jellyfin.Plugin.ArtworkStudio.dll ci/e2e/plugins/ArtworkStudio/
+          dotnet publish ext/preroll/JellyfinPreroll -c Release -o out/pr -p:JellyfinAbi=12 -p:JellyfinPackageVersion=$JV > ci/e2e/results/build-preroll.log 2>&1 \
+            && cp out/pr/JellyfinPreroll.dll ci/e2e/plugins/PreRollVideos/ || { echo "PRE-ROLL BUILD FAILED"; tail -30 ci/e2e/results/build-preroll.log; rmdir ci/e2e/plugins/PreRollVideos; }
+          dotnet publish ext/bulk/Jellyfin.Plugin.BulkMetadata -c Release -o out/bm -p:JellyfinVersion=$JV -p:JellyfinTfm=net10.0 > ci/e2e/results/build-bulk.log 2>&1 \
+            && cp out/bm/Jellyfin.Plugin.BulkMetadata.dll ci/e2e/plugins/BulkMetadata/ || { echo "BULK BUILD FAILED"; tail -30 ci/e2e/results/build-bulk.log; rmdir ci/e2e/plugins/BulkMetadata; }
+          cp build-as.log ci/e2e/results/build-artwork-studio.log
+          exit 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install browser
+        working-directory: ci/e2e
+        run: |
+          npm init -y >/dev/null
+          npm install playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Run Jellyfin 12 and test
+        working-directory: ci/e2e
+        run: bash run.sh
+
+      - name: Store results on the ci-results branch
+        if: always()
+        run: |
+          cd ci/e2e/results
+          echo "${{ github.sha }}" > commit.txt
+          echo "${{ steps.build.outputs.jv }}" > built-against.txt
+          git init -q . && git checkout -q -b ci-results
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "E2E results for ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-results

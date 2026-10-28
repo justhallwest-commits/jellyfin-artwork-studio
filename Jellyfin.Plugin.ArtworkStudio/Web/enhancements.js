@@ -244,7 +244,7 @@
         if (item.LocalTrailerCount > 0 && api().getLocalTrailers) {
             return api().getLocalTrailers(uid(), item.Id).then(function (list) {
                 if (list && list[0]) {
-                    return { type: 'video', src: api().getUrl('Videos/' + list[0].Id + '/stream', { static: true, api_key: api().accessToken() }), next: youTube(item) };
+                    return { type: 'video', src: api().getUrl('Videos/' + list[0].Id + '/stream', { static: true, ApiKey: api().accessToken() }), next: youTube(item) };
                 }
                 return youTube(item);
             }).catch(function () { return youTube(item); });
@@ -268,14 +268,14 @@
             var start = Math.round(run * (0.15 + Math.random() * 0.5));
             var ms = it.MediaSources && it.MediaSources[0];
             var a = api(), token = a.accessToken();
-            var direct = { type: 'clip', start: start, src: a.getUrl('Videos/' + it.Id + '/stream', { static: true, mediaSourceId: ms ? ms.Id : it.Id, api_key: token }) + '#t=' + start };
+            var direct = { type: 'clip', start: start, src: a.getUrl('Videos/' + it.Id + '/stream', { static: true, mediaSourceId: ms ? ms.Id : it.Id, ApiKey: token }) + '#t=' + start };
             if (X.ClipTranscode !== false && !noConvert) {
                 var session = 'as' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
                 var dev = a.deviceId ? a.deviceId() : 'artworkstudio';
                 direct.next = {
                     type: 'clip', start: 0, transcode: { deviceId: dev, playSessionId: session },
                     src: a.getUrl('Videos/' + it.Id + '/stream.mp4', {
-                        mediaSourceId: ms ? ms.Id : it.Id, deviceId: dev, playSessionId: session, api_key: token,
+                        mediaSourceId: ms ? ms.Id : it.Id, deviceId: dev, playSessionId: session, ApiKey: token,
                         videoCodec: 'h264', audioCodec: 'aac', audioBitRate: 64000, maxAudioChannels: 1,
                         maxWidth: 854, videoBitRate: 1200000, startTimeTicks: start * 1e7,
                         enableAutoStreamCopy: true, allowVideoStreamCopy: true, allowAudioStreamCopy: false, breakOnNonKeyFrames: true
@@ -349,7 +349,7 @@
                 v.__asKill = function () {
                     try {
                         fetch(api().getUrl('Videos/ActiveEncodings', { deviceId: t.transcode.deviceId, playSessionId: t.transcode.playSessionId }),
-                            { method: 'DELETE', headers: { 'X-Emby-Token': api().accessToken() } }).catch(function () {});
+                            { method: 'DELETE', headers: { 'Authorization': 'MediaBrowser Token="' + api().accessToken() + '"' } }).catch(function () {});
                     } catch (e) { /* ignore */ }
                 };
             }

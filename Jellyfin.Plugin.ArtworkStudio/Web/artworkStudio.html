@@ -684,9 +684,11 @@
     function debounce(fn, ms) { var t; return function () { var a = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, a); }, ms); }; }
     function userId() { return ApiClient.getCurrentUserId(); }
 
+    // Jellyfin 12 only accepts the token in the standard Authorization header (10.10 / 10.11 accept it too)
+    function authHeader() { return 'MediaBrowser Token="' + ApiClient.accessToken() + '"'; }
     function api(method, path, opts) {
         opts = opts || {};
-        var headers = { 'X-Emby-Token': ApiClient.accessToken() };
+        var headers = { 'Authorization': authHeader() };
         var body;
         if (opts.json !== undefined) { headers['Content-Type'] = 'application/json'; body = JSON.stringify(opts.json); }
         else if (opts.form) { body = opts.form; }
@@ -1771,7 +1773,7 @@
             rd.readAsDataURL(file);
         }).then(function (b64) {
             var send = function (path) {
-                return fetch(ApiClient.getUrl(path), { method: 'POST', headers: { 'X-Emby-Token': ApiClient.accessToken(), 'Content-Type': file.type || 'image/jpeg' }, body: b64 })
+                return fetch(ApiClient.getUrl(path), { method: 'POST', headers: { 'Authorization': authHeader(), 'Content-Type': file.type || 'image/jpeg' }, body: b64 })
                     .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + r.statusText); });
             };
             return send('UserImage?userId=' + encodeURIComponent(id)).catch(function () { return send('Users/' + id + '/Images/Primary'); });
@@ -1779,7 +1781,7 @@
     }
     function deleteUserPic(id) {
         var del = function (path) {
-            return fetch(ApiClient.getUrl(path), { method: 'DELETE', headers: { 'X-Emby-Token': ApiClient.accessToken() } })
+            return fetch(ApiClient.getUrl(path), { method: 'DELETE', headers: { 'Authorization': authHeader() } })
                 .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + r.statusText); });
         };
         return del('UserImage?userId=' + encodeURIComponent(id)).catch(function () { return del('Users/' + id + '/Images/Primary'); });

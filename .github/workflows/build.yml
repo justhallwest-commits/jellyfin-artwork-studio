@@ -26,6 +26,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
 
       - name: Work out version
         id: ver
@@ -42,6 +43,7 @@ jobs:
           # The last number marks the Jellyfin line, so a 10.11 server prefers the 10.11 build
           echo "v1010=$BASE.10" >> "$GITHUB_OUTPUT"
           echo "v1011=$BASE.11" >> "$GITHUB_OUTPUT"
+          echo "v12=$BASE.12" >> "$GITHUB_OUTPUT"
 
       - name: Build for Jellyfin 10.10 (.NET 8)
         run: |
@@ -59,6 +61,21 @@ jobs:
             -p:AssemblyVersion=${{ steps.ver.outputs.v1011 }} -p:FileVersion=${{ steps.ver.outputs.v1011 }} \
             -o out-1011
 
+      - name: Build for Jellyfin 12 (.NET 10)
+        id: b12
+        run: |
+          # Built against the oldest 12.x packages that exist, so it loads on every 12.x server
+          for JV in 12.0.0 12.0.1 12.1.0 12.2.0 12.3.0 12.4.0; do
+            rm -rf Jellyfin.Plugin.ArtworkStudio/bin Jellyfin.Plugin.ArtworkStudio/obj
+            if dotnet build "$PROJECT" -c Release \
+                -p:JellyfinVersion=$JV -p:JellyfinTfm=net10.0 \
+                -p:AssemblyVersion=${{ steps.ver.outputs.v12 }} -p:FileVersion=${{ steps.ver.outputs.v12 }} \
+                -o out-12; then
+              echo "Built against Jellyfin $JV"; echo "jv=$JV" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          done
+          exit 1
+
       - name: Package
         id: pkg
         run: |
@@ -67,6 +84,10 @@ jobs:
           Z11="artwork-studio_${{ steps.ver.outputs.v1011 }}_jellyfin-10.11.zip"
           (cd out-1010 && zip -j "../dist/$Z10" Jellyfin.Plugin.ArtworkStudio.dll)
           (cd out-1011 && zip -j "../dist/$Z11" Jellyfin.Plugin.ArtworkStudio.dll)
+          Z12="artwork-studio_${{ steps.ver.outputs.v12 }}_jellyfin-12.zip"
+          (cd out-12 && zip -j "../dist/$Z12" Jellyfin.Plugin.ArtworkStudio.dll)
+          echo "z12=$Z12" >> "$GITHUB_OUTPUT"
+          echo "md12=$(md5sum "dist/$Z12" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           echo "z10=$Z10" >> "$GITHUB_OUTPUT"
           echo "z11=$Z11" >> "$GITHUB_OUTPUT"
           echo "md10=$(md5sum "dist/$Z10" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
@@ -86,6 +107,14 @@ jobs:
               "owner": "${{ github.repository_owner }}",
               "category": "General",
               "versions": [
+                {
+                  "version": "${{ steps.ver.outputs.v12 }}",
+                  "changelog": "Build for Jellyfin 12.",
+                  "targetAbi": "${{ steps.b12.outputs.jv }}.0",
+                  "sourceUrl": "$URL/${{ steps.pkg.outputs.z12 }}",
+                  "checksum": "${{ steps.pkg.outputs.md12 }}",
+                  "timestamp": "$TS"
+                },
                 {
                   "version": "${{ steps.ver.outputs.v1011 }}",
                   "changelog": "Build for Jellyfin 10.11.",
@@ -123,5 +152,6 @@ jobs:
           files: |
             dist/${{ steps.pkg.outputs.z10 }}
             dist/${{ steps.pkg.outputs.z11 }}
+            dist/${{ steps.pkg.outputs.z12 }}
             dist/manifest.json
           generate_release_notes: true
