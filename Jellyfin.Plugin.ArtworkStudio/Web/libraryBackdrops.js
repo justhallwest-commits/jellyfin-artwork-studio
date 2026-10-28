@@ -5,6 +5,10 @@
 (function () {
     'use strict';
     if (window.__artworkStudioLibBg) { return; }
+    // Safe mode: add ?assafe=1 to the address to load Jellyfin without any Artwork Studio changes
+    try { if (/[?&#]assafe/i.test(location.href)) { sessionStorage.setItem('as-safe', '1'); } } catch (e) { /* ignore */ }
+    try { if (sessionStorage.getItem('as-safe') === '1' && !/[?&#]asnormal/i.test(location.href)) { return; } sessionStorage.removeItem('as-safe'); } catch (e) { /* ignore */ }
+
     window.__artworkStudioLibBg = true;
 
     var cfg = window.__artworkStudioCfg || {};
@@ -48,6 +52,23 @@
         '.as-loginbg::after{content:"";position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;background:' + dimCss + '}';
     document.head.appendChild(style);
 
+    // Dashboard and admin pages: never draw any Artwork Studio visuals over them
+    var guard = document.createElement('style');
+    guard.id = 'artworkStudioAdminGuard';
+    guard.textContent = 'html.as-admin #asLoginSplit,html.as-admin #asLibBackdrop,html.as-admin #asSeason,html.as-admin #asHoverTrailer,html.as-admin #asLoader,html.as-admin #asPause,html.as-admin #asSpotlight,html.as-admin .as-login-video{display:none!important}' +
+        'html.as-admin body,html.as-admin .mainAnimatedPages,html.as-admin .mainAnimatedPage,html.as-admin .page,html.as-admin .skinBody,html.as-admin main{filter:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}';
+    document.head.appendChild(guard);
+    function isAdminRoute() {
+        var h = (location.hash || '').toLowerCase().replace(/^#!?\/?/, '');
+        return /^(dashboard|configurationpage|plugins?|users?|useredit|userlibraryaccess|userparentalcontrol|userpassword|userprofile|usersettings|networking|devices?|log|logs|scheduledtasks?|apikeys|keys|livetvsettings|livetvstatus|livetvtuner|livetvguideprovider|library|libraries|librarydisplay|metadataimages|encodingsettings|playback|playbackconfiguration|streamingsettings|serveractivity|activity|branding|general|quickconnect|notificationsettings|mypreferences|mypreferencesmenu|repositories|installedplugins|addplugin|availableplugins)\b/.test(h) || /[?&]name=artworkstudio/.test(h);
+    }
+    function adminGuard() {
+        var on = isAdminRoute();
+        document.documentElement.classList.toggle('as-admin', on);
+        return on;
+    }
+    adminGuard();
+
     function routeInfo() {
         var h = location.hash || '';
         var q = h.indexOf('?');
@@ -71,12 +92,19 @@
         }).catch(function () { cache[id] = []; return []; });
     }
 
+    // Jellyfin keeps recent pages loaded and hides the box *around* them, so a page counts as
+    // showing only if it is actually on screen.
+    function shown(el) { return !!el && el.isConnected && !el.closest('.hide') && el.getClientRects().length > 0; }
+    function firstShown(sel) { var l = document.querySelectorAll(sel); for (var i = 0; i < l.length; i++) { if (shown(l[i])) { return l[i]; } } return null; }
     function loginPageEl() {
-        var p = document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide),#selectServerPage:not(.hide),#forgotPasswordPage:not(.hide)');
+        var p = firstShown('#loginPage,.loginPage,#selectServerPage,#forgotPasswordPage');
         if (p) { return p; }
-        var f = document.querySelector('.manualLoginForm,#divUsers,.visualLoginForm');
-        var pg = f && f.closest('.page,[data-role="page"]');
-        return pg && !pg.classList.contains('hide') && pg.offsetParent !== null ? pg : null;
+        var forms = document.querySelectorAll('.manualLoginForm,#divUsers,.visualLoginForm');
+        for (var i = 0; i < forms.length; i++) {
+            var pg = forms[i].closest('.page,[data-role="page"]');
+            if (shown(pg)) { return pg; }
+        }
+        return null;
     }
 
     // Split-screen login: our own fixed element on the image side, outside Jellyfin's page,
@@ -159,7 +187,7 @@
     function applyLogin() {
         if (currentKey !== 'login' || !curUrl) { return; }
         if (SPLIT) { showSplit(curUrl); layoutSplit(); return; }
-        var lp = loginPageEl() || document.querySelector('.standalonePage:not(.hide)');
+        var lp = loginPageEl() || firstShown('.standalonePage');
         if (!lp) { return; }
         lp.classList.add('as-loginbg');
         var vid = lp.querySelector(':scope > video.as-login-video');
@@ -262,6 +290,7 @@
     }
 
     function check() {
+        if (adminGuard()) { if (currentKey) { stop(); currentKey = null; } return; }
         var t = target();
         var key = t ? t.key : null;
         if (key === currentKey) {
