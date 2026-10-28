@@ -135,6 +135,8 @@
 
         // Surprise me
         '.as-surprise .material-icons{font-size:1.45em}' +
+        '.as-surprise-modern{background:none;border:0;color:inherit;width:48px;height:48px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}' +
+        '.as-surprise-modern:hover,.as-surprise-modern:focus-visible{background:rgba(255,255,255,.08)}' +
         '#asSurpriseMenu{position:fixed;z-index:1001;min-width:17em;max-width:min(22em,92vw);background:rgba(22,22,28,.96);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.6em;box-shadow:0 16px 44px rgba(0,0,0,.6);font-size:.95em}' +
         '#asSurpriseMenu .as-sm-opt{display:flex;align-items:center;gap:.6em;width:100%;text-align:left;border:0;background:none;color:inherit;font:inherit;padding:.6em .7em;border-radius:9px;cursor:pointer}' +
         '#asSurpriseMenu .as-sm-opt:hover,#asSurpriseMenu .as-sm-opt:focus{background:rgba(255,255,255,.09)}' +
@@ -773,12 +775,21 @@
     }
     function surpriseTick() {
         if (!X.SurpriseMe || !uid() || playing()) { return; }
+        // Legacy / TV layout: the classic header. Modern layout (Jellyfin 10.11+ default in 12): the
+        // MUI app bar, where the button joins the group that holds Search.
         var right = document.querySelector('.skinHeader .headerRight');
+        var modern = false;
+        if (!right) {
+            var search = document.querySelector('header.MuiAppBar-root a[href="#/search"], header.MuiAppBar-root [aria-label="Search"]');
+            right = search && search.parentElement;
+            modern = !!right;
+        }
         if (!right || right.querySelector('.as-surprise')) { return; }
-        var b = mk('button', 'headerButton headerButtonRight paper-icon-button-light as-surprise', '<span class="material-icons casino" aria-hidden="true">casino</span>');
+        var b = mk('button', (modern ? 'as-surprise-modern ' : 'headerButton headerButtonRight paper-icon-button-light ') + 'as-surprise', '<span class="material-icons casino" aria-hidden="true">casino</span>');
         b.type = 'button'; b.title = 'Surprise me';
         b.addEventListener('click', function (e) { e.stopPropagation(); if (document.getElementById('asSurpriseMenu')) { closeSurprise(); } else { openSurprise(b); } });
-        right.insertBefore(b, right.firstChild);
+        // React owns the app bar's children: add ours at the end so it never moves React's own nodes
+        if (modern) { right.appendChild(b); } else { right.insertBefore(b, right.firstChild); }
     }
     document.addEventListener('click', closeSurprise);
 

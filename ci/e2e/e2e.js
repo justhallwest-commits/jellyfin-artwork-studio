@@ -42,7 +42,12 @@ const probe = () => {
     script: !!window.__artworkStudioCfg, themeStyle: !!document.getElementById('artworkStudioTheme'),
     headerKind: header ? (header.classList.contains('skinHeader') ? 'legacy' : 'modern') : 'none',
     headerBg: header ? getComputedStyle(header).backgroundColor + ' / ' + getComputedStyle(header).backdropFilter : null,
-    logoShown: !!document.querySelector('.as-modern-logo, .pageTitleWithDefaultLogo, .pageTitleWithLogo') && vis(document.querySelector('.as-modern-logo, .pageTitleWithDefaultLogo, .pageTitleWithLogo')),
+    logoShown: (() => {
+      const home = q('header.MuiAppBar-root a.MuiButton-root[href="#/"]');
+      if (home) return /Backdrops\/logo/.test(getComputedStyle(home, '::before').backgroundImage);
+      const l = q('.pageTitleWithDefaultLogo, .pageTitleWithLogo');
+      return !!l && vis(l) && /Backdrops\/logo/.test(getComputedStyle(l).backgroundImage);
+    })(),
     surprise: vis(q('.as-surprise')), spotlight: vis(q('#asSpotlight')), spotTitle: (q('#asSpotlight .as-spot-logo') || {}).textContent || (q('#asSpotlight .as-spot-logo img') ? 'img' : ''),
     badges: document.querySelectorAll('.asx-badges').length, cards: document.querySelectorAll('.card[data-id]').length,
     avatar: (() => { const a = header && header.querySelector('.MuiAvatar-root, .headerUserButton'); return a ? Math.round(a.getBoundingClientRect().width) : 0; })(),

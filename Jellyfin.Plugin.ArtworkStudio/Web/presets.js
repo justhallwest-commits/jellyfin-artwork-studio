@@ -127,7 +127,7 @@
         css.push(':root{--as-text:' + s.text + ';--as-muted:' + s.muted + ';--as-surface:' + surface + ';--as-surface-rgb:' + S + ';--as-accent2:' + accent2 + ';--as-bg-rgb:' + B + '}');
 
         // Text
-        css.push('body,.skinHeader,.sectionTitle,.cardText,.itemName,.navMenuOption,.listItemBodyText,.emby-tab-button-active{color:' + s.text + '}' +
+        css.push('body,.skinHeader,header.MuiAppBar-root,.sectionTitle,.cardText,.itemName,.navMenuOption,.listItemBodyText,.emby-tab-button-active{color:' + s.text + '}' +
             '.cardText-secondary,.secondaryText,.fieldDescription,.itemMiscInfo,.listItemBodyText.secondary,.mediaInfoItem,.emby-tab-button:not(.emby-tab-button-active){color:' + s.muted + '!important}' +
             '::selection{background:rgba(' + A + ',.4)}' +
             '::-webkit-scrollbar-thumb{background:rgba(' + A + ',.35)!important;border-radius:8px}');

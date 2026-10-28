@@ -1,0 +1,70 @@
+name: HallFlix plugin catalog
+
+# One plugin repository URL for all HallFlix plugins: merges the manifests of Artwork Studio,
+# Pre-Roll Videos and Bulk Metadata Editor into catalog/manifest.json.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_run:
+    workflows: [ 'Build & Release' ]
+    types: [ completed ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalog
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Merge manifests
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          sources = [
+              "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/latest/download/manifest.json",
+              "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-preroll-ugreen/main/manifest.json",
+              "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-bulk-metadata/main/manifest.json",
+          ]
+          old = {}
+          if os.path.exists("catalog/manifest.json"):
+              old = {p["guid"]: p for p in json.load(open("catalog/manifest.json"))}
+          out = {}
+          for url in sources:
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as r:
+                      for p in json.load(r):
+                          out[p["guid"]] = p
+              except Exception as e:
+                  print("couldn't read", url, e)
+          for guid, p in old.items():          # keep a plugin if its source was briefly unreachable
+              out.setdefault(guid, p)
+          # Keep every earlier Artwork Studio build too (its release manifest only lists the newest)
+          for guid, p in out.items():
+              if guid in old:
+                  seen = {v["version"] for v in p["versions"]}
+                  p["versions"] += [v for v in old[guid]["versions"] if v["version"] not in seen]
+              p["versions"].sort(key=lambda v: tuple(int(x) for x in v["version"].split(".")), reverse=True)
+              p["versions"] = p["versions"][:30]
+          os.makedirs("catalog", exist_ok=True)
+          with open("catalog/manifest.json", "w") as f:
+              json.dump(sorted(out.values(), key=lambda p: p["name"]), f, indent=2)
+              f.write("\n")
+          for p in out.values():
+              print(p["name"], [v["version"] + "@" + v["targetAbi"] for v in p["versions"][:4]])
+          PY
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/manifest.json
+          git commit -m "Update HallFlix plugin catalog [skip ci]" || { echo "no changes"; exit 0; }
+          git push origin main

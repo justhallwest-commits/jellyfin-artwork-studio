@@ -71,6 +71,16 @@ jobs:
         working-directory: ci/e2e
         run: bash run.sh
 
+      - name: Check the UGREEN plugin installer against the published catalog
+        if: always()
+        run: |
+          mkdir -p inst ci/e2e/results
+          docker run --rm -v "$PWD/inst:/config" alpine:3.20 sh -c "wget -qO /tmp/i.sh https://raw.githubusercontent.com/${{ github.repository }}/main/ugreen/install-plugins.sh && sh /tmp/i.sh" > ci/e2e/results/installer.log 2>&1 || true
+          echo '--- second run (should skip everything)' >> ci/e2e/results/installer.log
+          docker run --rm -v "$PWD/inst:/config" alpine:3.20 sh -c "wget -qO /tmp/i.sh https://raw.githubusercontent.com/${{ github.repository }}/main/ugreen/install-plugins.sh && sh /tmp/i.sh" >> ci/e2e/results/installer.log 2>&1 || true
+          echo '--- files' >> ci/e2e/results/installer.log
+          (cd inst && find plugins -type f | sort) >> ci/e2e/results/installer.log 2>&1 || true
+
       - name: Store results on the ci-results branch
         if: always()
         run: |

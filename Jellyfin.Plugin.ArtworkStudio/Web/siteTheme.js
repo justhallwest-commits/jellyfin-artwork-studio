@@ -91,6 +91,21 @@
             }
         }
 
+        // Modern layout (default in Jellyfin 12): the MUI app bar's home button holds the Jellyfin
+        // icon and server name. Show the logo there instead, or the site name.
+        var MH = 'header.MuiAppBar-root a.MuiButton-root[href="#/"]';
+        if (logo) {
+            var mh = t.LogoHeight > 0 ? Math.min(6, Math.max(0.8, t.LogoHeight)) : 1.9;
+            css.push(MH + '{font-size:0!important;color:transparent!important;min-width:0!important;padding:.3rem .5rem!important}' +
+                MH + ' .MuiButton-startIcon{display:none!important}' +
+                MH + '::before{content:"";display:block;height:' + mh + 'rem;width:' + (mh * 5) + 'rem;max-width:42vw;background:url(' + cssString(logo) + ') left center/contain no-repeat}');
+        } else if (t.SiteName) {
+            css.push(MH + '{font-size:0!important}' + MH + ' .MuiButton-startIcon{font-size:1rem}' +
+                MH + '::after{content:' + cssString(t.SiteName) + ';font-size:1.05rem;font-weight:600;letter-spacing:.02em}');
+        }
+        // On the sign-in page the logo is already shown with the form
+        css.push('body:has(.as-login-visible) ' + MH + '{visibility:hidden}');
+
         if (accent) {
             var rgb = hexToRgb(accent);
             css.push(':root{--as-accent:' + accent + ';--as-accent-rgb:' + rgb + '}');
@@ -112,12 +127,13 @@
             css.push('html:not(.transparentDocument){background-color:' + bg + '!important}.backgroundContainer:not(.withBackdrop):not(.backgroundContainer-transparent){background-color:' + bg + '!important}');
         }
 
+        var HDR = '.skinHeader,header.MuiAppBar-root';
         if (t.HeaderStyle === 'glass') {
-            css.push('.skinHeader{background:rgba(' + (bg ? hexToRgb(bg) : '16,16,16') + ',.55)!important;-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}');
+            css.push(HDR + '{background:rgba(' + (bg ? hexToRgb(bg) : '16,16,16') + ',.55)!important;-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}');
         } else if (t.HeaderStyle === 'solid') {
-            css.push('.skinHeader{background:' + (bg || '#101010') + '!important}');
+            css.push(HDR + '{background:' + (bg || '#101010') + '!important}');
         } else if (t.HeaderStyle === 'transparent') {
-            css.push('.skinHeader{background:transparent!important;box-shadow:none!important}.skinHeader.semiTransparent{background:linear-gradient(rgba(0,0,0,.6),transparent)!important}');
+            css.push(HDR + '{background:transparent!important;box-shadow:none!important}.skinHeader.semiTransparent{background:linear-gradient(rgba(0,0,0,.6),transparent)!important}');
         }
 
         // Profile picture / icon at the top right of the top bar
@@ -127,7 +143,10 @@
                 '.skinHeader .headerUserButton>div,.skinHeader .headerUserButton>.headerUserButtonRound,.skinHeader .headerUserButton>img{width:' + hu + 'em!important;height:' + hu + 'em!important;' +
                 'min-width:' + hu + 'em!important;background-size:cover!important;background-position:center!important;border-radius:50%!important;margin:0!important;padding:0!important;font-size:1em!important}' +
                 '.skinHeader .headerUserButton>.material-icons,.skinHeader .headerUserButton>span{font-size:' + hu + 'em!important;width:auto!important;height:auto!important}' +
-                '.skinHeader .headerRight{align-items:center!important}');
+                '.skinHeader .headerRight{align-items:center!important}' +
+                // Modern layout: the avatar in the app bar
+                'header.MuiAppBar-root [aria-controls="app-user-menu"]{padding:.25rem!important}' +
+                'header.MuiAppBar-root [aria-controls="app-user-menu"] .MuiAvatar-root{width:' + hu + 'rem!important;height:' + hu + 'rem!important;font-size:' + (hu * 0.5).toFixed(2) + 'rem!important}');
         }
 
         if (t.BodyFont) {

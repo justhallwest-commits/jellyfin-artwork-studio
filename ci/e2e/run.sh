@@ -84,9 +84,16 @@ rows = b''.join(b'\x00' + bytes(v for x in range(w) for v in (x * 255 // w, 50, 
 def chunk(t, d): return struct.pack('>I', len(d)) + t + d + struct.pack('>I', zlib.crc32(t + d) & 0xffffffff)
 png = b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(rows, 6)) + chunk(b'IEND', b'')
 open('work/login.png', 'wb').write(png)
+# a wide red "logo"
+w, h = 600, 150
+rows = b''.join(b'\x00' + bytes(v for x in range(w) for v in ((229, 9, 20) if 20 < y < 130 and (x // 60) % 2 == 0 else (255, 255, 255))) for y in range(h))
+png = b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(rows, 6)) + chunk(b'IEND', b'')
+open('work/logo.png', 'wb').write(png)
 PY
 curl -fsS -X POST "$URL/ArtworkStudio/Backdrops/login/Upload" -H "$A" -F "file=@work/login.png;type=image/png" > "$RES/upload-login.json" || echo '{"error":true}' > "$RES/upload-login.json"
 log "login backdrop upload: $(cat "$RES/upload-login.json")"
+curl -fsS -X POST "$URL/ArtworkStudio/Backdrops/logo/Upload" -H "$A" -F "file=@work/logo.png;type=image/png" > "$RES/upload-logo.json" || echo '{"error":true}' > "$RES/upload-logo.json"
+log "logo upload: $(cat "$RES/upload-logo.json")"
 AS=7143ab64-23ea-4969-b0b9-672c6893c4b3
 aget "/Plugins/$AS/Configuration" > work/as-config.json
 python3 - <<'PY'
