@@ -15,6 +15,19 @@
     var base = me && me.src ? me.src.replace(/ArtworkStudio\/ClientScript.*$/i, '') : '../';
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    // Jellyfin's web app marks the kind of device on <html>: layout-tv (TV apps, remote control),
+    // layout-mobile (phone / tablet apps) or layout-desktop.
+    function isTv() { return document.documentElement.classList.contains('layout-tv'); }
+    function isPhone() {
+        return document.documentElement.classList.contains('layout-mobile') ||
+            !!(window.matchMedia && window.matchMedia('(pointer: coarse) and (max-width: 900px)').matches);
+    }
+    // Background previews stream video, so phones skip them unless allowed (mobile data), as does Data Saver.
+    function previewsAllowed() {
+        var c = navigator.connection;
+        if (c && c.saveData) { return false; }
+        return !isPhone() || !!X.PhonePreviews;
+    }
 
     // ------------------------------------------------------------------ helpers
     function safeColor(v) { return /^#[0-9a-f]{6}$/i.test(v || '') ? v : ''; }
@@ -97,7 +110,10 @@
         '#asSpotlight .as-spot-dots button.on{background:' + ACCENT + ';transform:scale(1.25)}' +
         '#asSpotlight .as-spot-mute{position:absolute;right:4%;bottom:12%;z-index:2;width:2.6em;height:2.6em;border-radius:50%;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.35);color:#fff;cursor:pointer;display:none;font-size:1em}' +
         '#asSpotlight.as-has-trailer .as-spot-mute{display:block}' +
-        '@media (max-width:700px){#asSpotlight .as-spot-info{width:auto;right:4%;bottom:14%}#asSpotlight .as-spot-ov{-webkit-line-clamp:2}}' +
+        '@media (max-width:700px){#asSpotlight{height:min(' + Math.min(85, Math.max(35, X.SpotlightHeight || 62)) + 'vh,125vw);min-height:260px}#asSpotlight .as-spot-info{width:auto;right:4%;bottom:14%}#asSpotlight .as-spot-ov{-webkit-line-clamp:2}#asSpotlight .as-spot-dots{bottom:4%}}' +
+        // remote-control focus (TV apps) and keyboard focus
+        '#asSpotlight button:focus-visible,html.layout-tv #asSpotlight button:focus{outline:3px solid ' + ACCENT + ';outline-offset:3px;transform:scale(1.06)}' +
+        'html.layout-tv #asSpotlight .as-spot-btns button{padding:.85em 1.9em;font-size:1.1em}' +
 
         // Hover trailers
         '#asHoverTrailer{position:fixed;z-index:999;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 18px 50px rgba(0,0,0,.65);pointer-events:none;opacity:0;transform:scale(.92);transition:opacity .25s,transform .25s}' +
@@ -428,7 +444,7 @@
         spot.media = null;
     }
     function startSpotTrailer(item) {
-        if (!spot.el || !X.SpotlightTrailers || reduceMotion || playing() || document.hidden) { return; }
+        if (!spot.el || !X.SpotlightTrailers || reduceMotion || playing() || document.hidden || !previewsAllowed()) { return; }
         trailerFor(item).then(function (t) {
             if (!t || !spot.el || spot.items[spot.idx] !== item) { return; }
             var box = spot.el.querySelector('.as-spot-trailer');
@@ -505,6 +521,19 @@
         el.id = 'asSpotlight';
         el.addEventListener('mouseenter', function () { spot.hover = true; });
         el.addEventListener('mouseleave', function () { spot.hover = false; });
+        // TV remotes: hold the slide while one of its buttons is selected
+        el.addEventListener('focusin', function () { spot.hover = true; });
+        el.addEventListener('focusout', function (e) { if (!el.contains(e.relatedTarget)) { spot.hover = false; scheduleSpot(); } });
+        // Phones / tablets: swipe left or right to change title
+        var sx = null, sy = null;
+        el.addEventListener('touchstart', function (e) { var p = e.touches[0]; sx = p.clientX; sy = p.clientY; }, { passive: true });
+        el.addEventListener('touchend', function (e) {
+            if (sx == null || !spot.items || !spot.items.length) { return; }
+            var p = e.changedTouches[0], dx = p.clientX - sx, dy = p.clientY - sy; sx = null;
+            if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) { return; }
+            showSpot((spot.idx + (dx < 0 ? 1 : -1) + spot.items.length) % spot.items.length);
+            scheduleSpot();
+        }, { passive: true });
         el.addEventListener('click', function (e) {
             var item = spot.items && spot.items[spot.idx]; if (!item) { return; }
             if (e.target.closest('.as-spot-play')) { stopSpotTrailer(); goDetails(item.Id, true); }
@@ -598,8 +627,26 @@
             if (e.relatedTarget && hov.card.contains(e.relatedTarget)) { return; }
             if (e.target.closest && e.target.closest('.card[data-id]') === hov.card) { closeHover(); }
         }, true);
-        window.addEventListener('scroll', closeHover, true);
+        window.addEventListener('scroll', function () {
+            // On TVs, moving with the remote scrolls the row: keep a preview that's still waiting to open
+            if (isTv() && hov.card && !hov.el && hov.card.contains(document.activeElement)) { return; }
+            closeHover();
+        }, true);
         window.addEventListener('blur', closeHover);
+    }
+    // TV apps: the same preview when a poster is selected with the remote (after a slightly longer pause)
+    if (X.HoverTrailers && X.TvFocusPreviews !== false) {
+        document.addEventListener('focusin', function (e) {
+            if (!isTv() || playing() || !uid()) { return; }
+            var card = e.target.closest && e.target.closest('.card[data-id]');
+            if (card === hov.card) { return; }
+            closeHover();
+            if (!card || card.closest('#asSpotlight,#divUsers,#asQuickSearch') || !/^(Movie|Series)$/.test(card.dataset.type || '')) { return; }
+            hov.card = card;
+            hov.timer = setTimeout(function () { if (hov.card === card && document.activeElement && card.contains(document.activeElement)) { openHover(card, card.dataset.id); } }, Math.max(1200, X.HoverDelay || 900));
+        }, true);
+        document.addEventListener('viewshow', closeHover);
+        window.addEventListener('hashchange', closeHover);
     }
 
     // ------------------------------------------------------------------ Badges + animated library covers

@@ -24,6 +24,16 @@ A friendly place in the Jellyfin dashboard to add and manage artwork for your li
 - **Backup:** export/import all settings as a file.
 - **Bulk apply:** select many items and put the same image on all of them, optionally skipping ones that already have it.
 
+## Other Jellyfin apps
+
+Web-based apps (browsers, the Android and iPhone/iPad apps, Jellyfin Media Player, LG webOS, Xbox, custom WebView apps) load the server's web app and get everything. Native apps don't run the site script, so the **Other apps** tab fills in Jellyfin's own branding for them:
+
+- **Splashscreen** — the first sign-in (or home) backdrop becomes Jellyfin's splashscreen, kept in sync. Roku (Settings → User Interface → General → Channel Background Image → Splashscreen Image), Android TV / Fire TV (sign-in screens) and Swiftfin ("Use splashscreen") show it.
+- **Login disclaimer** — the Design sign-in message is copied into Jellyfin's login disclaimer (Android TV / Fire TV, Swiftfin, Samsung).
+- **Custom CSS** — the design is published as a marked block in Branding → Custom CSS for apps with their own copy of the web app (Samsung TVs). Existing Custom CSS is kept.
+
+Item artwork, library tile pictures and user pictures are saved into Jellyfin itself, so every app shows them. Switching any option off restores what Jellyfin had before.
+
 ## Install
 
 ### Option A — plugin repository (recommended)

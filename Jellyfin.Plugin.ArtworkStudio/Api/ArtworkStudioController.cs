@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Jellyfin.Plugin.ArtworkStudio.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Net;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Providers;
@@ -67,6 +68,7 @@ public class ArtworkStudioController : ControllerBase
     private readonly IProviderManager _providerManager;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IApplicationPaths _appPaths;
+    private readonly IServerConfigurationManager _serverConfig;
     private readonly ILogger<ArtworkStudioController> _logger;
 
     public ArtworkStudioController(
@@ -74,8 +76,10 @@ public class ArtworkStudioController : ControllerBase
         IProviderManager providerManager,
         IHttpClientFactory httpClientFactory,
         IApplicationPaths appPaths,
+        IServerConfigurationManager serverConfig,
         ILogger<ArtworkStudioController> logger)
     {
+        _serverConfig = serverConfig;
         _libraryManager = libraryManager;
         _providerManager = providerManager;
         _httpClientFactory = httpClientFactory;
@@ -126,9 +130,15 @@ public class ArtworkStudioController : ControllerBase
             extras = cfg.Extras ?? new ExtrasSettings(),
             loader = ListPageFiles("loader").FirstOrDefault(),
             libanim = ListLibraryCovers(),
+            everywhere = new
+            {
+                syncLoginMessage = cfg.Everywhere?.SyncLoginMessage ?? false,
+                publishCss = cfg.Everywhere?.PublishCss ?? false
+            },
             now = DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture)
         };
-        var prefix = "window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
+        // "as-js" tells the copy of the design in Branding → Custom CSS that the full script is running here
+        var prefix = "document.documentElement.classList.add('as-js');window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
         Response.Headers.CacheControl = "no-cache";
         return Content(prefix + script, "application/javascript; charset=utf-8");
     }
@@ -312,6 +322,7 @@ public class ArtworkStudioController : ControllerBase
             System.IO.File.Delete(full);
         }
 
+        AfterPageChange(page);
         return Ok(new { success = true });
     }
 
@@ -351,7 +362,26 @@ public class ArtworkStudioController : ControllerBase
         var name = DateTime.UtcNow.ToString("yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture) + "-" + Guid.NewGuid().ToString("N")[..8] + ext;
         System.IO.File.Copy(source, System.IO.Path.Combine(dir, name));
         _logger.LogInformation("Artwork Studio: added {Page} page backdrop {Name}", page, name);
+        AfterPageChange(page);
         return Ok(new { success = true, Name = name });
+    }
+
+    /// <summary>Keeps Jellyfin's splashscreen (used by Roku, Android TV and Swiftfin) in step with the backdrops.</summary>
+    private void AfterPageChange(string page)
+    {
+        if (page is not ("login" or "home") || Config.Everywhere?.SyncSplashscreen != true)
+        {
+            return;
+        }
+
+        try
+        {
+            BrandingSync.SyncSplash(_serverConfig, _appPaths, _logger);
+        }
+        catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+        {
+            _logger.LogWarning(ex, "Artwork Studio: couldn't update Jellyfin's splashscreen");
+        }
     }
 
     private static bool IsPage(string page) => Pages.Contains(page, StringComparer.Ordinal) || IsLibraryCover(page);

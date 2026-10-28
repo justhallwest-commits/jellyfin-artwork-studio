@@ -52,7 +52,8 @@ public class ConflictsController : ControllerBase
     public ActionResult Get()
     {
         var branding = GetBranding();
-        var css = branding?.CustomCss ?? string.Empty;
+        // Artwork Studio's own published block isn't a conflict
+        var css = BrandingSync.StripManaged(branding?.CustomCss);
 
         var found = new List<object>();
         try
@@ -117,7 +118,7 @@ public class ConflictsController : ControllerBase
             return BadRequest(new { message = "Couldn't read Jellyfin's branding settings." });
         }
 
-        var css = branding.CustomCss ?? string.Empty;
+        var css = BrandingSync.StripManaged(branding.CustomCss);
         if (css.Length == 0)
         {
             return Ok(new { success = true, message = "Jellyfin's Custom CSS is already empty." });
@@ -127,7 +128,10 @@ public class ConflictsController : ControllerBase
         var file = Path.Combine(BackupDir, "custom-css-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".css");
         System.IO.File.WriteAllText(file, css);
 
-        branding.CustomCss = string.Empty;
+        // Keep Artwork Studio's own published design (if any); clear everything else
+        var imports = BrandingSync.ManagedImports(branding.CustomCss);
+        var ours = BrandingSync.ManagedBlock(branding.CustomCss);
+        branding.CustomCss = (imports.Length > 0 ? imports + "\n" : string.Empty) + ours;
         _config.SaveConfiguration("branding", branding);
         _logger.LogInformation("Artwork Studio: backed up Jellyfin Custom CSS to {File} and cleared it", file);
         return Ok(new { success = true, Backup = Path.GetFileName(file) });
@@ -156,7 +160,10 @@ public class ConflictsController : ControllerBase
             return BadRequest(new { message = "Couldn't read Jellyfin's branding settings." });
         }
 
-        branding.CustomCss = System.IO.File.ReadAllText(path);
+        var keepImports = BrandingSync.ManagedImports(branding.CustomCss);
+        var keepOurs = BrandingSync.ManagedBlock(branding.CustomCss);
+        var restored = BrandingSync.StripManaged(System.IO.File.ReadAllText(path));
+        branding.CustomCss = (keepImports.Length > 0 ? keepImports + "\n" : string.Empty) + restored + (keepOurs.Length > 0 ? "\n\n" + keepOurs + "\n" : string.Empty);
         _config.SaveConfiguration("branding", branding);
         return Ok(new { success = true, Restored = Path.GetFileName(path) });
     }

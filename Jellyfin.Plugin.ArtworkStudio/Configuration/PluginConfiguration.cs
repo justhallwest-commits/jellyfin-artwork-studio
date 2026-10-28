@@ -155,6 +155,12 @@ public class ExtrasSettings
     /// <summary>Gets or sets a value indicating whether the server may convert files the browser can't play directly (uses CPU).</summary>
     public bool ClipTranscode { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether previews also play on phones (uses mobile data).</summary>
+    public bool PhonePreviews { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether TVs show a preview when a card is selected with the remote.</summary>
+    public bool TvFocusPreviews { get; set; } = true;
+
     public bool HoverTrailers { get; set; } = true;
 
     public int HoverDelay { get; set; } = 900;
@@ -212,10 +218,28 @@ public class ExtrasSettings
     public ScheduledAnnouncement[] Announcements { get; set; } = Array.Empty<ScheduledAnnouncement>();
 }
 
+/// <summary>Settings that carry the design over to Jellyfin apps that don't run the site script.</summary>
+public class EverywhereSettings
+{
+    /// <summary>Gets or sets a value indicating whether a login/home backdrop is used as Jellyfin's splashscreen (Roku, Android TV, Fire TV, Swiftfin).</summary>
+    public bool SyncSplashscreen { get; set; }
+
+    /// <summary>Gets or sets which backdrops feed the splashscreen: "login" or "home".</summary>
+    public string SplashscreenSource { get; set; } = "login";
+
+    /// <summary>Gets or sets a value indicating whether the Design login message is copied to Jellyfin's login disclaimer.</summary>
+    public bool SyncLoginMessage { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the design is also published to Branding → Custom CSS (Samsung TVs and other apps with their own copy of the web app).</summary>
+    public bool PublishCss { get; set; }
+}
+
 public class PluginConfiguration : BasePluginConfiguration
 {
     /// <summary>Gets or sets the optional web app enhancements.</summary>
     public ExtrasSettings Extras { get; set; } = new ExtrasSettings();
+
+    public EverywhereSettings Everywhere { get; set; } = new EverywhereSettings();
 
     /// <summary>Gets or sets the site design settings.</summary>
     public ThemeSettings Theme { get; set; } = new ThemeSettings();

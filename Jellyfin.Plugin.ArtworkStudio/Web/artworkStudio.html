@@ -117,6 +117,20 @@
 #artworkStudioPage .as-seg button.active { background:var(--as-accent); color:#fff; }
 
 /* Settings */
+#artworkStudioPage .as-matrix { width:100%; border-collapse:collapse; font-size:.92em; }
+#artworkStudioPage .as-matrix th, #artworkStudioPage .as-matrix td { padding:.5em .6em; border-bottom:1px solid var(--as-line); text-align:center; vertical-align:top; }
+#artworkStudioPage .as-matrix th:first-child, #artworkStudioPage .as-matrix td:first-child { text-align:left; }
+#artworkStudioPage .as-matrix thead th { font-weight:600; font-size:.88em; opacity:.85; }
+#artworkStudioPage .as-matrix .y { color:#3fbf6f; } #artworkStudioPage .as-matrix .n { opacity:.35; } #artworkStudioPage .as-matrix .p { color:#e0a43a; font-size:.85em; white-space:nowrap; }
+#artworkStudioPage .as-matrix-wrap { overflow-x:auto; }
+#artworkStudioPage .as-approw { display:flex; gap:.8em; align-items:flex-start; padding:.65em 0; border-bottom:1px solid var(--as-line); }
+#artworkStudioPage .as-approw:last-child { border-bottom:0; }
+#artworkStudioPage .as-approw .material-icons { font-size:1.7em; opacity:.8; }
+#artworkStudioPage .as-approw b { display:block; }
+#artworkStudioPage .as-ev-opt { display:flex; gap:.8em; align-items:flex-start; padding:.8em 0; border-top:1px solid var(--as-line); }
+#artworkStudioPage .as-ev-opt:first-of-type { border-top:0; }
+#artworkStudioPage .as-ev-opt > div { flex:1; min-width:0; }
+#artworkStudioPage .as-splash-pv { width:100%; max-width:22em; aspect-ratio:16/9; border-radius:8px; background:#111 center/cover no-repeat; margin-top:.6em; border:1px solid var(--as-line); }
 #artworkStudioPage .as-panel { background:var(--as-softer); border:1px solid var(--as-line); border-radius:12px; padding:1.1em 1.2em; margin-bottom:1.1em; }
 #artworkStudioPage .as-panel h3 { margin:0 0 .3em; }
 #artworkStudioPage .as-rootrow { display:grid; grid-template-columns:minmax(120px,1fr) minmax(160px,2fr) auto auto; gap:.5em; align-items:center; margin:.45em 0; }
@@ -228,6 +242,7 @@
       <button class="as-tab" data-tab="design">Design</button>
       <button class="as-tab" data-tab="extras">Extras</button>
       <button class="as-tab" data-tab="settings">Settings</button>
+      <button class="as-tab" data-tab="apps">Other apps</button>
       <button class="as-tab" data-tab="help">Help</button>
     </div>
   </div>
@@ -421,7 +436,7 @@
   <section data-section="extras" style="display:none">
     <div class="as-panel">
       <h3 style="margin:0 0 .3em">Extras</h3>
-      <div class="as-hint">Enhancements for the Jellyfin web app — also the HallFlix TV app and other apps built on it (native TV apps keep their own look). Each one can be switched on or off. They all step aside while a video is playing. Save, then refresh the site with Ctrl+F5.</div>
+      <div class="as-hint">Enhancements for the Jellyfin web app — also the HallFlix TV app and other apps built on it (native TV apps keep their own look — see Other apps). Each one can be switched on or off. They all step aside while a video is playing. Save, then refresh the site with Ctrl+F5.</div>
     </div>
     <div id="asExtrasForm"></div>
 
@@ -521,6 +536,58 @@
   </section>
 
   <!-- ===================== HELP ===================== -->
+
+  <!-- ===================== OTHER APPS ===================== -->
+  <section data-section="apps" style="display:none">
+    <div class="as-panel">
+      <h3 style="margin:0 0 .3em">Your design in other Jellyfin apps</h3>
+      <div class="as-hint">
+        Jellyfin apps come in two kinds. <b>Web-based apps</b> load your server's web app, so they get everything from Artwork Studio automatically: any browser, the Jellyfin app for Android phones and tablets, the Jellyfin app for iPhone and iPad, Jellyfin Media Player on computers, LG TVs, Xbox and your HallFlix TV app.
+        <b>Native apps</b> — Roku, Android TV / Fire TV and Swiftfin (Apple TV, iPhone) — have their own screens and never run the site's design. They do show your artwork, and they read a few of Jellyfin's own branding settings, which Artwork Studio can fill in for you below.
+      </div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Share with the native apps</h3>
+      <div class="as-ev-opt">
+        <label class="as-switch"><input type="checkbox" id="evSplash"><i></i></label>
+        <div><b>Use my backdrop as Jellyfin's splashscreen</b>
+          <div class="as-hint">Roku, Android TV / Fire TV and Swiftfin show the server's splashscreen as a background. Artwork Studio keeps it matched to the first picture (not video) of the
+            <select class="as-in" id="evSplashSrc" style="width:auto;display:inline-block;padding:.2em .4em"><option value="login">sign-in page</option><option value="home">home page</option></select> backdrops, and updates it whenever you change them. Switching this off puts Jellyfin's previous splashscreen back.</div>
+          <div class="as-splash-pv" id="evSplashPv" style="display:none"></div>
+          <div class="as-hint" id="evSplashState"></div>
+        </div>
+      </div>
+      <div class="as-ev-opt">
+        <label class="as-switch"><input type="checkbox" id="evDisclaimer"><i></i></label>
+        <div><b>Show my sign-in message in the other apps</b>
+          <div class="as-hint">Copies the <i>Message under the logo</i> from Design → Sign-in page into Jellyfin's login disclaimer, which Android TV / Fire TV and Swiftfin show on their sign-in screens. (In the web app it isn't shown twice.)</div>
+          <div class="as-hint" id="evDisclaimerState"></div>
+        </div>
+      </div>
+      <div class="as-ev-opt">
+        <label class="as-switch"><input type="checkbox" id="evCss"><i></i></label>
+        <div><b>Publish my design to Jellyfin's Custom CSS</b>
+          <div class="as-hint">For apps that carry their own copy of the web app — mainly <b>Samsung TVs</b>. They load Branding → Custom CSS from your server but not Artwork Studio's script, so they get the colours, fonts, logo, theme preset, card and sign-in styling and the sign-in background (not the Extras or rotating backdrops). Whatever else is in your Custom CSS (e.g. ElegantFin) is kept; Artwork Studio only manages its own marked section and refreshes it each time you save.</div>
+          <div class="as-hint" id="evCssState"></div>
+        </div>
+      </div>
+      <button class="as-btn primary" id="evSave"><span class="material-icons">sync</span>Save &amp; apply</button>
+    </div>
+
+    <div class="as-panel">
+      <h3>What shows where</h3>
+      <div class="as-matrix-wrap"><table class="as-matrix" id="evMatrix"></table></div>
+      <div class="as-hint" style="margin-top:.6em"><span class="y">✔</span> shows &nbsp; <span class="p">○ on</span> after you switch it on above &nbsp; <span class="n">—</span> not possible in that app</div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Apps used on your server</h3>
+      <div class="as-hint">From Jellyfin's device list — what each one gets and anything to switch on in the app itself.</div>
+      <div id="evDevices" style="margin-top:.4em"><span class="as-spin"></span></div>
+    </div>
+  </section>
+
   <section data-section="help" class="as-help" style="display:none">
     <div class="as-panel">
       <h4 style="margin-top:0">The basics</h4>
@@ -706,6 +773,133 @@
         return Promise.reject(new Error('Unknown source'));
     }
 
+
+    // ============================================================ OTHER APPS
+    function collectEverywhere(prev) {
+        var ev = Object.assign({}, prev || (S.config && S.config.Everywhere) || {});
+        if ($('#evSplash')) {
+            ev.SyncSplashscreen = $('#evSplash').checked;
+            ev.SplashscreenSource = $('#evSplashSrc').value;
+            ev.SyncLoginMessage = $('#evDisclaimer').checked;
+            ev.PublishCss = $('#evCss').checked;
+        }
+        return ev;
+    }
+    function fillEverywhere(ev) {
+        ev = ev || {};
+        $('#evSplash').checked = !!ev.SyncSplashscreen;
+        $('#evSplashSrc').value = ev.SplashscreenSource === 'home' ? 'home' : 'login';
+        $('#evDisclaimer').checked = !!ev.SyncLoginMessage;
+        $('#evCss').checked = !!ev.PublishCss;
+    }
+    // The address apps will use to load the published images. Built from the address this page was opened with.
+    function serverBase() { return ApiClient.getUrl('ArtworkStudio/x').replace(/ArtworkStudio\/x.*$/, ''); }
+    function isLanAddress(u) { return /^https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|[^/]*\.local\b)/i.test(u); }
+    // Sends the Other apps settings to Jellyfin's branding (splashscreen, login disclaimer, Custom CSS).
+    function applyEverywhere(cfg) {
+        var ev = cfg.Everywhere || {};
+        var build = ev.PublishCss ? Promise.all([
+            api('GET', 'ArtworkStudio/Backdrops/logo').catch(function () { return { Files: [] }; }),
+            api('GET', 'ArtworkStudio/Backdrops/login').catch(function () { return { Files: [] }; })
+        ]).then(function (r) {
+            if (typeof window.__artworkStudioThemeCss !== 'function') { throw new Error('the site script isn’t running on this page — refresh with Ctrl+F5 and save again'); }
+            return window.__artworkStudioThemeCss(cfg.Theme || {}, {
+                base: serverBase(),
+                brand: { logo: ((r[0].Files || [])[0] || {}).Name },
+                login: (r[1].Files || []).map(function (f) { return f.Name; }),
+                dim: cfg.BackdropDimPercent == null ? 45 : cfg.BackdropDimPercent
+            });
+        }) : Promise.resolve({ css: '', imports: '' });
+        return build.then(function (out) {
+            return api('POST', 'ArtworkStudio/Everywhere/Apply', { json: { Css: out.css, Imports: out.imports } });
+        }).then(function (r) { return r && r.message; });
+    }
+    var APPS = [
+        { k: 'web', name: 'Web-based apps', sub: 'Browsers, Android & iPhone apps, Jellyfin Media Player, LG, Xbox, HallFlix TV', icon: 'language' },
+        { k: 'samsung', name: 'Samsung TV', sub: 'Own copy of the web app', icon: 'tv' },
+        { k: 'roku', name: 'Roku', icon: 'connected_tv' },
+        { k: 'atv', name: 'Android TV / Fire TV', icon: 'live_tv' },
+        { k: 'swift', name: 'Swiftfin', sub: 'Apple TV, iPhone, iPad', icon: 'phone_iphone' }
+    ];
+    // y = shows, p = once switched on, n = not possible
+    var FEATURES = [
+        ['Posters, backdrops, logos and other item artwork', 'y', 'y', 'y', 'y', 'y'],
+        ['Library tile pictures', 'y', 'y', 'y', 'y', 'y'],
+        ['User profile pictures', 'y', 'y', 'y', 'y', 'y'],
+        ['Sign-in / home background picture', 'y', 'css', 'splash', 'splash', 'splash'],
+        ['Sign-in message', 'y', 'disc', 'n', 'disc', 'disc'],
+        ['Colours, fonts, logo and theme preset', 'y', 'css', 'n', 'n', 'n'],
+        ['Split-screen sign-in layout', 'y', 'n', 'n', 'n', 'n'],
+        ['Rotating home / library backdrops', 'y', 'n', 'n', 'n', 'n'],
+        ['Extras (spotlight, previews, badges, effects …)', 'y', 'n', 'n', 'n', 'n'],
+        ['Animated library covers and video loops', 'y', 'n', 'n', 'n', 'n']
+    ];
+    function renderMatrix() {
+        var ev = collectEverywhere();
+        var mark = function (v) {
+            if (v === 'y') return '<span class="y" title="Shows">✔</span>';
+            if (v === 'n') return '<span class="n" title="Not possible in this app">—</span>';
+            var on = v === 'css' ? ev.PublishCss : v === 'splash' ? ev.SyncSplashscreen : ev.SyncLoginMessage;
+            return on ? '<span class="y" title="Switched on above">✔</span>' : '<span class="p" title="Switch on above">○ on</span>';
+        };
+        $('#evMatrix').innerHTML = '<thead><tr><th></th>' + APPS.map(function (a) { return '<th>' + esc(a.name) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+            FEATURES.map(function (f) { return '<tr><td>' + esc(f[0]) + '</td>' + f.slice(1).map(function (v) { return '<td>' + mark(v) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody>';
+    }
+    function appKind(d) {
+        var s = (d.AppName || '') + ' ' + (d.Name || '');
+        if (/roku/i.test(s)) return 'roku';
+        if (/swiftfin|tvos/i.test(s)) return 'swift';
+        if (/android ?tv|fire ?tv|androidtv|aft[a-z]/i.test(s)) return 'atv';
+        if (/tizen|samsung/i.test(s)) return 'samsung';
+        if (/infuse|kodi|findroid|streamyfin|plex|emby|jellycon/i.test(s)) return 'other';
+        return 'web';
+    }
+    var TIPS = {
+        web: 'Gets everything. After you save, refresh or reopen the app to load the changes.',
+        samsung: 'Turn on “Publish my design to Jellyfin’s Custom CSS” above. In the app, leave Settings → Display → “Disable server-provided custom CSS” off.',
+        roku: 'Shows your artwork. For your background picture: turn on the splashscreen above, then in the Roku app go to Settings → User Interface → General → Channel Background Image → Splashscreen Image (each user picks this once).',
+        atv: 'Shows your artwork. With the splashscreen switched on above, your picture appears behind the server and user sign-in screens (as long as backdrops aren’t turned off in the app’s settings). Your sign-in message shows there too.',
+        swift: 'Shows your artwork. For your background picture: turn on the splashscreen above, then in Swiftfin open the settings (gear on the “Who’s watching” screen) and switch on “Use splashscreen”. Your sign-in message shows on the sign-in screen.',
+        other: 'A third-party app: it shows your artwork (posters, backdrops, logos, user pictures) but uses its own design.'
+    };
+    function loadEverywhere() {
+        fillEverywhere(S.config && S.config.Everywhere);
+        renderMatrix();
+        api('GET', 'ArtworkStudio/Everywhere').then(function (r) {
+            var sp = r.Splashscreen || {};
+            var pv = $('#evSplashPv');
+            if (sp.Enabled) { pv.style.display = ''; pv.style.backgroundImage = 'url("' + ApiClient.getUrl('Branding/Splashscreen', { maxWidth: 640, quality: 80, v: sp.File || Date.now() }) + '")'; }
+            else { pv.style.display = 'none'; }
+            $('#evSplashState').textContent = !sp.Enabled ? 'Jellyfin’s splashscreen is currently off.' : sp.Ours ? 'Showing your backdrop (preview above).' : sp.Custom ? 'Jellyfin is using a splashscreen uploaded elsewhere (preview above).' : 'Jellyfin is using its own collage of your library (preview above).';
+            $('#evDisclaimerState').textContent = r.LoginDisclaimer ? 'Jellyfin’s login disclaimer now: “' + r.LoginDisclaimer.slice(0, 140) + (r.LoginDisclaimer.length > 140 ? '…' : '') + '”' : 'Jellyfin’s login disclaimer is empty.';
+            var cs = r.Css || {}, base = serverBase();
+            $('#evCssState').innerHTML = (cs.Published ? esc('Published (' + Math.round(cs.Length / 1024) + ' KB).') : esc('Not published.')) +
+                (cs.OtherLength ? esc(' Your own Custom CSS (' + Math.round(cs.OtherLength / 1024) + ' KB) is left as it is.') : '') +
+                (isLanAddress(base) ? '<br><b style="color:#e0a43a">Heads-up:</b> ' + esc('this page is open at ' + base + ', so the published design links to images there — apps outside your home network can’t reach that. Open the dashboard through your public address (e.g. hallflix.net) before saving.') : '');
+        }).catch(function (e) { $('#evSplashState').textContent = e.message; });
+        api('GET', 'Devices').then(function (r) {
+            var groups = {};
+            (r.Items || []).forEach(function (d) {
+                var app = d.AppName || 'Unknown app', kind = appKind(d), key = kind + '|' + app;
+                var g = groups[key] = groups[key] || { app: app + (kind === 'samsung' && !/samsung|tizen/i.test(app) ? ' \u2014 Samsung TV' : ''), kind: kind, devices: [], last: 0 };
+                g.devices.push(d.Name || 'Device');
+                var t = Date.parse(d.DateLastActivity || '') || 0; if (t > g.last) g.last = t;
+            });
+            var list = Object.keys(groups).map(function (k) { return groups[k]; }).sort(function (a, b) { return b.last - a.last; });
+            var icons = { web: 'language', samsung: 'tv', roku: 'connected_tv', atv: 'live_tv', swift: 'phone_iphone', other: 'apps' };
+            $('#evDevices').innerHTML = list.length ? list.map(function (g) {
+                var names = g.devices.filter(function (n, i) { return g.devices.indexOf(n) === i; });
+                return '<div class="as-approw">' + icon(icons[g.kind]) + '<div><b>' + esc(g.app) + '</b><span class="as-hint">' + esc(names.slice(0, 4).join(', ') + (names.length > 4 ? ' and ' + (names.length - 4) + ' more' : '')) +
+                    (g.last ? ' · last used ' + esc(new Date(g.last).toLocaleDateString()) : '') + '</span><div class="as-hint" style="margin-top:.25em">' + esc(TIPS[g.kind]) + '</div></div></div>';
+            }).join('') : '<div class="as-hint">No devices yet.</div>';
+        }).catch(function (e) { $('#evDevices').innerHTML = '<div class="as-hint">' + esc('Couldn’t read the device list: ' + e.message) + '</div>'; });
+    }
+    ['#evSplash', '#evSplashSrc', '#evDisclaimer', '#evCss'].forEach(function (sel) { $(sel).addEventListener('change', renderMatrix); });
+    $('#evSave').addEventListener('click', function () {
+        var b = $('#evSave'); b.disabled = true;
+        (S.config ? Promise.resolve() : loadSettings()).then(saveConfig).then(loadEverywhere).then(function () { b.disabled = false; }, function () { b.disabled = false; });
+    });
+
     // ============================================================ TABS
     $$('.as-tab').forEach(function (b) {
         b.addEventListener('click', function () {
@@ -715,6 +909,7 @@
             if (b.dataset.tab === 'settings' || b.dataset.tab === 'design') loadConflicts();
             if (b.dataset.tab === 'extras') { if (!S.config) loadSettings(); loadExtrasMedia(); }
             if (b.dataset.tab === 'design') { loadBrandSlots(); loadLoginUsers(); }
+            if (b.dataset.tab === 'apps') { (S.config ? Promise.resolve() : loadSettings()).then(loadEverywhere); }
         });
     });
 
@@ -1446,6 +1641,7 @@
             S.config = cfg;
             fillDesign(cfg.Theme || {});
             fillExtras(cfg.Extras || {});
+            fillEverywhere(cfg.Everywhere || {});
             $('#asRoots').innerHTML = (cfg.NasRoots || []).map(rootRow).join('') || '';
             if (!(cfg.NasRoots || []).length) $('#asRoots').innerHTML = rootRow({ Name: 'NAS Artwork', Path: '' });
             $('#asNasMode').value = cfg.DefaultNasMode || 'copy';
@@ -1497,9 +1693,12 @@
         cfg.DimAllBackdrops = $('#asDimAll').checked;
         cfg.Theme = collectDesign();
         cfg.Extras = collectExtras();
+        cfg.Everywhere = collectEverywhere(cfg.Everywhere);
         return ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function () {
             S.roots = null;
-            toast('Saved — refresh the browser (Ctrl+F5) to see changes');
+            return applyEverywhere(cfg).catch(function (e) { toast('Saved, but couldn\u2019t update the other apps: ' + e.message, true); });
+        }).then(function (note) {
+            toast(note || 'Saved — refresh the browser (Ctrl+F5) to see changes');
             return loadSettings();
         }).catch(function (e) { toast('Couldn\'t save: ' + (e && e.message || e), true); });
     }
@@ -1634,13 +1833,15 @@
                 { k: 'SpotlightCount', type: 'num', label: 'Titles', min: 3, max: 20 },
                 { k: 'SpotlightSeconds', type: 'num', label: 'Seconds each', min: 5, max: 60 },
                 { k: 'SpotlightHeight', type: 'num', label: 'Height (% of screen)', min: 35, max: 85 },
-                { k: 'SpotlightTrailers', type: 'bool', label: 'Play a muted preview in the background' }] },
+                { k: 'SpotlightTrailers', type: 'bool', label: 'Play a muted preview in the background' },
+                { k: 'PhonePreviews', type: 'bool', label: 'Also play previews on phones (uses mobile data)' }] },
             { k: 'PreviewSourceRow', noSwitch: true, label: 'Preview source', hint: 'Where spotlight and hover previews come from. "Clips from your server" plays a short muted scene from the movie or show itself — nothing goes to YouTube, and it works for every title. Clips play straight from the file; titles the browser can\u2019t play just show their backdrop, unless you allow the server to convert them.', sub: [
                 { k: 'PreviewSource', type: 'select', label: 'Use', opts: [['clips', 'Clips from your server'], ['clips-then-trailers', 'Clips, then trailers'], ['trailers-then-clips', 'Trailers, then clips'], ['trailers', 'Trailers only (local trailer files, then YouTube)']] },
                 { k: 'ClipSeconds', type: 'num', label: 'Clip length (seconds)', min: 8, max: 120 },
                 { k: 'ClipTranscode', type: 'bool', label: 'Let the server convert files the browser can\u2019t play (spotlight only, one at a time \u2014 only turn on if hardware transcoding is enabled in Dashboard \u2192 Playback)' }] },
-            { k: 'HoverTrailers', label: 'Preview on hover', hint: 'Rest the mouse on a movie or show poster and a small muted preview plays (from the source chosen above). Mouse only — not on touch screens.', sub: [
-                { k: 'HoverDelay', type: 'num', label: 'Delay (ms)', min: 300, max: 3000 }] },
+            { k: 'HoverTrailers', label: 'Preview on hover', hint: 'Rest the mouse on a movie or show poster and a small muted preview plays (from the source chosen above). With a mouse, or the remote on TV apps — not on touch screens.', sub: [
+                { k: 'HoverDelay', type: 'num', label: 'Delay (ms)', min: 300, max: 3000 },
+                { k: 'TvFocusPreviews', type: 'bool', label: 'On TVs, preview the poster selected with the remote' }] },
             { k: 'Badges', label: 'Badges on posters', hint: 'Small labels on posters: 4K, HDR / Dolby Vision, Dolby Atmos, NEW for recently added, and the rating.', sub: [
                 { k: 'BadgeQuality', type: 'bool', label: 'Quality (4K, HDR, Atmos)' },
                 { k: 'BadgeNew', type: 'bool', label: 'NEW ribbon' },
@@ -1697,7 +1898,7 @@
         x = x || {};
         $$('#asExtrasForm [data-xk]').forEach(function (el) {
             var v = x[el.dataset.xk];
-            if (el.type === 'checkbox') el.checked = v == null ? !/^(ClipTranscode|SeasonAccent)$/.test(el.dataset.xk) : !!v;
+            if (el.type === 'checkbox') el.checked = v == null ? !/^(ClipTranscode|SeasonAccent|PhonePreviews)$/.test(el.dataset.xk) : !!v;
             else if (v != null) el.value = v;
         });
         S.announcements = (x.Announcements || []).map(function (a) { return Object.assign({}, a); });
