@@ -5,10 +5,6 @@
 (function () {
     'use strict';
     if (window.__artworkStudioLibBg) { return; }
-    // Safe mode: add ?assafe=1 to the address to load Jellyfin without any Artwork Studio changes
-    try { if (/[?&#]assafe/i.test(location.href)) { sessionStorage.setItem('as-safe', '1'); } } catch (e) { /* ignore */ }
-    try { if (sessionStorage.getItem('as-safe') === '1' && !/[?&#]asnormal/i.test(location.href)) { return; } sessionStorage.removeItem('as-safe'); } catch (e) { /* ignore */ }
-
     window.__artworkStudioLibBg = true;
 
     var cfg = window.__artworkStudioCfg || {};
@@ -75,19 +71,12 @@
         }).catch(function () { cache[id] = []; return []; });
     }
 
-    // Jellyfin keeps recent pages loaded and hides the box *around* them, so a page counts as
-    // showing only if it is actually on screen.
-    function shown(el) { return !!el && el.isConnected && !el.closest('.hide') && el.getClientRects().length > 0; }
-    function firstShown(sel) { var l = document.querySelectorAll(sel); for (var i = 0; i < l.length; i++) { if (shown(l[i])) { return l[i]; } } return null; }
     function loginPageEl() {
-        var p = firstShown('#loginPage,.loginPage,#selectServerPage,#forgotPasswordPage');
+        var p = document.querySelector('#loginPage:not(.hide),.loginPage:not(.hide),#selectServerPage:not(.hide),#forgotPasswordPage:not(.hide)');
         if (p) { return p; }
-        var forms = document.querySelectorAll('.manualLoginForm,#divUsers,.visualLoginForm');
-        for (var i = 0; i < forms.length; i++) {
-            var pg = forms[i].closest('.page,[data-role="page"]');
-            if (shown(pg)) { return pg; }
-        }
-        return null;
+        var f = document.querySelector('.manualLoginForm,#divUsers,.visualLoginForm');
+        var pg = f && f.closest('.page,[data-role="page"]');
+        return pg && !pg.classList.contains('hide') && pg.offsetParent !== null ? pg : null;
     }
 
     // Split-screen login: our own fixed element on the image side, outside Jellyfin's page,
@@ -170,7 +159,7 @@
     function applyLogin() {
         if (currentKey !== 'login' || !curUrl) { return; }
         if (SPLIT) { showSplit(curUrl); layoutSplit(); return; }
-        var lp = loginPageEl() || firstShown('.standalonePage');
+        var lp = loginPageEl() || document.querySelector('.standalonePage:not(.hide)');
         if (!lp) { return; }
         lp.classList.add('as-loginbg');
         var vid = lp.querySelector(':scope > video.as-login-video');
