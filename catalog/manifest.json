@@ -8,6 +8,30 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.0.31.12",
+        "changelog": "Build for Jellyfin 12.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.31/artwork-studio_1.0.31.12_jellyfin-12.zip",
+        "checksum": "fcff02eb51ba6ba4378d801ff5b9ce6c",
+        "timestamp": "2026-10-28T19:17:55Z"
+      },
+      {
+        "version": "1.0.31.11",
+        "changelog": "Build for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.31/artwork-studio_1.0.31.11_jellyfin-10.11.zip",
+        "checksum": "64d0cfd8afa66c02320fe0cb0e9e713b",
+        "timestamp": "2026-10-28T19:17:55Z"
+      },
+      {
+        "version": "1.0.31.10",
+        "changelog": "Build for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.31/artwork-studio_1.0.31.10_jellyfin-10.10.zip",
+        "checksum": "58b5abc8fcff572668d5d0f6e68fc1be",
+        "timestamp": "2026-10-28T19:17:55Z"
+      },
+      {
         "version": "1.0.30.12",
         "changelog": "Build for Jellyfin 12.",
         "targetAbi": "12.0.0.0",
