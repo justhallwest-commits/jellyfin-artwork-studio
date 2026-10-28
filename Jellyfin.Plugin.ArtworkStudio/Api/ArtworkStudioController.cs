@@ -95,7 +95,7 @@ public class ArtworkStudioController : ControllerBase
     {
         var asm = typeof(Plugin).Assembly;
         var script = new System.Text.StringBuilder();
-        foreach (var name in new[] { "libraryBackdrops.js", "presets.js", "siteTheme.js" })
+        foreach (var name in new[] { "libraryBackdrops.js", "presets.js", "siteTheme.js", "enhancements.js" })
         {
             using var stream = asm.GetManifestResourceStream(typeof(Plugin).Namespace + ".Web." + name);
             if (stream is null)
@@ -122,7 +122,11 @@ public class ArtworkStudioController : ControllerBase
                 loginLogo = ListPageFiles("loginlogo").FirstOrDefault(),
                 favicon = ListPageFiles("favicon").FirstOrDefault()
             },
-            theme = cfg.Theme ?? new ThemeSettings()
+            theme = cfg.Theme ?? new ThemeSettings(),
+            extras = cfg.Extras ?? new ExtrasSettings(),
+            loader = ListPageFiles("loader").FirstOrDefault(),
+            libanim = ListLibraryCovers(),
+            now = DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture)
         };
         var prefix = "window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
         Response.Headers.CacheControl = "no-cache";
@@ -161,9 +165,15 @@ public class ArtworkStudioController : ControllerBase
     // ---------------------------------------------------------------- Home & login page backdrops
 
     // "home"/"login" hold several rotating backdrops; the brand slots hold a single image each.
-    private static readonly string[] Pages = { "home", "login", "logo", "loginlogo", "favicon" };
+    private static readonly string[] Pages = { "home", "login", "logo", "loginlogo", "favicon", "loader" };
 
-    private static readonly string[] SingleImagePages = { "logo", "loginlogo", "favicon" };
+    private static readonly string[] SingleImagePages = { "logo", "loginlogo", "favicon", "loader" };
+
+    // Page backgrounds, the loading animation and animated library covers may also be short video loops.
+    private static readonly HashSet<string> PageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".mp4", ".webm"
+    };
 
     /// <summary>Lists the backdrops for the home or login page.</summary>
     [HttpGet("Backdrops/{page}")]
@@ -178,7 +188,7 @@ public class ArtworkStudioController : ControllerBase
         var dir = PageDir(page);
         var files = Directory.Exists(dir)
             ? new DirectoryInfo(dir).EnumerateFiles()
-                .Where(f => ImageExtensions.Contains(f.Extension))
+                .Where(f => PageExtensions.Contains(f.Extension))
                 .OrderBy(f => f.Name, StringComparer.Ordinal)
                 .Select(f => new { f.Name, Size = f.Length, Modified = f.LastWriteTimeUtc })
                 .ToList<object>()
@@ -203,7 +213,7 @@ public class ArtworkStudioController : ControllerBase
         }
 
         Response.Headers.CacheControl = "public, max-age=86400";
-        return PhysicalFile(full, MimeFromExtension(full) ?? "image/jpeg");
+        return PhysicalFile(full, MimeFromExtension(full) ?? "image/jpeg", enableRangeProcessing: true);
     }
 
     /// <summary>Adds a home/login backdrop from an uploaded file.</summary>
@@ -307,14 +317,21 @@ public class ArtworkStudioController : ControllerBase
 
     private ActionResult StorePageBackdrop(string page, string source)
     {
-        var mime = SniffFile(source);
+        var mime = SniffFile(source) ?? SniffVideo(source);
         if (mime is null)
         {
-            return BadRequest(new { message = "That file doesn't look like a supported image (JPG, PNG, WebP, GIF or BMP)." });
+            return BadRequest(new { message = "That file doesn't look like a supported image or video (JPG, PNG, WebP, GIF, BMP, MP4 or WebM)." });
+        }
+
+        if (mime.StartsWith("video/", StringComparison.Ordinal) && page is "logo" or "loginlogo" or "favicon")
+        {
+            return BadRequest(new { message = "Logos and the tab icon need to be an image (PNG, JPG, WebP or GIF)." });
         }
 
         var ext = mime switch
         {
+            "video/mp4" => ".mp4",
+            "video/webm" => ".webm",
             "image/png" => ".png",
             "image/webp" => ".webp",
             "image/gif" => ".gif",
@@ -323,7 +340,7 @@ public class ArtworkStudioController : ControllerBase
         };
         var dir = PageDir(page);
         Directory.CreateDirectory(dir);
-        if (SingleImagePages.Contains(page, StringComparer.Ordinal))
+        if (SingleImagePages.Contains(page, StringComparer.Ordinal) || IsLibraryCover(page))
         {
             foreach (var existing in Directory.EnumerateFiles(dir))
             {
@@ -337,7 +354,38 @@ public class ArtworkStudioController : ControllerBase
         return Ok(new { success = true, Name = name });
     }
 
-    private static bool IsPage(string page) => Pages.Contains(page, StringComparer.Ordinal);
+    private static bool IsPage(string page) => Pages.Contains(page, StringComparer.Ordinal) || IsLibraryCover(page);
+
+    /// <summary>"lib-{libraryId}" holds one animated cover for that library tile.</summary>
+    private static bool IsLibraryCover(string page) => Regex.IsMatch(page, "^lib-[0-9a-f]{32}$");
+
+    /// <summary>Animated library covers: library id -> file name.</summary>
+    private static Dictionary<string, string> ListLibraryCovers()
+    {
+        var result = new Dictionary<string, string>(StringComparer.Ordinal);
+        var root = System.IO.Path.Combine(Plugin.Instance?.DataFolderPath ?? System.IO.Path.GetTempPath(), "backdrops");
+        if (!Directory.Exists(root))
+        {
+            return result;
+        }
+
+        foreach (var dir in Directory.EnumerateDirectories(root, "lib-*"))
+        {
+            var name = System.IO.Path.GetFileName(dir);
+            if (!IsLibraryCover(name))
+            {
+                continue;
+            }
+
+            var file = ListPageFiles(name).FirstOrDefault();
+            if (file is not null)
+            {
+                result[name[4..]] = file;
+            }
+        }
+
+        return result;
+    }
 
     private static bool SafeFileName(string file) => Regex.IsMatch(file, "^[A-Za-z0-9][A-Za-z0-9._-]{0,120}$") && !file.Contains("..", StringComparison.Ordinal);
 
@@ -356,7 +404,7 @@ public class ArtworkStudioController : ControllerBase
         }
 
         return new DirectoryInfo(dir).EnumerateFiles()
-            .Where(f => ImageExtensions.Contains(f.Extension))
+            .Where(f => PageExtensions.Contains(f.Extension))
             .OrderBy(f => f.Name, StringComparer.Ordinal)
             .Select(f => f.Name)
             .ToArray();
@@ -402,7 +450,7 @@ public class ArtworkStudioController : ControllerBase
                 .ToList();
 
             var files = dir.EnumerateFiles()
-                .Where(f => ImageExtensions.Contains(f.Extension) && !f.Name.StartsWith('.'))
+                .Where(f => PageExtensions.Contains(f.Extension) && !f.Name.StartsWith('.'))
                 .OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase)
                 .Select(f => new { f.Name, Path = Rel(rootFull, f.FullName), Size = f.Length, Modified = f.LastWriteTimeUtc })
                 .ToList();
@@ -455,7 +503,7 @@ public class ArtworkStudioController : ControllerBase
         var results = new List<object>();
         foreach (var file in Directory.EnumerateFiles(full, "*", options))
         {
-            if (!ImageExtensions.Contains(System.IO.Path.GetExtension(file)))
+            if (!PageExtensions.Contains(System.IO.Path.GetExtension(file)))
             {
                 continue;
             }
@@ -485,7 +533,7 @@ public class ArtworkStudioController : ControllerBase
             return BadRequest(new { message = error });
         }
 
-        if (!System.IO.File.Exists(full) || !ImageExtensions.Contains(System.IO.Path.GetExtension(full)))
+        if (!System.IO.File.Exists(full) || !PageExtensions.Contains(System.IO.Path.GetExtension(full)))
         {
             return NotFound();
         }
@@ -532,7 +580,7 @@ public class ArtworkStudioController : ControllerBase
             }
 
             var mime = SniffFile(temp) ?? MimeFromExtension(file.FileName);
-            if (mime is null)
+            if (mime is null || !mime.StartsWith("image/", StringComparison.Ordinal))
             {
                 return BadRequest(new { message = "That file doesn't look like a supported image (JPG, PNG, WebP, GIF or BMP)." });
             }
@@ -666,7 +714,7 @@ public class ArtworkStudioController : ControllerBase
         }
 
         var mime = SniffFile(full) ?? MimeFromExtension(full);
-        if (mime is null)
+        if (mime is null || !mime.StartsWith("image/", StringComparison.Ordinal))
         {
             return BadRequest(new { message = "That file isn't a supported image." });
         }
@@ -852,10 +900,35 @@ public class ArtworkStudioController : ControllerBase
         return null;
     }
 
+    /// <summary>Recognises MP4 and WebM video loops.</summary>
+    private static string? SniffVideo(string path)
+    {
+        Span<byte> b = stackalloc byte[12];
+        int n;
+        using (var fs = System.IO.File.OpenRead(path))
+        {
+            n = fs.Read(b);
+        }
+
+        if (n >= 8 && b[4] == 'f' && b[5] == 't' && b[6] == 'y' && b[7] == 'p')
+        {
+            return "video/mp4";
+        }
+
+        if (n >= 4 && b[0] == 0x1A && b[1] == 0x45 && b[2] == 0xDF && b[3] == 0xA3)
+        {
+            return "video/webm";
+        }
+
+        return null;
+    }
+
     private static string? MimeFromExtension(string name)
     {
         return System.IO.Path.GetExtension(name).ToLowerInvariant() switch
         {
+            ".mp4" => "video/mp4",
+            ".webm" => "video/webm",
             ".jpg" or ".jpeg" or ".tbn" => MediaTypeNames.Image.Jpeg,
             ".png" => "image/png",
             ".webp" => "image/webp",

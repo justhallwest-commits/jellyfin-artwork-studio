@@ -145,6 +145,16 @@
 #artworkStudioPage .as-brand-thumb img { max-width:100%; max-height:100%; object-fit:contain; }
 #artworkStudioPage .as-brand-info { flex:1 1 180px; min-width:0; }
 #artworkStudioPage .as-brand-info b { display:block; }
+#artworkStudioPage .as-x-row { display:flex; align-items:flex-start; justify-content:space-between; gap:1em; padding:.6em 0; border-bottom:1px solid var(--as-line); }
+#artworkStudioPage .as-x-row:last-child { border-bottom:0; }
+#artworkStudioPage .as-x-row b { display:block; }
+#artworkStudioPage .as-x-sub { display:flex; flex-wrap:wrap; gap:.6em 1.2em; margin:.5em 0 0; font-size:.9em; }
+#artworkStudioPage .as-x-sub label { display:flex; align-items:center; gap:.4em; }
+#artworkStudioPage .as-x-sub .as-in { padding:.35em .5em; }
+#artworkStudioPage .as-x-off .as-x-sub { opacity:.45; pointer-events:none; }
+#artworkStudioPage .as-ann { display:grid; grid-template-columns:1fr auto; gap:.5em; padding:.7em; border:1px solid var(--as-line); border-radius:10px; margin-bottom:.6em; }
+#artworkStudioPage .as-ann textarea { grid-column:1 / -1; min-height:3em; }
+#artworkStudioPage .as-ann .as-row { grid-column:1 / -1; }
 #artworkStudioPage .as-user-row { display:flex; align-items:center; gap:.9em; padding:.55em 0; border-bottom:1px solid var(--as-line); flex-wrap:wrap; }
 #artworkStudioPage .as-user-row:last-child { border-bottom:0; }
 #artworkStudioPage .as-user-pic { width:52px; height:52px; border-radius:50%; background:var(--as-soft) center/cover no-repeat; display:flex; align-items:center; justify-content:center; flex:0 0 auto; color:rgba(128,128,128,.9); cursor:pointer; position:relative; overflow:hidden; }
@@ -216,6 +226,7 @@
     <div class="as-tabs">
       <button class="as-tab active" data-tab="browse">Browse</button>
       <button class="as-tab" data-tab="design">Design</button>
+      <button class="as-tab" data-tab="extras">Extras</button>
       <button class="as-tab" data-tab="settings">Settings</button>
       <button class="as-tab" data-tab="help">Help</button>
     </div>
@@ -404,6 +415,38 @@
       <div class="as-hint" style="margin-top:.5em">A rough preview — the real result also depends on the page.</div>
     </div>
    </div>
+  </section>
+
+  <!-- ===================== EXTRAS ===================== -->
+  <section data-section="extras" style="display:none">
+    <div class="as-panel">
+      <h3 style="margin:0 0 .3em">Extras</h3>
+      <div class="as-hint">Enhancements for the Jellyfin web app — also the HallFlix TV app and other apps built on it (native TV apps keep their own look). Each one can be switched on or off. They all step aside while a video is playing. Save, then refresh the site with Ctrl+F5.</div>
+    </div>
+    <div id="asExtrasForm"></div>
+
+    <div class="as-panel">
+      <h3>Loading animation</h3>
+      <div class="as-hint">Shown while a video starts (and as the site's loading spinner if it's an image). Use your logo GIF, a PNG, or a short MP4/WebM loop. If empty, your header logo pulses instead.</div>
+      <div class="as-brand-row" id="asLoaderRow"><div class="as-brand-thumb">…</div>
+        <div class="as-brand-info"><b>Loading animation</b><span class="as-hint" id="asLoaderInfo"></span></div>
+        <div class="as-row"><button class="as-btn small" id="asLoaderSet"><span class="material-icons">add_photo_alternate</span>Choose…</button><button class="as-btn small danger" id="asLoaderDel" style="display:none"><span class="material-icons">delete</span></button></div></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Animated library covers</h3>
+      <div class="as-hint">An animated GIF or short MP4/WebM loop that plays on a library's tile on the home screen. Keep loops small (a few MB) so the home screen stays quick.</div>
+      <div id="asLibAnim" style="margin-top:.5em"><span class="as-spin"></span></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Scheduled announcements</h3>
+      <div class="as-hint">Banners on the home screen that appear and disappear on their own — e.g. "Server maintenance Saturday 2–4 PM". Leave a time blank for "straight away" / "no end".</div>
+      <div id="asAnnList" style="margin-top:.6em"></div>
+      <button class="as-btn" id="asAnnAdd" style="margin-top:.4em"><span class="material-icons">add</span>Add announcement</button>
+    </div>
+
+    <button class="as-btn primary" id="asSaveExtras"><span class="material-icons">save</span>Save extras</button>
   </section>
 
   <!-- ===================== SETTINGS ===================== -->
@@ -635,7 +678,7 @@
                 if (dt.items[i].kind === 'file') { var f = dt.items[i].getAsFile(); if (f) { files = [f]; break; } }
             }
         }
-        if (files && files[0] && /^image\//.test(files[0].type)) return { kind: 'upload', file: files[0] };
+        if (files && files[0] && /^(image|video)\//.test(files[0].type)) return { kind: 'upload', file: files[0] };
         if (files && files[0]) return { error: 'That file isn\'t an image.' };
         var html = dt.getData && dt.getData('text/html');
         if (html) { var m = html.match(/<img[^>]+src=["']([^"']+)["']/i); if (m && /^https?:/i.test(m[1])) return { kind: 'url', url: m[1].replace(/&amp;/g, '&') }; }
@@ -670,6 +713,7 @@
             $$('section[data-section]').forEach(function (s) { s.style.display = s.dataset.section === b.dataset.tab ? '' : 'none'; });
             if ((b.dataset.tab === 'settings' || b.dataset.tab === 'design') && !S.config) loadSettings();
             if (b.dataset.tab === 'settings' || b.dataset.tab === 'design') loadConflicts();
+            if (b.dataset.tab === 'extras') { if (!S.config) loadSettings(); loadExtrasMedia(); }
             if (b.dataset.tab === 'design') { loadBrandSlots(); loadLoginUsers(); }
         });
     });
@@ -1191,14 +1235,14 @@
 
             // ---------- upload
             function setUpload(file) {
-                if (!file || !/^image\//.test(file.type)) { toast('Please choose an image file.', true); return; }
+                if (!file || !/^(image|video)\//.test(file.type)) { toast('Please choose an image file.', true); return; }
                 var u = URL.createObjectURL(file); objectUrls.push(u);
                 var dz = $('#asBigDrop', ov);
-                if (dz) dz.innerHTML = '<img src="' + u + '"><div class="as-hint">' + esc(file.name || 'Pasted image') + ' · ' + fmtSize(file.size) + ' — click to pick a different one</div>';
+                if (dz) dz.innerHTML = (/^video\//.test(file.type) ? '<video src="' + u + '" autoplay muted loop playsinline style="max-height:340px;max-width:100%;border-radius:8px"></video>' : '<img src="' + u + '">') + '<div class="as-hint">' + esc(file.name || 'Pasted image') + ' · ' + fmtSize(file.size) + ' — click to pick a different one</div>';
                 choose({ kind: 'upload', file: file }, file.name || 'Pasted image');
             }
             function renderUpload() {
-                body.innerHTML = '<input type="file" id="asFile" accept="image/*" style="display:none">' +
+                body.innerHTML = '<input type="file" id="asFile" accept="image/*,video/mp4,video/webm" style="display:none">' +
                     '<div class="as-bigdrop" id="asBigDrop">' + icon('cloud_upload') + '<div><b>Drop an image here</b> or click to browse</div><div class="as-hint">JPG, PNG, WebP, GIF or BMP · you can also paste with Ctrl+V</div></div>';
                 var dz = $('#asBigDrop', ov), fi = $('#asFile', ov);
                 dz.onclick = function () { fi.click(); };
@@ -1401,6 +1445,7 @@
         return ApiClient.getPluginConfiguration(PLUGIN_ID).then(function (cfg) {
             S.config = cfg;
             fillDesign(cfg.Theme || {});
+            fillExtras(cfg.Extras || {});
             $('#asRoots').innerHTML = (cfg.NasRoots || []).map(rootRow).join('') || '';
             if (!(cfg.NasRoots || []).length) $('#asRoots').innerHTML = rootRow({ Name: 'NAS Artwork', Path: '' });
             $('#asNasMode').value = cfg.DefaultNasMode || 'copy';
@@ -1451,6 +1496,7 @@
         cfg.BackdropDimPercent = parseInt($('#asDim').value, 10) || 0;
         cfg.DimAllBackdrops = $('#asDimAll').checked;
         cfg.Theme = collectDesign();
+        cfg.Extras = collectExtras();
         return ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function () {
             S.roots = null;
             toast('Saved — refresh the browser (Ctrl+F5) to see changes');
@@ -1459,6 +1505,7 @@
     }
     $('#asSave').addEventListener('click', saveConfig);
     $('#asSaveDesign').addEventListener('click', saveConfig);
+    $('#asSaveExtras').addEventListener('click', saveConfig);
 
     // ---------- backup
     $('#asExport').addEventListener('click', function () {
@@ -1576,6 +1623,183 @@
         var src = readTransfer(e.dataTransfer);
         if (src && src.kind === 'upload') doUserPic(p.closest('[data-user]').dataset.user, src.file);
         else toast('Drop an image file from your computer here.', true);
+    });
+
+    // ============================================================ EXTRAS
+    var SEASON_OPTS = [['auto', 'Automatic by date'], ['halloween', 'Halloween'], ['thanksgiving', 'Thanksgiving'], ['christmas', 'Christmas'], ['newyear', 'New Year'], ['valentines', 'Valentine\u2019s'], ['stpatricks', 'St Patrick\u2019s'], ['july4', 'Fourth of July']];
+    var EXTRAS = [
+        { title: 'Home screen', items: [
+            { k: 'Spotlight', label: 'Spotlight banner', hint: 'A big rotating banner of featured titles at the top of the home screen, with logo, details and Play / More info buttons.', sub: [
+                { k: 'SpotlightSource', type: 'select', label: 'Show', opts: [['latest', 'Recently added'], ['random', 'Random picks'], ['unwatched', 'Unwatched picks'], ['favorites', 'Favorites']] },
+                { k: 'SpotlightCount', type: 'num', label: 'Titles', min: 3, max: 20 },
+                { k: 'SpotlightSeconds', type: 'num', label: 'Seconds each', min: 5, max: 60 },
+                { k: 'SpotlightHeight', type: 'num', label: 'Height (% of screen)', min: 35, max: 85 },
+                { k: 'SpotlightTrailers', type: 'bool', label: 'Play muted trailers in the background' }] },
+            { k: 'HoverTrailers', label: 'Trailer on hover', hint: 'Rest the mouse on a movie or show poster and a small muted trailer preview plays. (Mouse only — not on touch screens.)', sub: [
+                { k: 'HoverDelay', type: 'num', label: 'Delay (ms)', min: 300, max: 3000 }] },
+            { k: 'Badges', label: 'Badges on posters', hint: 'Small labels on posters: 4K, HDR / Dolby Vision, Dolby Atmos, NEW for recently added, and the rating.', sub: [
+                { k: 'BadgeQuality', type: 'bool', label: 'Quality (4K, HDR, Atmos)' },
+                { k: 'BadgeNew', type: 'bool', label: 'NEW ribbon' },
+                { k: 'BadgeNewDays', type: 'num', label: 'NEW for (days)', min: 1, max: 90 },
+                { k: 'BadgeRating', type: 'bool', label: 'Rating' }] },
+            { k: 'AnimatedLibraryCovers', label: 'Animated library covers', hint: 'Play the GIF / video loops set below on library tiles.' },
+            { k: 'SurpriseMe', label: '"Surprise me" button', hint: 'A dice button in the top bar that picks a random movie, show or episode — optionally by genre and unwatched only.' }] },
+        { title: 'Movie & show pages', items: [
+            { k: 'CinematicBackdrop', label: 'Cinematic backdrop', hint: 'A slow drift-and-zoom on backdrops (also on the spotlight banner).' },
+            { k: 'DetailLogo', label: 'Title logo', hint: 'Show the title\u2019s logo artwork instead of plain text when it has one.' },
+            { k: 'AmbientColor', label: 'Ambient colour', hint: 'Tint each title\u2019s page with colours taken from its poster.' },
+            { k: 'EndsAt', label: 'Time left & "Ends at"', hint: 'Shows how long is left and what time it will finish, next to the Play button.' }] },
+        { title: 'Playback', items: [
+            { k: 'PauseScreen', label: 'Pause screen', hint: 'When you pause, the logo, episode and description fade in over the dimmed picture.', sub: [
+                { k: 'PauseDelay', type: 'num', label: 'After (seconds)', min: 1, max: 30 }] },
+            { k: 'BrandedLoader', label: 'Branded loading screen', hint: 'Your loading animation (below) instead of a spinner while a video starts.' },
+            { k: 'UpNextStyle', label: 'Up-next card', hint: 'A bigger, nicer "next episode" card near the end of an episode.' },
+            { k: 'LogoSpinner', label: 'Logo loading spinner', hint: 'Your loading image or logo, pulsing, wherever Jellyfin shows its spinner.' }] },
+        { title: 'Sign-in', items: [
+            { k: 'AnimatedProfiles', label: 'Animated "Who\u2019s watching?"', hint: 'Profile pictures glide in, glow and grow on hover. (Video sign-in backgrounds: upload an MP4/WebM under Browse \u2192 Library artwork \u2192 Login page.)' }] },
+        { title: 'Seasonal', items: [
+            { k: 'Seasonal', label: 'Seasonal themes', hint: 'Halloween, Thanksgiving, Christmas, New Year, Valentine\u2019s, St Patrick\u2019s and Fourth of July — switching on and off by date.', sub: [
+                { k: 'SeasonMode', type: 'select', label: 'Season', opts: SEASON_OPTS },
+                { k: 'SeasonEffects', type: 'bool', label: 'Falling effects on home & sign-in (snow, bats, leaves\u2026)' },
+                { k: 'SeasonAccent', type: 'bool', label: 'Use the season\u2019s colour as the accent' }] }] },
+        { title: 'Site-wide', items: [
+            { k: 'QuickSearch', label: 'Quick search', hint: 'Press Ctrl+K (or /) anywhere to search and jump straight to a title.' }] }
+    ];
+    function renderExtrasForm() {
+        var host = $('#asExtrasForm');
+        if (host.children.length) return;
+        host.innerHTML = EXTRAS.map(function (sec) {
+            return '<div class="as-panel"><h3>' + esc(sec.title) + '</h3>' + sec.items.map(function (it) {
+                var sub = (it.sub || []).map(function (f) {
+                    if (f.type === 'bool') return '<label><input type="checkbox" data-xk="' + f.k + '"> ' + esc(f.label) + '</label>';
+                    if (f.type === 'select') return '<label>' + esc(f.label) + ' <select class="as-in" data-xk="' + f.k + '">' + f.opts.map(function (o) { return '<option value="' + o[0] + '">' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
+                    return '<label>' + esc(f.label) + ' <input class="as-in" type="number" style="width:5.5em" min="' + f.min + '" max="' + f.max + '" data-xk="' + f.k + '" data-xnum></label>';
+                }).join('');
+                return '<div class="as-x-row" data-xrow="' + it.k + '"><div style="flex:1;min-width:0"><b>' + esc(it.label) + '</b><span class="as-hint">' + esc(it.hint) + '</span>' +
+                    (sub ? '<div class="as-x-sub">' + sub + '</div>' : '') + '</div>' +
+                    '<label class="as-switch" style="flex:0 0 auto"><input type="checkbox" data-xk="' + it.k + '"><i></i></label></div>';
+            }).join('') + '</div>';
+        }).join('');
+        host.addEventListener('change', syncExtrasRows);
+    }
+    function syncExtrasRows() {
+        $$('[data-xrow]').forEach(function (row) {
+            var on = $('.as-switch input', row).checked;
+            row.classList.toggle('as-x-off', !on);
+        });
+    }
+    function fillExtras(x) {
+        renderExtrasForm();
+        x = x || {};
+        $$('#asExtrasForm [data-xk]').forEach(function (el) {
+            var v = x[el.dataset.xk];
+            if (el.type === 'checkbox') el.checked = v !== false && v != null ? !!v : (v === false ? false : true);
+            else if (v != null) el.value = v;
+        });
+        S.announcements = (x.Announcements || []).map(function (a) { return Object.assign({}, a); });
+        renderAnnouncements();
+        syncExtrasRows();
+    }
+    function collectExtras() {
+        var x = Object.assign({}, (S.config && S.config.Extras) || {});
+        $$('#asExtrasForm [data-xk]').forEach(function (el) {
+            if (el.type === 'checkbox') x[el.dataset.xk] = el.checked;
+            else if (el.dataset.xnum != null) { var n = parseInt(el.value, 10); x[el.dataset.xk] = isNaN(n) ? parseInt(el.min, 10) : Math.max(+el.min, Math.min(+el.max, n)); }
+            else x[el.dataset.xk] = el.value;
+        });
+        x.Announcements = (S.announcements || []).filter(function (a) { return a.Text && a.Text.trim(); });
+        return x;
+    }
+
+    // ---- scheduled announcements editor
+    function renderAnnouncements() {
+        var list = S.announcements || [];
+        $('#asAnnList').innerHTML = list.length ? list.map(function (a, i) {
+            return '<div class="as-ann" data-ann="' + i + '"><textarea class="as-in" data-af="Text" placeholder="Announcement text (links are clickable)">' + esc(a.Text || '') + '</textarea>' +
+                '<div class="as-row"><label class="as-row" style="gap:.3em">From <input class="as-in" type="datetime-local" data-af="Start" value="' + esc(a.Start || '') + '"></label>' +
+                '<label class="as-row" style="gap:.3em">Until <input class="as-in" type="datetime-local" data-af="End" value="' + esc(a.End || '') + '"></label>' +
+                '<select class="as-in" data-af="Style">' + [['info', 'Blue'], ['success', 'Green'], ['warning', 'Amber'], ['accent', 'Accent colour']].map(function (o) { return '<option value="' + o[0] + '"' + (a.Style === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
+                '<label class="as-row" style="gap:.3em"><input type="checkbox" data-af="Dismissible"' + (a.Dismissible !== false ? ' checked' : '') + '> Can be dismissed</label>' +
+                '<span class="as-hint" style="margin-left:auto">' + annStatus(a) + '</span>' +
+                '<button class="as-btn small danger" data-adel title="Remove"><span class="material-icons">delete</span></button></div></div>';
+        }).join('') : '<div class="as-hint">No scheduled announcements yet.</div>';
+    }
+    function annStatus(a) {
+        var now = Date.now(), s = a.Start ? Date.parse(a.Start) : NaN, e = a.End ? Date.parse(a.End) : NaN;
+        if (!isNaN(e) && now > e) return '\u23F9 Finished';
+        if (!isNaN(s) && now < s) return '\u23F3 Scheduled';
+        return '\u25CF Showing now';
+    }
+    $('#asAnnAdd').addEventListener('click', function () {
+        S.announcements = S.announcements || [];
+        S.announcements.push({ Text: '', Style: 'info', Start: '', End: '', Dismissible: true });
+        renderAnnouncements();
+        var boxes = $$('#asAnnList textarea'); if (boxes.length) boxes[boxes.length - 1].focus();
+    });
+    $('#asAnnList').addEventListener('input', function (e) {
+        var row = e.target.closest('[data-ann]'), f = e.target.dataset.af; if (!row || !f) return;
+        var a = S.announcements[+row.dataset.ann];
+        a[f] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    });
+    $('#asAnnList').addEventListener('change', function (e) {
+        var row = e.target.closest('[data-ann]'), f = e.target.dataset.af; if (!row || !f) return;
+        S.announcements[+row.dataset.ann][f] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        if (f === 'Start' || f === 'End') renderAnnouncements();
+    });
+    $('#asAnnList').addEventListener('click', function (e) {
+        if (!e.target.closest('[data-adel]')) return;
+        S.announcements.splice(+e.target.closest('[data-ann]').dataset.ann, 1);
+        renderAnnouncements();
+    });
+
+    // ---- loading animation + animated library covers (stored by the plugin)
+    function mediaThumb(url) {
+        return /\.(mp4|webm)(\?|$)/i.test(url) ? '<video src="' + url + '" autoplay muted loop playsinline style="max-width:100%;max-height:100%"></video>' : '<img src="' + url + '" alt="">';
+    }
+    function loadExtrasMedia() {
+        api('GET', 'ArtworkStudio/Backdrops/loader').then(function (r) {
+            var f = (r.Files || [])[0], row = $('#asLoaderRow');
+            S.loaderFile = f ? f.Name : null;
+            $('.as-brand-thumb', row).innerHTML = f ? mediaThumb(pageImgUrl('loader', f.Name)) : 'Logo';
+            $('#asLoaderInfo').textContent = f ? f.Name.split('.').pop().toUpperCase() + ' \u00B7 ' + fmtSize(f.Size) : 'Not set — your header logo will pulse instead.';
+            $('#asLoaderDel').style.display = f ? '' : 'none';
+        }).catch(function () {});
+        var libs = S.libraries.length ? Promise.resolve(S.libraries) : loadLibraries().then(function () { return S.libraries; });
+        libs.then(function (list) {
+            if (!list.length) { $('#asLibAnim').innerHTML = '<div class="as-hint">No libraries found.</div>'; return; }
+            return Promise.all(list.map(function (l) {
+                var page = 'lib-' + String(l.ItemId).replace(/-/g, '').toLowerCase();
+                return api('GET', 'ArtworkStudio/Backdrops/' + page).catch(function () { return { Files: [] }; }).then(function (r) { return { lib: l, page: page, file: (r.Files || [])[0] }; });
+            })).then(function (rows) {
+                $('#asLibAnim').innerHTML = rows.map(function (x) {
+                    return '<div class="as-brand-row" data-libanim="' + esc(x.page) + '"><div class="as-brand-thumb">' + (x.file ? mediaThumb(pageImgUrl(x.page, x.file.Name)) : 'None') + '</div>' +
+                        '<div class="as-brand-info"><b>' + esc(x.lib.Name) + '</b><span class="as-hint">' + (x.file ? x.file.Name.split('.').pop().toUpperCase() + ' \u00B7 ' + fmtSize(x.file.Size) : 'Uses its normal cover') + '</span></div>' +
+                        '<div class="as-row"><button class="as-btn small" data-la="set"><span class="material-icons">animation</span>Choose…</button>' +
+                        (x.file ? '<button class="as-btn small danger" data-la="del" data-file="' + esc(x.file.Name) + '"><span class="material-icons">delete</span></button>' : '') + '</div></div>';
+                }).join('');
+            });
+        });
+    }
+    function chooseMediaFor(page, title, done) {
+        openSource({ title: title, type: 'Backdrop', itemId: null, guess: '', stack: 2 }).then(function (src) {
+            if (!src) return;
+            applyPageSource(page, src).then(function () { toast(title + ' updated'); done(); }).catch(function (err) { toast(err.message, true); });
+        });
+    }
+    $('#asLoaderSet').addEventListener('click', function () { chooseMediaFor('loader', 'Loading animation', loadExtrasMedia); });
+    $('#asLoaderDel').addEventListener('click', function () {
+        if (!S.loaderFile || !confirm('Remove the loading animation?')) return;
+        api('DELETE', 'ArtworkStudio/Backdrops/loader/' + encodeURIComponent(S.loaderFile)).then(loadExtrasMedia).catch(function (e) { toast(e.message, true); });
+    });
+    $('#asLibAnim').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-la]'); if (!b) return;
+        var row = b.closest('[data-libanim]'), page = row.dataset.libanim, name = $('b', row).textContent;
+        if (b.dataset.la === 'del') {
+            if (!confirm('Remove the animated cover for ' + name + '?')) return;
+            api('DELETE', 'ArtworkStudio/Backdrops/' + page + '/' + encodeURIComponent(b.dataset.file)).then(loadExtrasMedia).catch(function (err) { toast(err.message, true); });
+        } else {
+            chooseMediaFor(page, 'Animated cover · ' + name, loadExtrasMedia);
+        }
     });
 
     // ============================================================ CONFLICTS

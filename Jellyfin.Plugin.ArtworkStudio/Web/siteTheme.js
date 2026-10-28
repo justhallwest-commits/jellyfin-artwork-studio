@@ -1,4 +1,4 @@
-/* Artwork Studio — site design: logos, favicon, tab title, colours, fonts, cards,
+/* Artwork Studio \u2014 site design: logos, favicon, tab title, colours, fonts, cards,
  * backdrop blur, login page, home announcement and custom CSS. */
 (function () {
     'use strict';

@@ -1,4 +1,4 @@
-/* Artwork Studio — theme presets.
+/* Artwork Studio \u2014 theme presets.
  * Fresh recreations of the look of popular community Jellyfin themes, written for Artwork Studio
  * so they work on any Jellyfin version this plugin supports. Presets only style the interface:
  * they never change logos, backdrops, artwork, sizes, announcements or custom CSS.
@@ -30,7 +30,7 @@
         },
         neutralfin: {
             name: 'NeutralFin', credit: 'KartoffelChipss',
-            desc: 'ElegantFin’s layout in pure black and soft greys — lets your artwork supply the colour.',
+            desc: 'ElegantFin\u2019s layout in pure black and soft greys \u2014 lets your artwork supply the colour.',
             settings: { AccentColor: '#e5e5e5', BackgroundColor: '#000000', HeaderStyle: 'glass', BodyFont: 'Inter', HeadingFont: 'Inter', CardRadius: 12, CardHover: false, BackdropBlur: 4, LoginGlass: true },
             style: { text: '#f2f2f2', muted: '#9e9e9e', accent2: '#9e9e9e', glass: true, glassBlur: 18, buttons: 'pill', titles: 'medium', hover: 'lift', shadow: true, spacious: true, surfaceLift: 0.08 }
         },

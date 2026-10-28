@@ -112,8 +112,102 @@ public class ThemeSettings
     public string BeforePreset { get; set; } = string.Empty;
 }
 
+/// <summary>A home-page banner shown between two dates.</summary>
+public class ScheduledAnnouncement
+{
+    public string Text { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the colour style: info, success, warning, accent.</summary>
+    public string Style { get; set; } = "info";
+
+    /// <summary>Gets or sets the local start time (yyyy-MM-ddTHH:mm), empty = straight away.</summary>
+    public string Start { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the local end time (yyyy-MM-ddTHH:mm), empty = no end.</summary>
+    public string End { get; set; } = string.Empty;
+
+    public bool Dismissible { get; set; } = true;
+}
+
+/// <summary>Optional enhancements to the Jellyfin web app.</summary>
+public class ExtrasSettings
+{
+    // Home
+    public bool Spotlight { get; set; } = true;
+
+    /// <summary>Gets or sets what the spotlight shows: latest, random, unwatched, favorites.</summary>
+    public string SpotlightSource { get; set; } = "latest";
+
+    public int SpotlightCount { get; set; } = 8;
+
+    public int SpotlightSeconds { get; set; } = 9;
+
+    public int SpotlightHeight { get; set; } = 62;
+
+    public bool SpotlightTrailers { get; set; } = true;
+
+    public bool HoverTrailers { get; set; } = true;
+
+    public int HoverDelay { get; set; } = 900;
+
+    public bool Badges { get; set; } = true;
+
+    public bool BadgeQuality { get; set; } = true;
+
+    public bool BadgeNew { get; set; } = true;
+
+    public int BadgeNewDays { get; set; } = 14;
+
+    public bool BadgeRating { get; set; } = true;
+
+    public bool AnimatedLibraryCovers { get; set; } = true;
+
+    public bool SurpriseMe { get; set; } = true;
+
+    // Movie & show pages
+    public bool CinematicBackdrop { get; set; } = true;
+
+    public bool DetailLogo { get; set; } = true;
+
+    public bool AmbientColor { get; set; } = true;
+
+    public bool EndsAt { get; set; } = true;
+
+    // Playback
+    public bool PauseScreen { get; set; } = true;
+
+    public int PauseDelay { get; set; } = 3;
+
+    public bool BrandedLoader { get; set; } = true;
+
+    public bool UpNextStyle { get; set; } = true;
+
+    public bool LogoSpinner { get; set; } = true;
+
+    // Sign-in
+    public bool AnimatedProfiles { get; set; } = true;
+
+    // Seasonal
+    public bool Seasonal { get; set; } = true;
+
+    /// <summary>Gets or sets the season: auto (by date) or a fixed season id.</summary>
+    public string SeasonMode { get; set; } = "auto";
+
+    public bool SeasonEffects { get; set; } = true;
+
+    public bool SeasonAccent { get; set; }
+
+    // Site-wide
+    public bool QuickSearch { get; set; } = true;
+
+    public ScheduledAnnouncement[] Announcements { get; set; } = Array.Empty<ScheduledAnnouncement>();
+}
+
 public class PluginConfiguration : BasePluginConfiguration
 {
+    /// <summary>Gets or sets the optional web app enhancements.</summary>
+    public ExtrasSettings Extras { get; set; } = new ExtrasSettings();
+
     /// <summary>Gets or sets the site design settings.</summary>
     public ThemeSettings Theme { get; set; } = new ThemeSettings();
 

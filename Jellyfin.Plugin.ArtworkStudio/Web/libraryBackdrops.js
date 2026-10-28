@@ -1,4 +1,4 @@
-/* Artwork Studio — custom page backgrounds for the Jellyfin web app.
+/* Artwork Studio \u2014 custom page backgrounds for the Jellyfin web app.
  *  - Library pages show the library's own backdrop(s) instead of random item backdrops.
  *  - The home page and the login page can have their own backdrop(s).
  *  - The darkness of the overlay on top of backdrops is adjustable. */
@@ -35,6 +35,9 @@
         '#asLibBackdrop{position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;overflow:hidden}' +
         '#asLibBackdrop>div{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease}' +
         '#asLibBackdrop>div.as-on{opacity:1}' +
+        '.as-bg-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;pointer-events:none}' +
+        '.as-login-video{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none}' +
+        'html.transparentDocument .as-bg-video,html.transparentDocument .as-login-video{display:none!important}' +
         'body.as-libbg .backdropContainer{display:none!important}' +
         'body.as-libbg .backgroundContainer:not(.backgroundContainer-transparent){background:' + dimCss + '!important}' +
         (cfg.dimAll ? '.backgroundContainer.withBackdrop:not(.backgroundContainer-transparent){background:' + dimCss + '!important}' : '') +
@@ -80,6 +83,27 @@
     // so nothing inside the page can clip or cover it.
     var SPLIT = !!(cfg.theme && /^split/.test(cfg.theme.LoginLayout || ''));
     var splitEl = null, splitLayers = [], splitShown = null;
+    // A layer shows either an image (as its background) or a muted looping video
+    function isVideo(url) { return /\.(mp4|webm)(\?|$)/i.test(url || ''); }
+    function setLayer(layer, url) {
+        var v = layer.querySelector('video');
+        if (isVideo(url)) {
+            layer.style.backgroundImage = '';
+            if (!v) {
+                v = document.createElement('video');
+                v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+                v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+                v.className = 'as-bg-video';
+                layer.appendChild(v);
+            }
+            if (v.getAttribute('src') !== url) { v.src = url; }
+            var pr = v.play(); if (pr && pr.catch) { pr.catch(function () {}); }
+        } else {
+            if (v) { v.remove(); }
+            layer.style.backgroundImage = 'url("' + url + '")';
+        }
+    }
+
     function showSplit(url) {
         if (!splitEl || !splitEl.isConnected) {
             splitEl = document.createElement('div');
@@ -95,7 +119,7 @@
         splitShown = url;
         var next = splitLayers[0].classList.contains('as-on') ? splitLayers[1] : splitLayers[0];
         var prev = next === splitLayers[0] ? splitLayers[1] : splitLayers[0];
-        next.style.backgroundImage = 'url("' + url + '")';
+        setLayer(next, url);
         next.classList.add('as-on');
         prev.classList.remove('as-on');
     }
@@ -138,6 +162,21 @@
         var lp = loginPageEl() || document.querySelector('.standalonePage:not(.hide)');
         if (!lp) { return; }
         lp.classList.add('as-loginbg');
+        var vid = lp.querySelector(':scope > video.as-login-video');
+        if (isVideo(curUrl)) {
+            // video can't be a CSS background: put a looping video at the back of the sign-in page
+            lp.style.removeProperty('--as-login-img');
+            if (!vid) {
+                vid = document.createElement('video');
+                vid.className = 'as-login-video';
+                vid.muted = true; vid.loop = true; vid.autoplay = true; vid.playsInline = true;
+                vid.setAttribute('muted', ''); vid.setAttribute('playsinline', '');
+                lp.insertBefore(vid, lp.firstChild);
+            }
+            if (vid.getAttribute('src') !== curUrl) { vid.src = curUrl; var pr = vid.play(); if (pr && pr.catch) { pr.catch(function () {}); } }
+            return;
+        }
+        if (vid) { vid.remove(); }
         var v = 'url("' + curUrl + '")';
         if (lp.style.getPropertyValue('--as-login-img') !== v) { lp.style.setProperty('--as-login-img', v); }
     }
@@ -180,12 +219,13 @@
         img.onload = function () {
             var next = layers[0].classList.contains('as-on') ? layers[1] : layers[0];
             var prev = next === layers[0] ? layers[1] : layers[0];
-            next.style.backgroundImage = 'url("' + url + '")';
+            setLayer(next, url);
             next.classList.add('as-on');
             prev.classList.remove('as-on');
             curUrl = url;
             applyLogin();
         };
+        if (isVideo(url)) { img.onload(); return; }   // videos load themselves
         img.src = url;
     }
 
@@ -211,6 +251,7 @@
         hideSplit();
         document.body.classList.remove('as-libbg');
         Array.prototype.forEach.call(document.querySelectorAll('.as-loginbg'), function (el) { el.classList.remove('as-loginbg'); el.style.removeProperty('--as-login-img'); });
+        Array.prototype.forEach.call(document.querySelectorAll('video.as-login-video'), function (v) { v.remove(); });
         if (host) { host.remove(); host = null; }
         if (addedWithBackdrop) {
             var bg = document.querySelector('.backgroundContainer');

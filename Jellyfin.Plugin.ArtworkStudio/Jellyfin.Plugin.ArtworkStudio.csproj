@@ -32,6 +32,8 @@
     <EmbeddedResource Include="Web\libraryBackdrops.js" />
     <None Remove="Web\presets.js" />
     <EmbeddedResource Include="Web\presets.js" />
+    <None Remove="Web\enhancements.js" />
+    <EmbeddedResource Include="Web\enhancements.js" />
     <None Remove="Web\siteTheme.js" />
     <EmbeddedResource Include="Web\siteTheme.js" />
   </ItemGroup>
