@@ -134,6 +134,39 @@
             css.push(HDR + '{background:' + (bg || '#101010') + '!important}');
         } else if (t.HeaderStyle === 'transparent') {
             css.push(HDR + '{background:transparent!important;box-shadow:none!important}.skinHeader.semiTransparent{background:linear-gradient(rgba(0,0,0,.6),transparent)!important}');
+        } else if (t.HeaderStyle === 'fade') {
+            // see-through over backdrops, frosted once the page scrolls (html.as-scrolled is set by this script)
+            css.push(HDR + '{background:linear-gradient(rgba(0,0,0,.55),transparent)!important;box-shadow:none!important;transition:background .35s,backdrop-filter .35s}' +
+                'html.as-scrolled :is(' + HDR + '){background:rgba(' + (bg ? hexToRgb(bg) : '16,16,16') + ',.82)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}');
+        }
+
+        // Jellyfin 12: its built-in themes all read a shared set of colour variables. Point them at the
+        // design so screens this stylesheet doesn't reach (dialogs, menus, dashboard, new pages) match too.
+        var P0 = window.__artworkStudioPresets, preset0 = P0 && t.Preset && P0.list[t.Preset];
+        var nAcc = accent || (preset0 ? safeColor(preset0.settings.AccentColor) : '');
+        var nBg = bg || (preset0 ? safeColor(preset0.settings.BackgroundColor) : '');
+        if (t.NativeTheme !== false && (nAcc || nBg || t.CardRadius >= 0)) {
+            var v = [];
+            function mix(hex, amt) { var c = hexToRgb(hex).split(',').map(Number); return 'rgb(' + c.map(function (x) { return Math.round(amt < 0 ? x * (1 + amt) : x + (255 - x) * amt); }).join(',') + ')'; }
+            if (nAcc) {
+                var ch = hexToRgb(nAcc).split(',').join(' ');
+                v.push('--jf-palette-primary-main:' + nAcc, '--jf-palette-primary-mainChannel:' + ch, '--jf-palette-primary-dark:' + mix(nAcc, -0.25),
+                    '--jf-palette-primary-light:' + mix(nAcc, 0.25), '--jf-palette-primary-contrastText:' + onAccent(nAcc),
+                    '--jf-palette-secondary-main:' + nAcc, '--jf-palette-secondary-mainChannel:' + ch, '--jf-palette-secondary-contrastText:' + onAccent(nAcc));
+            }
+            if (nBg) {
+                v.push('--jf-palette-background-default:' + nBg, '--jf-palette-background-defaultChannel:' + hexToRgb(nBg).split(',').join(' '),
+                    '--jf-palette-background-paper:' + mix(nBg, 0.06), '--jf-palette-AppBar-transparentBg:rgba(' + hexToRgb(nBg) + ',.6)');
+            }
+            if (t.CardRadius >= 0) { v.push('--jf-card-borderRadius:' + Math.min(40, t.CardRadius) + 'px'); }
+            css.push(':root:root{' + v.map(function (x) { return x + '!important'; }).join(';') + '}');
+        }
+
+        // Modern layout side menu: the logo instead of the Jellyfin icon and server name
+        if (logo && t.DrawerLogo !== false) {
+            var DL = '.MuiDrawer-paper a[href="#/"]:has(img)';
+            css.push(DL + '>*{display:none!important}' +
+                DL + '::before{content:"";display:block;height:2.6rem;width:100%;max-width:12rem;background:url(' + cssString(logo) + ') left center/contain no-repeat;margin:.2rem 0}');
         }
 
         // Profile picture / icon at the top right of the top bar
@@ -334,6 +367,16 @@
 
         if (t.CustomCss) { css.push(t.CustomCss); }
         return { css: css, fonts: fonts };
+    }
+
+    if (t.HeaderStyle === 'fade') {
+        var onScroll = function () {
+            var y = Math.max(window.scrollY || 0, (document.scrollingElement || document.documentElement).scrollTop || 0);
+            Array.prototype.forEach.call(document.querySelectorAll('.mainAnimatedPage:not(.hide) .scrollY, .page:not(.hide)'), function (el) { y = Math.max(y, el.scrollTop || 0); });
+            document.documentElement.classList.toggle('as-scrolled', y > 60);
+        };
+        window.addEventListener('scroll', onScroll, true);
+        window.addEventListener('hashchange', function () { setTimeout(onScroll, 300); });
     }
 
     var built = buildCss(t, { logo: logo, dim: cfg.dim, live: true });

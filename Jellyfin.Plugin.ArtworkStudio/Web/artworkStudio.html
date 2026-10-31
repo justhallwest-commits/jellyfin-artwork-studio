@@ -264,6 +264,8 @@
         <option value="MusicVideo">Music videos</option>
         <option value="Playlist">Playlists</option>
         <option value="Video">Home videos</option>
+        <option value="Book">Books &amp; comics</option>
+        <option value="AudioBook">Audiobooks</option>
       </select>
       <select class="as-in" id="asMissing" title="Show only items missing…">
         <option value="">Show: Everything</option>
@@ -340,11 +342,21 @@
           <button class="as-swatch" style="background:#000000" data-c="#000000" title="Black"></button><button class="as-swatch" style="background:#0b0b0f" data-c="#0b0b0f" title="Near black"></button><button class="as-swatch" style="background:#141821" data-c="#141821" title="Midnight"></button><button class="as-swatch" style="background:#1a1220" data-c="#1a1220" title="Plum"></button>
         </div></div></div>
       <div class="as-field"><label for="tHeader">Top bar style</label>
-        <select class="as-in" id="tHeader"><option value="default">Jellyfin default</option><option value="glass">Frosted glass</option><option value="solid">Solid</option><option value="transparent">Transparent (fade)</option></select></div>
+        <select class="as-in" id="tHeader"><option value="default">Jellyfin default</option><option value="glass">Frosted glass</option><option value="solid">Solid</option><option value="transparent">Transparent (fade)</option><option value="fade">See-through over backdrops, frosted when scrolling</option></select></div>
       <div class="as-field" style="max-width:none"><label for="tHeadUser">Profile picture size (top right): <span id="tHeadUserVal"></span></label><input id="tHeadUser" type="range" min="0" max="4" step="0.1" style="width:100%"></div>
       <div class="as-field"><label for="tBodyFont">Text font <span class="as-hint">(any Google Font name)</span></label><input class="as-in" id="tBodyFont" list="asFontList" placeholder="Jellyfin default"></div>
       <div class="as-field"><label for="tHeadFont">Heading font</label><input class="as-in" id="tHeadFont" list="asFontList" placeholder="Same as text"></div>
       <datalist id="asFontList"><option>Inter</option><option>Poppins</option><option>Montserrat</option><option>Roboto</option><option>Open Sans</option><option>Lato</option><option>Nunito</option><option>Outfit</option><option>DM Sans</option><option>Manrope</option><option>Work Sans</option><option>Raleway</option><option>Quicksand</option><option>Oswald</option><option>Bebas Neue</option><option>Anton</option><option>Playfair Display</option><option>Merriweather</option></datalist>
+    </div>
+
+    <div class="as-panel">
+      <h3>Jellyfin 12 &amp; the Modern layout</h3>
+      <div class="as-hint">Jellyfin 12 uses the new Modern layout by default, with a side menu and its own colour system. These settings carry your design into it. (On older Jellyfin they simply have no effect.)</div>
+      <label class="as-row" style="gap:.5em;margin-top:.7em"><input type="checkbox" id="tNative"> Use my colours in Jellyfin's own theme too <span class="as-hint">(menus, dialogs, the dashboard and new pages follow your accent and background)</span></label>
+      <label class="as-row" style="gap:.5em;margin-top:.4em"><input type="checkbox" id="tDrawerLogo"> Show my logo at the top of the side menu</label>
+      <div style="margin-top:.9em"><b>Side-menu links</b> <span class="as-hint">— extra links in the side menu (both layouts), e.g. a request page, Discord or a help page. Icon = any <a href="https://fonts.google.com/icons" target="_blank" rel="noopener">Material icon</a> name.</span></div>
+      <div id="tLinks" style="margin-top:.4em"></div>
+      <button class="as-btn small" id="tLinkAdd" type="button"><span class="material-icons">add_link</span>Add link</button>
     </div>
 
     <div class="as-panel">
@@ -666,7 +678,7 @@
         movies: 'Movie', tvshows: 'Series', music: 'MusicAlbum,MusicArtist', boxsets: 'BoxSet',
         musicvideos: 'MusicVideo', homevideos: 'Video,PhotoAlbum', playlists: 'Playlist', books: 'Book,AudioBook'
     };
-    var DEFAULT_TYPES = 'Movie,Series,BoxSet,MusicAlbum,MusicArtist,MusicVideo,Video';
+    var DEFAULT_TYPES = 'Movie,Series,BoxSet,MusicAlbum,MusicArtist,MusicVideo,Video,Book,AudioBook';
     var PAGE_SIZE = 60, MISSING_PAGE_SIZE = 400;
 
     // ------------------------------------------------------------ state
@@ -1836,7 +1848,8 @@
                 { k: 'SpotlightSeconds', type: 'num', label: 'Seconds each', min: 5, max: 60 },
                 { k: 'SpotlightHeight', type: 'num', label: 'Height (% of screen)', min: 35, max: 85 },
                 { k: 'SpotlightTrailers', type: 'bool', label: 'Play a muted preview in the background' },
-                { k: 'PhonePreviews', type: 'bool', label: 'Also play previews on phones (uses mobile data)' }] },
+                { k: 'PhonePreviews', type: 'bool', label: 'Also play previews on phones (uses mobile data)' },
+                { k: 'SpotlightVersionPicker', type: 'bool', label: 'When a title has several versions (1080p / 4K…), Play asks which one' }] },
             { k: 'PreviewSourceRow', noSwitch: true, label: 'Preview source', hint: 'Where spotlight and hover previews come from. "Clips from your server" plays a short muted scene from the movie or show itself — nothing goes to YouTube, and it works for every title. Clips play straight from the file; titles the browser can\u2019t play just show their backdrop, unless you allow the server to convert them.', sub: [
                 { k: 'PreviewSource', type: 'select', label: 'Use', opts: [['clips', 'Clips from your server'], ['clips-then-trailers', 'Clips, then trailers'], ['trailers-then-clips', 'Trailers, then clips'], ['trailers', 'Trailers only (local trailer files, then YouTube)']] },
                 { k: 'ClipSeconds', type: 'num', label: 'Clip length (seconds)', min: 8, max: 120 },
@@ -1848,9 +1861,11 @@
                 { k: 'BadgeQuality', type: 'bool', label: 'Quality (4K, HDR, Atmos)' },
                 { k: 'BadgeNew', type: 'bool', label: 'NEW ribbon' },
                 { k: 'BadgeNewDays', type: 'num', label: 'NEW for (days)', min: 1, max: 90 },
-                { k: 'BadgeRating', type: 'bool', label: 'Rating' }] },
+                { k: 'BadgeRating', type: 'bool', label: 'Rating' },
+                { k: 'BadgeVersions', type: 'bool', label: 'Number of versions (Jellyfin 12: 1080p and 4K copies of one title)' }] },
             { k: 'AnimatedLibraryCovers', label: 'Animated library covers', hint: 'Play the GIF / video loops set below on library tiles.' },
-            { k: 'SurpriseMe', label: '"Surprise me" button', hint: 'A dice button in the top bar that picks a random movie, show or episode — optionally by genre and unwatched only.' }] },
+            { k: 'SurpriseMe', label: '"Surprise me" button', hint: 'A dice button in the top bar that picks a random movie, show or episode — optionally by genre and unwatched only.' },
+            { k: 'ArtworkSearch', label: 'Artwork search shortcuts (Jellyfin 12, admins only)', hint: 'Type "missing poster", "missing logo", "missing backdrop", "missing banner", "missing thumb" or "missing art" into Jellyfin\u2019s normal search to list the movies and shows that need that artwork. Other searches work as usual.' }] },
         { title: 'Movie & show pages', items: [
             { k: 'CinematicBackdrop', label: 'Cinematic backdrop', hint: 'A slow drift-and-zoom on backdrops (also on the spotlight banner).' },
             { k: 'DetailLogo', label: 'Title logo', hint: 'Show the title\u2019s logo artwork instead of plain text when it has one.' },
@@ -2152,6 +2167,9 @@
         $('#tCss').value = t.CustomCss || '';
         S.preset = t.Preset || '';
         S.beforePreset = t.BeforePreset || '';
+        $('#tNative').checked = t.NativeTheme !== false;
+        $('#tDrawerLogo').checked = t.DrawerLogo !== false;
+        $('#tLinks').innerHTML = (t.MenuLinks || []).map(linkRow).join('');
         ensurePresets().then(renderPresets);
         updatePreview();
     }
@@ -2192,9 +2210,27 @@
             AnnouncementDismissible: $('#tAnnDismiss').checked,
             CustomCss: $('#tCss').value,
             Preset: S.preset || '',
-            BeforePreset: S.beforePreset || ''
+            BeforePreset: S.beforePreset || '',
+            NativeTheme: $('#tNative').checked,
+            DrawerLogo: $('#tDrawerLogo').checked,
+            MenuLinks: $$('#tLinks .as-linkrow').map(function (r) {
+                return { Name: $('[data-k="Name"]', r).value.trim(), Url: $('[data-k="Url"]', r).value.trim(), Icon: $('[data-k="Icon"]', r).value.trim() || 'link' };
+            }).filter(function (l) { return l.Name && /^https?:\/\//i.test(l.Url); })
         };
     }
+
+
+    // ---- side-menu links (Design)
+    function linkRow(l) {
+        l = l || {};
+        return '<div class="as-row as-linkrow" style="gap:.4em;margin-bottom:.4em;flex-wrap:wrap">' +
+            '<input class="as-in" data-k="Icon" style="width:7em" placeholder="icon" value="' + esc(l.Icon || 'link') + '">' +
+            '<input class="as-in" data-k="Name" style="flex:1 1 9em" placeholder="Name (e.g. Request a movie)" value="' + esc(l.Name || '') + '">' +
+            '<input class="as-in" data-k="Url" style="flex:2 1 14em" placeholder="https://…" value="' + esc(l.Url || '') + '">' +
+            '<button class="as-btn small danger" type="button" data-linkdel title="Remove">' + icon('delete') + '</button></div>';
+    }
+    $('#tLinkAdd').addEventListener('click', function () { $('#tLinks').insertAdjacentHTML('beforeend', linkRow({})); });
+    $('#tLinks').addEventListener('click', function (e) { var d = e.target.closest('[data-linkdel]'); if (d) { d.closest('.as-linkrow').remove(); } });
 
     // ============================================================ THEME PRESETS
     function ensurePresets() {
