@@ -652,7 +652,7 @@
     // ------------------------------------------------------------------ Home screen layout (set by an admin)
     // New users (or everyone, with "keep in step") get the admin's layout the first time they open the web app.
     var HL = cfg.homeLayout || {};
-    // Jellyfin 12's web app saves its data cache in IndexedDB ("keyval-store" / "query-cache", via idb-keyval)
+    // Jellyfin 12's web app saves its data cache in IndexedDB ("keyval-store" / "jellyfin-query-cache", via idb-keyval)
     function dropWebQueryCache() {
         return new Promise(function (done) {
             var t = setTimeout(done, 1500);
@@ -666,7 +666,7 @@
                     try {
                         if (!db.objectStoreNames.contains('keyval')) { db.close(); finish(); return; }
                         var tx = db.transaction('keyval', 'readwrite');
-                        tx.objectStore('keyval').delete('query-cache');
+                        var st = tx.objectStore('keyval'); st.delete('jellyfin-query-cache'); st.delete('query-cache');
                         tx.oncomplete = tx.onerror = tx.onabort = function () { db.close(); finish(); };
                     } catch (e) { try { db.close(); } catch (x) { /* ignore */ } finish(); }
                 };
