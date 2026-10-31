@@ -652,6 +652,27 @@
     // ------------------------------------------------------------------ Home screen layout (set by an admin)
     // New users (or everyone, with "keep in step") get the admin's layout the first time they open the web app.
     var HL = cfg.homeLayout || {};
+    // Jellyfin 12's web app saves its data cache in IndexedDB ("keyval-store" / "query-cache", via idb-keyval)
+    function dropWebQueryCache() {
+        return new Promise(function (done) {
+            var t = setTimeout(done, 1500);
+            var finish = function () { clearTimeout(t); done(); };
+            try {
+                var req = indexedDB.open('keyval-store');
+                req.onupgradeneeded = function () { try { req.result.createObjectStore('keyval'); } catch (e) { /* ignore */ } };
+                req.onerror = finish;
+                req.onsuccess = function () {
+                    var db = req.result;
+                    try {
+                        if (!db.objectStoreNames.contains('keyval')) { db.close(); finish(); return; }
+                        var tx = db.transaction('keyval', 'readwrite');
+                        tx.objectStore('keyval').delete('query-cache');
+                        tx.oncomplete = tx.onerror = tx.onabort = function () { db.close(); finish(); };
+                    } catch (e) { try { db.close(); } catch (x) { /* ignore */ } finish(); }
+                };
+            } catch (e) { finish(); }
+        });
+    }
     var homeChecked = null;
     function homeLayoutTick() {
         var me = uid();
@@ -679,8 +700,13 @@
                     return a.updateUserConfiguration(me, c);
                 });
             }).then(function () {
-                // the web app keeps its own copy of these settings: reload once so it shows (and keeps) the new layout
-                try { if (sessionStorage.getItem('as-home-reload') !== HL.Stamp) { sessionStorage.setItem('as-home-reload', HL.Stamp); location.reload(); } } catch (e) { /* ignore */ }
+                // The web app keeps its own copy of these settings (in memory, and in Jellyfin 12 also in a saved
+                // cache), so drop that cache and reload once: it then shows, and keeps, the new layout.
+                try {
+                    if (sessionStorage.getItem('as-home-reload') === HL.Stamp) { return; }
+                    sessionStorage.setItem('as-home-reload', HL.Stamp);
+                } catch (e) { return; }
+                return dropWebQueryCache().then(function () { location.reload(); });
             });
         }).catch(function () { homeChecked = null; });
     }

@@ -145,7 +145,7 @@ const probe = () => {
     const p2 = await c2.newPage(); watch(p2, 'newbie');
     await login(p2, 'newbie', 'newbie-pass-1'); await p2.waitForTimeout(8000);
     await shot(p2, '17-newbie-home');
-    const sectionsShown = await p2.evaluate(() => [...document.querySelectorAll('.homeSectionsContainer .verticalSection .sectionTitle')].map(x => x.textContent.trim()).slice(0, 4));
+    const sectionsShown = await p2.evaluate(() => [...document.querySelectorAll('.homeSectionsContainer > div')].filter(d => d.offsetParent && !d.classList.contains('hide')).map(d => (d.className.match(/section\d+/) || [''])[0] + ':' + ((d.querySelector('.sectionTitle') || {}).textContent || '').trim()).slice(0, 5));
     await c2.close();
     const newbie = await prefsOf('newbie');
     return { status, kid, newbie, newbieFirstRows: sectionsShown };
