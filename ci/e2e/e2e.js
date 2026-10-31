@@ -143,12 +143,16 @@ const probe = () => {
     });
     const c2 = await browser.newContext({ viewport: { width: 1400, height: 900 } });
     const p2 = await c2.newPage(); watch(p2, 'newbie');
-    await login(p2, 'newbie', 'newbie-pass-1'); await p2.waitForTimeout(8000);
+    const timeline = []; const t0 = Date.now();
+    p2.on('console', m => { if (/Artwork Studio|homesection/i.test(m.text())) timeline.push((Date.now() - t0) + 'ms console ' + m.text().slice(0, 120)); });
+    p2.on('framenavigated', f => { if (f === p2.mainFrame()) timeline.push((Date.now() - t0) + 'ms nav ' + f.url().replace(URL, '')); });
+    p2.on('request', r => { if (/DisplayPreferences/.test(r.url())) timeline.push((Date.now() - t0) + 'ms ' + r.method() + ' ' + r.url().replace(URL, '').slice(0, 90)); });
+    await login(p2, 'newbie', 'newbie-pass-1'); await p2.waitForTimeout(12000);
     await shot(p2, '17-newbie-home');
     const sectionsShown = await p2.evaluate(() => [...document.querySelectorAll('.homeSectionsContainer > div')].filter(d => d.offsetParent && !d.classList.contains('hide')).map(d => (d.className.match(/section\d+/) || [''])[0] + ':' + ((d.querySelector('.sectionTitle') || {}).textContent || '').trim()).slice(0, 5));
     await c2.close();
     const newbie = await prefsOf('newbie');
-    return { status, kid, newbie, newbieFirstRows: sectionsShown };
+    return { status, kid, newbie, newbieFirstRows: sectionsShown, timeline };
   });
 
   await step('bulk-versions-tab', async () => {

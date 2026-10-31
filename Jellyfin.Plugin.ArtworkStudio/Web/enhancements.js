@@ -691,6 +691,7 @@
             if (!had && !HL.ApplyToNewUsers && !HL.KeepInStep) { return null; }
             want.forEach(function (v, i) { cp['homesection' + i] = v; });
             cp.asHomeLayout = HL.Stamp;
+            console.info('[Artwork Studio] applying the home screen layout set by the admin');
             return a.ajax({ type: 'POST', url: url, data: JSON.stringify(p), contentType: 'application/json' }).then(function () {
                 if (!(HL.LibraryOrder || []).length && !(HL.LatestExcludes || []).length) { return; }
                 return a.getUser(me).then(function (u) {
