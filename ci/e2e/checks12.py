@@ -101,12 +101,10 @@ check('pr-playlist', pr_playlist)
 
 
 def pr_segments():
-    tasks = call('GET', '/ScheduledTasks')
-    t = next((t for t in tasks if 'segment' in (t.get('Key', '') + t.get('Name', '')).lower()), None)
-    assert t, [x.get('Name') for x in tasks]
-    call('POST', f"/ScheduledTasks/Running/{t['Id']}")
+    # Pre-Roll Videos marks its clips itself when settings are saved (Jellyfin's scan skips home videos)
+    pr_config(SkippablePrerolls=True, SkippableType='Intro')
     segs = None
-    for _ in range(30):
+    for _ in range(40):
         time.sleep(2)
         segs = call('GET', f"/MediaSegments/{clips[0]['Id']}")
         if segs and segs.get('Items'):

@@ -176,7 +176,11 @@ const probe = () => {
     const p = await c.newPage(); watch(p, 'phone');
     await p.goto(URL + '/web/#/login'); await p.waitForTimeout(4000); await shot(p, '07-login-phone');
     await login(p); await shot(p, '08-home-phone');
-    const r = await p.evaluate(probe); await c.close(); return r;
+    const r = await p.evaluate(probe);
+    const menu = p.locator('header.MuiAppBar-root button').first();
+    if (await menu.count()) { await menu.click(); await p.waitForTimeout(1500); await shot(p, '09-phone-drawer'); }
+    r.drawer = await p.evaluate(() => { const a = document.querySelector('.MuiDrawer-paper a[href="#/"]'); return { found: !!a, logo: a ? /Backdrops\/logo/.test(getComputedStyle(a, '::before').backgroundImage) : false, links: [...document.querySelectorAll('.MuiDrawer-paper a[target=_blank]')].map(x => x.textContent) }; });
+    await c.close(); return r;
   });
 
   await browser.close();
