@@ -8,6 +8,30 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.0.33.12",
+        "changelog": "Build for Jellyfin 12.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.33/artwork-studio_1.0.33.12_jellyfin-12.zip",
+        "checksum": "2504a28816b0a0be96d6872fbad8e479",
+        "timestamp": "2026-10-31T17:12:54Z"
+      },
+      {
+        "version": "1.0.33.11",
+        "changelog": "Build for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.33/artwork-studio_1.0.33.11_jellyfin-10.11.zip",
+        "checksum": "1cf3d8cb26cf3926c9b169241449fa86",
+        "timestamp": "2026-10-31T17:12:54Z"
+      },
+      {
+        "version": "1.0.33.10",
+        "changelog": "Build for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.33/artwork-studio_1.0.33.10_jellyfin-10.10.zip",
+        "checksum": "f6257f90f62ff6b03749a8bfb3ed7059",
+        "timestamp": "2026-10-31T17:12:54Z"
+      },
+      {
         "version": "1.0.32.12",
         "changelog": "Build for Jellyfin 12.",
         "targetAbi": "12.0.0.0",
@@ -91,6 +115,22 @@
     "imageUrl": "",
     "versions": [
       {
+        "version": "1.1.0.12",
+        "changelog": "Release 1.1.0.0 for Jellyfin 12",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-bulk-metadata/releases/download/v1.1.0.0/bulk-metadata-editor_1.1.0.12_jellyfin-12.zip",
+        "checksum": "c66abf8331c5174cc01708f6a389d19a",
+        "timestamp": "2026-10-31T17:12:56Z"
+      },
+      {
+        "version": "1.1.0.0",
+        "changelog": "Release 1.1.0.0",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-bulk-metadata/releases/download/v1.1.0.0/bulk-metadata-editor_1.1.0.0.zip",
+        "checksum": "fd1165b5900f07ce99021a9b60ec5a8b",
+        "timestamp": "2026-10-31T17:12:56Z"
+      },
+      {
         "version": "1.0.1.12",
         "changelog": "Release 1.0.1.0 for Jellyfin 12",
         "targetAbi": "12.0.0.0",
@@ -125,6 +165,22 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.1.1.12",
+        "changelog": "Build 41c5125066adc3b7d5fc090263eb85178b7d9b37",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-12-b6.zip",
+        "checksum": "e228ffec7c6faf19224ecaa9ead45195",
+        "timestamp": "2026-10-31T17:12:51Z"
+      },
+      {
+        "version": "1.1.1.0",
+        "changelog": "Build 41c5125066adc3b7d5fc090263eb85178b7d9b37",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.11-b6.zip",
+        "checksum": "064c6f1d206caab5e9af91416b9fe09d",
+        "timestamp": "2026-10-31T17:12:51Z"
+      },
+      {
         "version": "1.1.0.12",
         "changelog": "Build e5b9e565be2afe818de44b16c51e3f11a97f31a1",
         "targetAbi": "12.0.0.0",
@@ -139,6 +195,14 @@
         "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.11-b5.zip",
         "checksum": "ba0fdd5368b250911fe547fe418d100f",
         "timestamp": "2026-10-31T03:11:31Z"
+      },
+      {
+        "version": "1.0.1.0",
+        "changelog": "Build 41c5125066adc3b7d5fc090263eb85178b7d9b37",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.10-b6.zip",
+        "checksum": "67e7adb2664ef317a4e651d0b6704dd8",
+        "timestamp": "2026-10-31T17:12:51Z"
       },
       {
         "version": "1.0.0.0",
@@ -159,6 +223,22 @@
     "category": "General",
     "imageUrl": "",
     "versions": [
+      {
+        "version": "3.1.0.12",
+        "changelog": "v3.1.0 for Jellyfin 12: similar-title fallback, same pre-roll for every version, skippable pre-rolls, playlist line-up",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v3.1.0/jellyfin-preroll-v3.1.0-jf12.zip",
+        "checksum": "69500857f94a83e28cc6c9ed432c1188",
+        "timestamp": "2026-10-31T17:12:51Z"
+      },
+      {
+        "version": "3.1.0.0",
+        "changelog": "v3.1.0 for Jellyfin 10.11",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v3.1.0/jellyfin-preroll-v3.1.0.zip",
+        "checksum": "72b0050e2419fd50599840ab5b153254",
+        "timestamp": "2026-10-31T17:12:51Z"
+      },
       {
         "version": "3.0.0.12",
         "changelog": "Build for Jellyfin 12.x (.NET 10)",
@@ -206,6 +286,14 @@
         "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v2.0.0/jellyfin-preroll-v2.0.0.zip",
         "checksum": "8932237939d3ec828f35e131517e5096",
         "timestamp": "2026-10-23T00:00:00Z"
+      },
+      {
+        "version": "1.31.0.0",
+        "changelog": "v3.1.0 for Jellyfin 10.10",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-preroll-ugreen/releases/download/v3.1.0/jellyfin-preroll-v3.1.0-jf10.10.zip",
+        "checksum": "d7286c14cfd3bb261f748d3967bdc1a3",
+        "timestamp": "2026-10-31T17:12:51Z"
       },
       {
         "version": "1.30.0.0",
