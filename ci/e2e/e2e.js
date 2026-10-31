@@ -20,14 +20,14 @@ function watch(page, tag) {
   page.on('response', r => { const u = r.url(); if (r.status() >= 400 && !/favicon|\.map$/.test(u)) R.failedRequests.push(`[${tag}] ${r.status()} ${r.request().method()} ${u.replace(URL, '').slice(0, 160)}`); });
 }
 
-async function login(page) {
+async function login(page, user = USER, pass = PASS) {
   await page.goto(URL + '/web/#/login', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(4000);
   // Manual sign-in (the user list may or may not be showing)
   const manual = page.locator('.btnManual:not(.hide)');
   if (await manual.count()) { await manual.first().click().catch(() => {}); await page.waitForTimeout(500); }
-  await page.fill('#txtManualName', USER);
-  await page.fill('#txtManualPassword', PASS);
+  await page.fill('#txtManualName', user);
+  await page.fill('#txtManualPassword', pass);
   await page.locator('.manualLoginForm .button-submit').click();
   await page.waitForFunction(() => /#\/home/.test(location.hash) || document.querySelector('.homePage'), null, { timeout: 30000 });
   await page.waitForTimeout(6000);
@@ -107,6 +107,48 @@ const probe = () => {
     }
     out.browseCards = await page.evaluate(() => document.querySelectorAll('#asGrid .as-card').length);
     return out;
+  });
+
+  await step('home-layout', async () => {
+    page.on('dialog', d => d.accept().catch(() => {}));
+    await page.goto(URL + '/web/#/configurationpage?name=ArtworkStudio'); await page.waitForTimeout(5000);
+    await page.click('.as-tab[data-tab="home"]'); await page.waitForTimeout(3000);
+    // "Recently added" to the top, "Continue listening" off
+    for (let i = 0; i < 10; i++) {
+      const done = await page.evaluate(() => {
+        const rows = [...document.querySelectorAll('#hlSections > div')];
+        const r = rows.findIndex(x => /Recently added/.test(x.textContent));
+        if (r <= 0) return true;
+        rows[r].querySelector('[data-hup]').click(); return false;
+      });
+      if (done) break;
+    }
+    await page.evaluate(() => { const r = [...document.querySelectorAll('#hlSections > div')].find(x => /Continue listening/.test(x.textContent)); const c = r && r.querySelector('[data-hs]'); if (c && c.checked) { c.click(); } });
+    await page.evaluate(() => { const c = document.getElementById('hlNew'); if (!c.checked) c.click(); });
+    await shot(page, '16-home-layout');
+    await page.click('#hlApplyAll'); await page.waitForTimeout(8000);
+    const status = await page.evaluate(() => document.getElementById('hlStatus').textContent);
+    const prefsOf = (name) => page.evaluate(async (n) => {
+      const h = { Authorization: 'MediaBrowser Token="' + ApiClient.accessToken() + '"' };
+      const users = await (await fetch(ApiClient.getUrl('Users'), { headers: h })).json();
+      const u = users.find(x => x.Name === n); if (!u) return null;
+      const p = await (await fetch(ApiClient.getUrl('DisplayPreferences/usersettings', { userId: u.Id, client: 'emby' }), { headers: h })).json();
+      return [0, 1, 2, 3].map(i => p.CustomPrefs['homesection' + i]).concat([p.CustomPrefs.asHomeLayout ? 'stamped' : 'no-stamp']);
+    }, name);
+    const kid = await prefsOf('kid');
+    // a brand-new user gets the layout the first time they open the web app
+    await page.evaluate(async () => {
+      const h = { Authorization: 'MediaBrowser Token="' + ApiClient.accessToken() + '"', 'Content-Type': 'application/json' };
+      await fetch(ApiClient.getUrl('Users/New'), { method: 'POST', headers: h, body: JSON.stringify({ Name: 'newbie', Password: 'newbie-pass-1' }) });
+    });
+    const c2 = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+    const p2 = await c2.newPage(); watch(p2, 'newbie');
+    await login(p2, 'newbie', 'newbie-pass-1'); await p2.waitForTimeout(8000);
+    await shot(p2, '17-newbie-home');
+    const sectionsShown = await p2.evaluate(() => [...document.querySelectorAll('.homeSectionsContainer .verticalSection .sectionTitle')].map(x => x.textContent.trim()).slice(0, 4));
+    await c2.close();
+    const newbie = await prefsOf('newbie');
+    return { status, kid, newbie, newbieFirstRows: sectionsShown };
   });
 
   await step('bulk-versions-tab', async () => {
