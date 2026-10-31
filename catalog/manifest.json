@@ -8,6 +8,30 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.0.32.12",
+        "changelog": "Build for Jellyfin 12.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.32/artwork-studio_1.0.32.12_jellyfin-12.zip",
+        "checksum": "c77dbadab093b33cb58d1c2457b38442",
+        "timestamp": "2026-10-31T03:09:31Z"
+      },
+      {
+        "version": "1.0.32.11",
+        "changelog": "Build for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.32/artwork-studio_1.0.32.11_jellyfin-10.11.zip",
+        "checksum": "3e73dbeae9af6ad1d9e09afd590c4c00",
+        "timestamp": "2026-10-31T03:09:31Z"
+      },
+      {
+        "version": "1.0.32.10",
+        "changelog": "Build for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/v1.0.32/artwork-studio_1.0.32.10_jellyfin-10.10.zip",
+        "checksum": "d01cb9ed2f3d767e30526292ae472876",
+        "timestamp": "2026-10-31T03:09:31Z"
+      },
+      {
         "version": "1.0.31.12",
         "changelog": "Build for Jellyfin 12.",
         "targetAbi": "12.0.0.0",
@@ -89,6 +113,32 @@
         "sourceUrl": "https://github.com/justhallwest-commits/jellyfin-bulk-metadata/releases/download/v1.0.0.0/bulk-metadata-editor_1.0.0.0.zip",
         "checksum": "7ac8429a18c63020216253cad5a119b9",
         "timestamp": "2026-10-25T01:19:47Z"
+      }
+    ]
+  },
+  {
+    "guid": "c4c95473-00dd-462d-9561-f825460e5048",
+    "name": "Content Guard",
+    "description": "Per-user content blocking by tags, genres and ratings.",
+    "overview": "Reliable parental controls: episodes inherit series tags, changes apply instantly, works on every client.",
+    "owner": "justhallwest-commits",
+    "category": "General",
+    "versions": [
+      {
+        "version": "1.1.0.0",
+        "changelog": "Build 0fa4386d031811fdb732db73bf93f2aa241735a4",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.11-b4.zip",
+        "checksum": "06e496c1bb98177d6abb9b0564699cad",
+        "timestamp": "2026-10-30T17:02:31Z"
+      },
+      {
+        "version": "1.0.0.0",
+        "changelog": "Build 0fa4386d031811fdb732db73bf93f2aa241735a4",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.10-b4.zip",
+        "checksum": "53181aa057a0893213f4a86be3e1f941",
+        "timestamp": "2026-10-30T17:02:31Z"
       }
     ]
   },
