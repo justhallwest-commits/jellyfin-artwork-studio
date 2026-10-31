@@ -8,6 +8,9 @@ on:
       jellyfin_tag:
         description: 'Jellyfin image tag(s) to try, space separated'
         default: '12.4'
+      branch:
+        description: 'Branch to use for the other three plugins'
+        default: 'main'
   push:
     branches: [ main ]
     paths: [ 'Jellyfin.Plugin.ArtworkStudio/**', 'ci/e2e/**', '.github/workflows/e2e-jellyfin12.yml' ]
@@ -30,20 +33,47 @@ jobs:
         with:
           repository: justhallwest-commits/jellyfin-preroll-ugreen
           path: ext/preroll
+          ref: ${{ github.event.inputs.branch || 'main' }}
 
       - uses: actions/checkout@v4
         with:
           repository: justhallwest-commits/jellyfin-bulk-metadata
           path: ext/bulk
+          ref: ${{ github.event.inputs.branch || 'main' }}
 
       - uses: actions/checkout@v4
         with:
           repository: justhallwest-commits/jellyfin-content-guard
           path: ext/guard
+          ref: ${{ github.event.inputs.branch || 'main' }}
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Compile check for Jellyfin 10.10 and 10.11
+        run: |
+          mkdir -p ci/e2e/results
+          R=ci/e2e/results/compat-builds.txt; : > $R
+          b() { name=$1; shift; if dotnet build "$@" -c Release -o "/tmp/compat/$name" > "/tmp/$name.log" 2>&1; then echo "$name: ok" >> $R; else echo "$name: FAILED" >> $R; grep -E "error" "/tmp/$name.log" | sort -u | head -15 >> $R; fi; }
+          b as-1010 Jellyfin.Plugin.ArtworkStudio/Jellyfin.Plugin.ArtworkStudio.csproj -p:JellyfinVersion=10.10.7 -p:JellyfinTfm=net8.0
+          rm -rf Jellyfin.Plugin.ArtworkStudio/obj Jellyfin.Plugin.ArtworkStudio/bin
+          b as-1011 Jellyfin.Plugin.ArtworkStudio/Jellyfin.Plugin.ArtworkStudio.csproj -p:JellyfinVersion=10.11.0 -p:JellyfinTfm=net9.0
+          rm -rf Jellyfin.Plugin.ArtworkStudio/obj Jellyfin.Plugin.ArtworkStudio/bin
+          b pr-1010 ext/preroll/JellyfinPreroll/JellyfinPreroll.csproj -p:JellyfinAbi=10.10
+          rm -rf ext/preroll/JellyfinPreroll/obj ext/preroll/JellyfinPreroll/bin
+          b pr-1011 ext/preroll/JellyfinPreroll/JellyfinPreroll.csproj -p:JellyfinAbi=10.11
+          rm -rf ext/preroll/JellyfinPreroll/obj ext/preroll/JellyfinPreroll/bin
+          b bm-1010 ext/bulk/Jellyfin.Plugin.BulkMetadata/Jellyfin.Plugin.BulkMetadata.csproj
+          rm -rf ext/bulk/Jellyfin.Plugin.BulkMetadata/obj ext/bulk/Jellyfin.Plugin.BulkMetadata/bin
+          b cg-1010 ext/guard/Jellyfin.Plugin.ContentGuard/Jellyfin.Plugin.ContentGuard.csproj -p:JellyfinVersion=10.10
+          rm -rf ext/guard/Jellyfin.Plugin.ContentGuard/obj ext/guard/Jellyfin.Plugin.ContentGuard/bin
+          b cg-1011 ext/guard/Jellyfin.Plugin.ContentGuard/Jellyfin.Plugin.ContentGuard.csproj -p:JellyfinVersion=10.11
+          rm -rf ext/guard/Jellyfin.Plugin.ContentGuard/obj ext/guard/Jellyfin.Plugin.ContentGuard/bin
+          cat $R
 
       - name: Build the three plugins for Jellyfin 12
         id: build
@@ -54,6 +84,7 @@ jobs:
             if dotnet build Jellyfin.Plugin.ArtworkStudio/Jellyfin.Plugin.ArtworkStudio.csproj -c Release -p:JellyfinVersion=$v -p:JellyfinTfm=net10.0 -o out/as > build-as.log 2>&1; then JV=$v; break; fi
           done
           echo "Artwork Studio built against: ${JV:-FAILED}"; tail -20 build-as.log
+          mkdir -p ci/e2e/results; grep -E " error " build-as.log | sort -u | head -30 > ci/e2e/results/build-as-errors.txt || true
           [ -n "$JV" ] || exit 1
           echo "jv=$JV" >> "$GITHUB_OUTPUT"
           mkdir -p ci/e2e/plugins/ArtworkStudio ci/e2e/plugins/PreRollVideos ci/e2e/plugins/BulkMetadata ci/e2e/results
