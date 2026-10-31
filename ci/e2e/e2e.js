@@ -82,7 +82,7 @@ const probe = () => {
   });
 
   // ---------------- plugin pages
-  const pages = [['artwork-studio', 'ArtworkStudio'], ['preroll', 'Pre-Roll Videos'], ['bulk-metadata', 'BulkMetadata']];
+  const pages = [['artwork-studio', 'ArtworkStudio'], ['preroll', 'Pre-Roll Videos'], ['bulk-metadata', 'BulkMetadata'], ['content-guard', 'Content Guard']];
   for (const [slug, name] of pages) {
     await step('page-' + slug, async () => {
       await page.goto(URL + '/web/#/configurationpage?name=' + encodeURIComponent(name)); await page.waitForTimeout(6000);

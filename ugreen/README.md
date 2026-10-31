@@ -5,6 +5,7 @@ This sets up **Jellyfin 12** on a UGREEN NAS (UGOS Pro) with all the HallFlix pl
 - **Artwork Studio** — artwork, site design, themes, sign-in page, Extras, Other apps
 - **Pre-Roll Videos** — pre-rolls before movies and episodes
 - **Bulk Metadata Editor** — bulk editing across all libraries
+- **Content Guard** — per-user blocking by tags, genres and ratings
 
 Everything is done in the UGOS web interface — no terminal. The new server runs **next to** the Jellyfin you have now (App Center, port 8899) on port **8097**, so nothing changes on the current server until you decide to switch.
 
@@ -34,7 +35,7 @@ Check which volume your shares are on: right-click the `docker` folder → **Pro
    - If any path isn't on volume 1, change `/volume1` to match.
 6. **Deploy**.
 
-UGOS first runs a small helper (`hallflix-plugins`) that downloads the Jellyfin 12 versions of the three plugins into the config folder. It finishes after a few seconds, and then Jellyfin starts. The helper showing as *Exited* afterwards is normal.
+UGOS first runs a small helper (`hallflix-plugins`) that downloads the Jellyfin 12 versions of the four plugins into the config folder. It finishes after a few seconds, and then Jellyfin starts. The helper showing as *Exited* afterwards is normal.
 
 > If deployment fails with a message about `/dev/dri`, your model has no Intel graphics device. Delete the two `devices:` lines and deploy again (you only lose hardware transcoding).
 
@@ -43,7 +44,7 @@ UGOS first runs a small helper (`hallflix-plugins`) that downloads the Jellyfin 
 1. Open `http://<your NAS IP>:8097` (e.g. `http://192.168.254.204:8097`).
 2. Go through the setup wizard: language, your admin user, and then your libraries.
    - Your media is at `/media` inside Jellyfin. For example: Movies → `/media/Movies`, Shows → `/media/TV Shows`, Pre-rolls → `/media/Prerolls`.
-3. Open **Dashboard → Plugins**. Artwork Studio, Pre-Roll Videos and Bulk Metadata Editor should all show as **Active**.
+3. Open **Dashboard → Plugins**. Artwork Studio, Pre-Roll Videos, Bulk Metadata Editor and Content Guard should all show as **Active**.
 
 ## 4. Add the HallFlix catalog (for updates)
 
@@ -52,7 +53,7 @@ UGOS first runs a small helper (`hallflix-plugins`) that downloads the Jellyfin 
 - Name: `HallFlix`
 - URL: `https://raw.githubusercontent.com/justhallwest-commits/jellyfin-artwork-studio/main/catalog/manifest.json`
 
-This one address covers all three plugins. Jellyfin then offers updates on its own. Restarting the Docker project also fetches the newest versions.
+This one address covers all four plugins. Jellyfin then offers updates on its own. Restarting the Docker project also fetches the newest versions.
 
 ## 5. Set up the plugins
 

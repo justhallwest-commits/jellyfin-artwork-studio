@@ -4,6 +4,10 @@ name: Test on Jellyfin 12
 # drives it with a browser and stores screenshots + results on the "ci-results" branch.
 on:
   workflow_dispatch:
+    inputs:
+      jellyfin_tag:
+        description: 'Jellyfin image tag(s) to try, space separated'
+        default: '12.4'
   push:
     branches: [ main ]
     paths: [ 'Jellyfin.Plugin.ArtworkStudio/**', 'ci/e2e/**', '.github/workflows/e2e-jellyfin12.yml' ]
@@ -32,6 +36,11 @@ jobs:
           repository: justhallwest-commits/jellyfin-bulk-metadata
           path: ext/bulk
 
+      - uses: actions/checkout@v4
+        with:
+          repository: justhallwest-commits/jellyfin-content-guard
+          path: ext/guard
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
@@ -53,6 +62,9 @@ jobs:
             && cp out/pr/JellyfinPreroll.dll ci/e2e/plugins/PreRollVideos/ || { echo "PRE-ROLL BUILD FAILED"; tail -30 ci/e2e/results/build-preroll.log; rmdir ci/e2e/plugins/PreRollVideos; }
           dotnet publish ext/bulk/Jellyfin.Plugin.BulkMetadata -c Release -o out/bm -p:JellyfinVersion=$JV -p:JellyfinTfm=net10.0 > ci/e2e/results/build-bulk.log 2>&1 \
             && cp out/bm/Jellyfin.Plugin.BulkMetadata.dll ci/e2e/plugins/BulkMetadata/ || { echo "BULK BUILD FAILED"; tail -30 ci/e2e/results/build-bulk.log; rmdir ci/e2e/plugins/BulkMetadata; }
+          mkdir -p ci/e2e/plugins/ContentGuard
+          dotnet publish ext/guard/Jellyfin.Plugin.ContentGuard -c Release -o out/cg -p:JellyfinVersion=12.0 > ci/e2e/results/build-guard.log 2>&1 \
+            && cp out/cg/Jellyfin.Plugin.ContentGuard.dll ci/e2e/plugins/ContentGuard/ || { echo "CONTENT GUARD BUILD FAILED"; tail -30 ci/e2e/results/build-guard.log; rmdir ci/e2e/plugins/ContentGuard; }
           cp build-as.log ci/e2e/results/build-artwork-studio.log
           exit 0
 
@@ -69,6 +81,8 @@ jobs:
 
       - name: Run Jellyfin 12 and test
         working-directory: ci/e2e
+        env:
+          JELLYFIN_TAGS: ${{ github.event.inputs.jellyfin_tag || '12.4' }}
         run: bash run.sh
 
       - name: Check the UGREEN plugin installer against the published catalog

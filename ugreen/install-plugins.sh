@@ -1,5 +1,6 @@
 #!/bin/sh
-# Installs or updates the HallFlix plugins (Artwork Studio, Pre-Roll Videos, Bulk Metadata Editor)
+# Installs or updates the HallFlix plugins (Artwork Studio, Pre-Roll Videos, Bulk Metadata Editor,
+# Content Guard)
 # for Jellyfin 12 into /config/plugins. Run by the "hallflix-plugins" helper in docker-compose.yml
 # before Jellyfin starts; safe to run on every start (it only downloads what's new).
 set -u

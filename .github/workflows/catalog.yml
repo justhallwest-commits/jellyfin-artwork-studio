@@ -32,6 +32,7 @@ jobs:
               "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/latest/download/manifest.json",
               "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-preroll-ugreen/main/manifest.json",
               "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-bulk-metadata/main/manifest.json",
+              "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/manifest.json",
           ]
           old = {}
           if os.path.exists("catalog/manifest.json"):
