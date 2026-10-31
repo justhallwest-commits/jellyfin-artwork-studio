@@ -56,8 +56,8 @@
         if (tag) { q.tag = tag; }
         return api().getUrl('Items/' + id + '/Images/' + type, q);
     }
-    function goDetails(id, autoplay) {
-        if (autoplay) { try { sessionStorage.setItem('as-autoplay', JSON.stringify({ id: id, t: Date.now() })); } catch (e) { /* ignore */ } }
+    function goDetails(id, autoplay, sourceId) {
+        if (autoplay) { try { sessionStorage.setItem('as-autoplay', JSON.stringify({ id: id, t: Date.now(), source: sourceId || '' })); } catch (e) { /* ignore */ } }
         var sid = '';
         try { sid = api().serverId ? api().serverId() : ''; } catch (e) { /* ignore */ }
         location.hash = '#/details?id=' + encodeURIComponent(id) + (sid ? '&serverId=' + encodeURIComponent(sid) : '');
@@ -128,6 +128,11 @@
         '.asx-badges .asx-b-dv{background:linear-gradient(90deg,#6a3df0,#c94bff)}' +
         '.asx-badges .asx-b-hdr{background:linear-gradient(90deg,#e8a33d,#f5d061);color:#000}' +
         '.asx-badges .asx-b-4k{background:rgba(255,255,255,.92);color:#000}' +
+        '.asx-badges .asx-b-ver{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.55)}' +
+        '#asVerMenu{position:fixed;z-index:1003;min-width:15em;max-width:90vw;background:rgba(20,20,26,.97);border:1px solid rgba(255,255,255,.12);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.6);padding:.4em;color:#fff}' +
+        '#asVerMenu b{display:block;font-size:.78em;letter-spacing:.06em;text-transform:uppercase;opacity:.6;padding:.4em .7em}' +
+        '#asVerMenu button{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:.6em .7em;border-radius:8px;cursor:pointer}' +
+        '#asVerMenu button:hover,#asVerMenu button:focus{background:rgba(' + A + ',.25);outline:none}' +
         '.as-rating{position:absolute;bottom:.45em;right:.45em;z-index:3;font-size:.66em;font-weight:800;padding:.2em .45em;border-radius:4px;background:rgba(0,0,0,.72);color:#ffd257;pointer-events:none}' +
 
         // Animated library covers
@@ -515,6 +520,32 @@
             showSpot(spot.idx + 1);
         }, Math.max(5, X.SpotlightSeconds || 9) * 1000);
     }
+    // Spotlight Play: when a title has several versions (Jellyfin 12: 1080p / 4K…), ask which one
+    function closeVerMenu() { var m = document.getElementById('asVerMenu'); if (m) { m.remove(); } }
+    function playWithVersion(item, anchor) {
+        if (X.SpotlightVersionPicker === false) { goDetails(item.Id, true); return; }
+        getItem(item.Id).then(function (full) {
+            var ms = (full && full.MediaSources) || [];
+            if (ms.length < 2) { goDetails(item.Id, true); return; }
+            closeVerMenu();
+            var m = mk('div', '', '<b>Choose a version</b>' + ms.map(function (s, i) {
+                var v = (s.MediaStreams || []).filter(function (x) { return x.Type === 'Video'; })[0] || {};
+                var label = s.Name || ((v.Height ? (v.Height >= 1700 ? '4K' : v.Height + 'p') : 'Version ' + (i + 1)));
+                return '<button type="button" data-src="' + esc(s.Id) + '">' + esc(label) + '</button>';
+            }).join(''));
+            m.id = 'asVerMenu';
+            document.body.appendChild(m);
+            var r = anchor.getBoundingClientRect();
+            m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, r.left)) + 'px';
+            m.style.top = Math.max(8, r.top - m.offsetHeight - 8) + 'px';
+            m.addEventListener('click', function (ev) {
+                var b = ev.target.closest('button[data-src]'); if (!b) { return; }
+                ev.stopPropagation(); closeVerMenu(); goDetails(item.Id, true, b.dataset.src);
+            });
+            var first = m.querySelector('button'); if (first) { first.focus(); }
+            setTimeout(function () { document.addEventListener('click', closeVerMenu, { once: true }); }, 0);
+        }).catch(function () { goDetails(item.Id, true); });
+    }
     function buildSpot(container) {
         var el = mk('div', '', '<div class="as-spot-layer"></div><div class="as-spot-layer"></div><div class="as-spot-trailer"></div><div class="as-spot-shade"></div>' +
             '<div class="as-spot-info"><div class="as-spot-logo"></div><div class="as-spot-meta"></div><div class="as-spot-ov"></div>' +
@@ -538,7 +569,7 @@
         }, { passive: true });
         el.addEventListener('click', function (e) {
             var item = spot.items && spot.items[spot.idx]; if (!item) { return; }
-            if (e.target.closest('.as-spot-play')) { stopSpotTrailer(); goDetails(item.Id, true); }
+            if (e.target.closest('.as-spot-play')) { stopSpotTrailer(); playWithVersion(item, e.target.closest('.as-spot-play')); }
             else if (e.target.closest('.as-spot-more')) { stopSpotTrailer(); goDetails(item.Id, false); }
             else if (e.target.closest('.as-spot-mute')) { spot.muted = !spot.muted; updateMute(); }
             else if (e.target.closest('.as-spot-dots button')) { showSpot(+e.target.dataset.i); scheduleSpot(); }
@@ -581,7 +612,17 @@
         var r = route();
         if (r.route !== 'details' || r.params.get('id') !== want.id) { return; }
         var btn = Array.prototype.filter.call(document.querySelectorAll('.itemDetailPage:not(.hide) .btnPlay, #itemDetailPage:not(.hide) .btnPlay'), function (b) { return b.offsetParent && !b.classList.contains('hide'); })[0];
-        if (btn) { try { sessionStorage.removeItem('as-autoplay'); } catch (e) { /* ignore */ } btn.click(); }
+        if (btn) {
+            try { sessionStorage.removeItem('as-autoplay'); } catch (e) { /* ignore */ }
+            if (want.source) {
+                var sel = Array.prototype.filter.call(document.querySelectorAll('.itemDetailPage:not(.hide) select.selectSource, #itemDetailPage:not(.hide) select.selectSource'), function (x) { return x.offsetParent; })[0];
+                if (sel && Array.prototype.some.call(sel.options, function (o) { return o.value === want.source; })) {
+                    sel.value = want.source;
+                    sel.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+            btn.click();
+        }
     }
 
     // ------------------------------------------------------------------ Hover trailers
@@ -707,6 +748,10 @@
                 else if (/HDR|HLG/i.test(range)) { out.push(['HDR', 'asx-b-hdr']); }
             }
             if (streams.some(function (s) { return s.Type === 'Audio' && /atmos/i.test((s.DisplayTitle || '') + ' ' + (s.Profile || '') + ' ' + (s.Title || '')); })) { out.push(['ATMOS', '']); }
+        }
+        // Jellyfin 12 keeps 1080p / 4K copies (and episode versions) as versions of one title
+        if (X.BadgeVersions !== false && item.MediaSources && item.MediaSources.length > 1) {
+            out.push([item.MediaSources.length + ' VERSIONS', 'asx-b-ver']);
         }
         return out;
     }

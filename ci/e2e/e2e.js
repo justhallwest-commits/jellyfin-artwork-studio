@@ -50,6 +50,8 @@ const probe = () => {
     })(),
     surprise: vis(q('.as-surprise')), spotlight: vis(q('#asSpotlight')), spotTitle: (q('#asSpotlight .as-spot-logo') || {}).textContent || (q('#asSpotlight .as-spot-logo img') ? 'img' : ''),
     badges: document.querySelectorAll('.asx-badges').length, cards: document.querySelectorAll('.card[data-id]').length,
+    versionBadges: [...document.querySelectorAll('.asx-b-ver')].map(b => b.textContent),
+    nativeAccent: getComputedStyle(document.documentElement).getPropertyValue('--jf-palette-primary-main').trim(),
     avatar: (() => { const a = header && header.querySelector('.MuiAvatar-root, .headerUserButton'); return a ? Math.round(a.getBoundingClientRect().width) : 0; })(),
     blurOverlays: [...document.querySelectorAll('body *')].filter(e => { const s = getComputedStyle(e); const r = e.getBoundingClientRect(); return vis(e) && /blur/.test(s.backdropFilter + s.filter) && r.width > innerWidth * 0.8 && r.height > innerHeight * 0.8; }).map(e => e.tagName + '#' + e.id + '.' + [...e.classList].join('.')).slice(0, 5)
   };
@@ -107,6 +109,29 @@ const probe = () => {
     return out;
   });
 
+  await step('bulk-versions-tab', async () => {
+    await page.goto(URL + '/web/#/configurationpage?name=BulkMetadata'); await page.waitForTimeout(5000);
+    await page.click('.bme-tab[data-tab="jf12"]'); await page.waitForTimeout(2500);
+    await page.click('#jvFind'); await page.waitForTimeout(4000);
+    await shot(page, '13-bulk-versions');
+    return await page.evaluate(() => ({ found: document.getElementById('jvOut').innerText.slice(0, 200), libraryRows: document.querySelectorAll('#jlTable tbody tr').length, targets: document.querySelectorAll('#jcTarget option').length }));
+  });
+
+  await step('preroll-jf12-tab', async () => {
+    await page.goto(URL + '/web/#/configurationpage?name=' + encodeURIComponent('Pre-Roll Videos')); await page.waitForTimeout(5000);
+    await page.click('.prTab[data-tab="jf12"]'); await page.waitForTimeout(1500);
+    await shot(page, '14-preroll-jf12');
+    return await page.evaluate(() => ({ playlists: document.querySelectorAll('#selectPlaylist option').length, skippable: document.getElementById('chkSkippable').checked, panels: document.querySelectorAll('.prTab').length }));
+  });
+
+  await step('drawer-logo', async () => {
+    await page.goto(URL + '/web/#/home'); await page.waitForTimeout(5000);
+    const menu = page.locator('header.MuiAppBar-root button[aria-label*="enu"]').first();
+    if (await menu.count()) { await menu.click(); await page.waitForTimeout(1500); }
+    await shot(page, '15-drawer');
+    return await page.evaluate(() => { const a = document.querySelector('.MuiDrawer-paper a[href="#/"]'); return { drawer: !!a, logo: a ? getComputedStyle(a, '::before').backgroundImage.slice(0, 80) : null, links: [...document.querySelectorAll('.MuiDrawer-paper a[target=_blank]')].map(x => x.textContent) }; });
+  });
+
   await step('other-apps-apply', async () => {
     await page.goto(URL + '/web/#/configurationpage?name=ArtworkStudio'); await page.waitForTimeout(5000);
     await page.click('.as-tab[data-tab="apps"]'); await page.waitForTimeout(2500);
@@ -151,7 +176,11 @@ const probe = () => {
     const p = await c.newPage(); watch(p, 'phone');
     await p.goto(URL + '/web/#/login'); await p.waitForTimeout(4000); await shot(p, '07-login-phone');
     await login(p); await shot(p, '08-home-phone');
-    const r = await p.evaluate(probe); await c.close(); return r;
+    const r = await p.evaluate(probe);
+    const menu = p.locator('header.MuiAppBar-root button').first();
+    if (await menu.count()) { await menu.click(); await p.waitForTimeout(1500); await shot(p, '09-phone-drawer'); }
+    r.drawer = await p.evaluate(() => { const a = document.querySelector('.MuiDrawer-paper a[href="#/"]'); return { found: !!a, logo: a ? /Backdrops\/logo/.test(getComputedStyle(a, '::before').backgroundImage) : false, links: [...document.querySelectorAll('.MuiDrawer-paper a[target=_blank]')].map(x => x.textContent) }; });
+    await c.close(); return r;
   });
 
   await browser.close();

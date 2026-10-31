@@ -29,6 +29,9 @@ FF="docker run --rm --user $(id -u):$(id -g) --entrypoint /usr/lib/jellyfin-ffmp
 mk() { mkdir -p "work/media/$1"; $FF -f lavfi -i "testsrc2=size=1280x720:rate=24" -f lavfi -i "sine=frequency=$3" -t "$2" -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "/media/$1/$(basename "$1").mp4"; }
 mk "movies/Big Buck Bunny (2008)" 40 440
 mk "movies/Sintel (2010)" 40 550
+# a second version of Sintel, so Jellyfin groups "Sintel (2010) - 720p" and "Sintel (2010) - 1080p" as one title
+mv "work/media/movies/Sintel (2010)/Sintel (2010).mp4" "work/media/movies/Sintel (2010)/Sintel (2010) - 1080p.mp4"
+cp "work/media/movies/Sintel (2010)/Sintel (2010) - 1080p.mp4" "work/media/movies/Sintel (2010)/Sintel (2010) - 720p.mp4"
 mk "movies/Tears of Steel (2012)" 40 660
 mk "prerolls/HallFlix Intro" 4 880
 log "media ready"
@@ -100,12 +103,16 @@ python3 - <<'PY'
 import json
 c = json.load(open('work/as-config.json'))
 t = c.setdefault('Theme', {})
-t.update({'Enabled': True, 'Preset': 'jellyskin', 'AccentColor': '#e50914', 'LoginLayout': 'split', 'LoginMessage': 'Welcome to HallFlix', 'SiteName': 'HallFlix', 'HeaderStyle': 'glass', 'HeaderUserSize': 2.2})
+t.update({'Enabled': True, 'Preset': 'jellyskin', 'AccentColor': '#e50914', 'LoginLayout': 'split', 'LoginMessage': 'Welcome to HallFlix', 'SiteName': 'HallFlix', 'HeaderStyle': 'glass', 'HeaderUserSize': 2.2,
+          'NativeTheme': True, 'DrawerLogo': True, 'MenuLinks': [{'Name': 'Request a movie', 'Url': 'https://hallflix.net/requests', 'Icon': 'add_circle'}]})
 x = c.setdefault('Extras', {})
 x.update({'Spotlight': True, 'SpotlightTrailers': False, 'Badges': True, 'SurpriseMe': True, 'QuickSearch': True})
 json.dump(c, open('work/as-config.json', 'w'))
 PY
 curl -fsS -X POST "$URL/Plugins/$AS/Configuration" -H "$A" -H "$J" --data @work/as-config.json >/dev/null && log "Artwork Studio configured"
+
+# ---- Jellyfin 12 options of all four plugins, checked through the API
+TOKEN="$TOKEN" URL="$URL" RES="$RES" python3 checks12.py 2>&1 | tee -a "$RES/run.log" || true
 
 # ---- browser run
 echo "$TOKEN" > work/token

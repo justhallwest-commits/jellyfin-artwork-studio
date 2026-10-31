@@ -110,9 +110,31 @@ public class ThemeSettings
 
     /// <summary>Gets or sets the user's own style settings saved before a preset was applied (JSON), for "Reset to my design".</summary>
     public string BeforePreset { get; set; } = string.Empty;
+
+    // ---- Jellyfin 12 / Modern layout
+
+    /// <summary>Gets or sets a value indicating whether Jellyfin 12's own theme colour variables follow the design.</summary>
+    public bool NativeTheme { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether the logo replaces the Jellyfin icon and server name in the side menu.</summary>
+    public bool DrawerLogo { get; set; } = true;
+
+    /// <summary>Gets or sets extra links shown in the side menu (Jellyfin's web config.json menuLinks).</summary>
+    public MenuLink[] MenuLinks { get; set; } = Array.Empty<MenuLink>();
 }
 
 /// <summary>A home-page banner shown between two dates.</summary>
+/// <summary>A link in the web app's side menu.</summary>
+public class MenuLink
+{
+    public string Name { get; set; } = string.Empty;
+
+    public string Url { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets a Material icon name, e.g. "help", "forum", "movie".</summary>
+    public string Icon { get; set; } = "link";
+}
+
 public class ScheduledAnnouncement
 {
     public string Text { get; set; } = string.Empty;
@@ -160,6 +182,15 @@ public class ExtrasSettings
 
     /// <summary>Gets or sets a value indicating whether TVs show a preview when a card is selected with the remote.</summary>
     public bool TvFocusPreviews { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether posters show a badge when a title has several versions (1080p / 4K…).</summary>
+    public bool BadgeVersions { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether the spotlight Play button lets you pick a version.</summary>
+    public bool SpotlightVersionPicker { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether admins can type "missing poster" etc. into Jellyfin's search (Jellyfin 12).</summary>
+    public bool ArtworkSearch { get; set; } = true;
 
     public bool HoverTrailers { get; set; } = true;
 

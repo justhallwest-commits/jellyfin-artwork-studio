@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Jellyfin.Plugin.ArtworkStudio.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -30,6 +31,74 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         _logger = logger;
         _webPath = (applicationPaths as IServerApplicationPaths)?.WebPath;
         InjectClientScript();
+        SyncMenuLinks();
+        ConfigurationChanged += (_, _) => SyncMenuLinks();
+    }
+
+    /// <summary>
+    /// Writes the Design → side-menu links into the web app's config.json ("menuLinks"), keeping any links
+    /// that were put there by hand. Links Artwork Studio added before are tracked by URL in the plugin's data folder.
+    /// </summary>
+    public void SyncMenuLinks()
+    {
+        try
+        {
+            var file = string.IsNullOrEmpty(_webPath) ? null : Path.Combine(_webPath, "config.json");
+            if (file is null || !File.Exists(file))
+            {
+                return;
+            }
+
+            var stateFile = Path.Combine(DataFolderPath, "menu-links.json");
+            var ours = File.Exists(stateFile)
+                ? (System.Text.Json.JsonSerializer.Deserialize<string[]>(File.ReadAllText(stateFile)) ?? Array.Empty<string>())
+                : Array.Empty<string>();
+
+            var root = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(file)) as System.Text.Json.Nodes.JsonObject;
+            if (root is null)
+            {
+                return;
+            }
+
+            var existing = root["menuLinks"] as System.Text.Json.Nodes.JsonArray ?? new System.Text.Json.Nodes.JsonArray();
+            var keep = new System.Text.Json.Nodes.JsonArray();
+            foreach (var link in existing)
+            {
+                var url = link?["url"]?.GetValue<string>() ?? string.Empty;
+                if (!ours.Contains(url, StringComparer.Ordinal))
+                {
+                    keep.Add(link?.DeepClone());
+                }
+            }
+
+            var wanted = (Configuration.Theme?.MenuLinks ?? Array.Empty<MenuLink>())
+                .Where(l => !string.IsNullOrWhiteSpace(l.Name) && Uri.TryCreate(l.Url?.Trim(), UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeHttp))
+                .ToList();
+            foreach (var l in wanted)
+            {
+                keep.Add(new System.Text.Json.Nodes.JsonObject
+                {
+                    ["name"] = l.Name.Trim(),
+                    ["url"] = l.Url.Trim(),
+                    ["icon"] = string.IsNullOrWhiteSpace(l.Icon) ? "link" : l.Icon.Trim()
+                });
+            }
+
+            var before = existing.ToJsonString();
+            if (before != keep.ToJsonString())
+            {
+                root["menuLinks"] = keep;
+                File.WriteAllText(file, root.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                _logger.LogInformation("Artwork Studio: updated side-menu links in {File}", file);
+            }
+
+            Directory.CreateDirectory(DataFolderPath);
+            File.WriteAllText(stateFile, System.Text.Json.JsonSerializer.Serialize(wanted.Select(l => l.Url.Trim()).ToArray()));
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException || ex is System.Text.Json.JsonException || ex is InvalidOperationException)
+        {
+            _logger.LogWarning("Artwork Studio: couldn't update side-menu links: {Message}", ex.Message);
+        }
     }
 
     public static Plugin? Instance { get; private set; }

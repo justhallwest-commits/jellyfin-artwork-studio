@@ -25,6 +25,20 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- Jellyfin 12 builds (.NET 10) get the JF12 features: search shortcuts etc. -->
+  <PropertyGroup Condition="'$(JellyfinTfm)' == 'net10.0'">
+    <DefineConstants>$(DefineConstants);JF12</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(JellyfinTfm)' == 'net10.0'">
+    <PackageReference Include="Jellyfin.Data" Version="$(JellyfinVersion)">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Jellyfin.Database.Implementations" Version="$(JellyfinVersion)">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup>
     <None Remove="Web\artworkStudio.html" />
     <EmbeddedResource Include="Web\artworkStudio.html" />
