@@ -1,0 +1,38 @@
+[e2e] image jellyfin/jellyfin:12.0
+[e2e] plugin ArtworkStudio: Jellyfin.Plugin.ArtworkStudio.dll 
+[e2e] plugin BulkMetadata: Jellyfin.Plugin.BulkMetadata.dll 
+[e2e] plugin ContentGuard: Jellyfin.Plugin.ContentGuard.dll 
+[e2e] plugin PreRollVideos: JellyfinPreroll.dll 
+[e2e] media ready
+[e2e] wizard done
+[e2e] movies in library: 3
+[e2e] plugin Artwork Studio 1.0.0.0 Active
+[e2e] plugin AudioDB 12.0.0.0 Active
+[e2e] plugin Bulk Metadata Editor 1.0.0.0 Active
+[e2e] plugin Content Guard 1.1.0.12 Active
+[e2e] plugin ListenBrainz Similarity Provider 12.0.0.0 Active
+[e2e] plugin MusicBrainz 12.0.0.0 Active
+[e2e] plugin OMDb 12.0.0.0 Active
+[e2e] plugin Pre-Roll Videos 2.3.0.0 Active
+[e2e] plugin Studio Images 12.0.0.0 Active
+[e2e] plugin TMDb 12.0.0.0 Active
+[e2e] index.html: data-artwork-studio defer src="../ArtworkStudio/ClientScript"
+[e2e] login backdrop upload: {"success":true,"Name":"20261031031457-405d035e.png"}
+[e2e] logo upload: {"success":true,"Name":"20261031031457-1a7a5049.png"}
+[e2e] Artwork Studio configured
+[e2e] login-page ok
+[e2e] sign-in ok
+[e2e] home-modern ok
+[e2e] item-details ok
+[e2e] page-artwork-studio ok
+[e2e] page-preroll ok
+[e2e] page-bulk-metadata ok
+[e2e] page-content-guard ok
+[e2e] artwork-studio-tabs ok
+[e2e] other-apps-apply ok
+[e2e] home-after-design ok
+[e2e] home-legacy ok
+[e2e] home-tv ok
+[e2e] home-phone ok
+[e2e] wrote results.json
+[e2e] done

@@ -1,0 +1,4 @@
+  Determining projects to restore...
+  Restored /home/runner/work/jellyfin-artwork-studio/jellyfin-artwork-studio/ext/bulk/Jellyfin.Plugin.BulkMetadata/Jellyfin.Plugin.BulkMetadata.csproj (in 156 ms).
+  Jellyfin.Plugin.BulkMetadata -> /home/runner/work/jellyfin-artwork-studio/jellyfin-artwork-studio/ext/bulk/Jellyfin.Plugin.BulkMetadata/bin/Release/net10.0/Jellyfin.Plugin.BulkMetadata.dll
+  Jellyfin.Plugin.BulkMetadata -> /home/runner/work/jellyfin-artwork-studio/jellyfin-artwork-studio/out/bm/

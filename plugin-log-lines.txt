@@ -1,0 +1,14 @@
+[03:14:26.561] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded assembly Jellyfin.Plugin.ArtworkStudio, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null from /config/plugins/ArtworkStudio_1.0.0.0/Jellyfin.Plugin.ArtworkStudio.dll
+[03:14:26.562] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded assembly Jellyfin.Plugin.BulkMetadata, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null from /config/plugins/BulkMetadata_1.0.0.0/Jellyfin.Plugin.BulkMetadata.dll
+[03:14:26.563] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded assembly Jellyfin.Plugin.ContentGuard, Version=1.1.0.12, Culture=neutral, PublicKeyToken=null from /config/plugins/ContentGuard_1.0.0.0/Jellyfin.Plugin.ContentGuard.dll
+[03:14:26.563] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded assembly JellyfinPreroll, Version=2.3.0.0, Culture=neutral, PublicKeyToken=null from /config/plugins/PreRollVideos_1.0.0.0/JellyfinPreroll.dll
+[03:14:27.755] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: Artwork Studio 1.0.0.0
+[03:14:27.761] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: Bulk Metadata Editor 1.0.0.0
+[03:14:27.763] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: Content Guard 1.1.0.12
+[03:14:27.766] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: Pre-Roll Videos 2.3.0.0
+[03:14:27.767] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: TMDb 12.0.0.0
+[03:14:27.767] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: Studio Images 12.0.0.0
+[03:14:27.767] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: OMDb 12.0.0.0
+[03:14:27.775] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: MusicBrainz 12.0.0.0
+[03:14:27.776] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: ListenBrainz Similarity Provider 12.0.0.0
+[03:14:27.776] [INF] [11] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: AudioDB 12.0.0.0

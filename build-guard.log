@@ -1,0 +1,4 @@
+  Determining projects to restore...
+  Restored /home/runner/work/jellyfin-artwork-studio/jellyfin-artwork-studio/ext/guard/Jellyfin.Plugin.ContentGuard/Jellyfin.Plugin.ContentGuard.csproj (in 188 ms).
+  Jellyfin.Plugin.ContentGuard -> /home/runner/work/jellyfin-artwork-studio/jellyfin-artwork-studio/ext/guard/Jellyfin.Plugin.ContentGuard/bin/Release/net10.0/Jellyfin.Plugin.ContentGuard.dll
+  Jellyfin.Plugin.ContentGuard -> /home/runner/work/jellyfin-artwork-studio/jellyfin-artwork-studio/out/cg/

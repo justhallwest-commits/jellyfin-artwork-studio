@@ -1,0 +1,168 @@
+{
+  "steps": {
+    "login-page": {
+      "ok": true,
+      "split": true,
+      "splitImage": true,
+      "brand": "Welcome to HallFlix",
+      "disclaimerShown": false
+    },
+    "sign-in": {
+      "ok": true,
+      "hash": "#/home"
+    },
+    "home-modern": {
+      "ok": true,
+      "htmlClass": "layout-desktop as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "modern",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 6,
+      "avatar": 33,
+      "blurOverlays": []
+    },
+    "item-details": {
+      "ok": true,
+      "title": "Please sign in",
+      "playBtn": true,
+      "endsAt": true
+    },
+    "page-artwork-studio": {
+      "ok": true,
+      "textLength": 533,
+      "sample": "photo_library Artwork Studio Browse Design Extras Settings Other apps Help 🖼 Library artwork All libraries Movies Prerolls Type: Auto Movies Shows Seasons Epis",
+      "blurOverlays": []
+    },
+    "page-preroll": {
+      "ok": true,
+      "textLength": 2181,
+      "sample": "Pre-Roll Videos Pre-roll library — None (plugin off) — Movies Prerolls The library that holds your pre-roll clips. Clips per play How many pre-rolls to play be",
+      "blurOverlays": []
+    },
+    "page-bulk-metadata": {
+      "ok": true,
+      "textLength": 725,
+      "sample": "Bulk Metadata Editor v1.0.0.0 1 · Find items 2 · Edit selected0 Genres, tags & studios Spreadsheet (CSV) History & undo Search title, original title or file pat",
+      "blurOverlays": []
+    },
+    "page-content-guard": {
+      "ok": true,
+      "textLength": 765,
+      "sample": "Content Guard Hide titles from specific users by tag, genre or rating. Rules apply on every client and every screen, including home rows, search, Next Up, Cont",
+      "blurOverlays": []
+    },
+    "artwork-studio-tabs": {
+      "ok": true,
+      "browse": 458,
+      "design": 5234,
+      "extras": 4085,
+      "settings": 2023,
+      "apps": 3048,
+      "help": 3567,
+      "browseCards": 4
+    },
+    "other-apps-apply": {
+      "ok": true,
+      "splashState": "Showing your backdrop (preview above).",
+      "cssState": "Published (21 KB).Heads-up: this page is open at http://localhost:8096/, so the published design links to images there — apps outside your home network can’t reach that. Open the dashboard through your public address (e.g. hallflix.net) before saving.",
+      "devices": [
+        "Jellyfin Web",
+        "HallFlix E2E"
+      ]
+    },
+    "home-after-design": {
+      "ok": true,
+      "htmlClass": "layout-desktop as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "modern",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 6,
+      "avatar": 33,
+      "blurOverlays": []
+    },
+    "home-legacy": {
+      "ok": true,
+      "htmlClass": "layout-desktop as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "legacy",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 6,
+      "avatar": 40,
+      "blurOverlays": []
+    },
+    "home-tv": {
+      "ok": true,
+      "htmlClass": "layout-tv as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "legacy",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 6,
+      "avatar": 54,
+      "blurOverlays": [],
+      "focused": "BUTTON.card.overflowPortraitCard.show-focus"
+    },
+    "home-phone": {
+      "ok": true,
+      "htmlClass": "layout-mobile as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "modern",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": false,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 6,
+      "avatar": 32,
+      "blurOverlays": []
+    }
+  },
+  "console": [
+    "[desktop] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[desktop] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[desktop] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[desktop] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[desktop] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[desktop] warning: Not initializing chromecast: chrome object is missing",
+    "[desktop] error: Translation key is missing from dictionary: ",
+    "[desktop] warning: Not initializing chromecast: chrome object is missing",
+    "[legacy] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[legacy] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[legacy] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[legacy] warning: Not initializing chromecast: chrome object is missing",
+    "[tv] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[tv] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[tv] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[tv] warning: Not initializing chromecast: chrome object is missing",
+    "[phone] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[phone] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[phone] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403",
+    "[phone] error: WebSocket connection to 'ws://localhost:8096/socket' failed: Error during WebSocket handshake: Unexpected response code: 403"
+  ],
+  "failedRequests": []
+}

@@ -1,0 +1,26 @@
+Unable to find image 'alpine:3.20' locally
+3.20: Pulling from library/alpine
+25f1d6b1951a: Pulling fs layer
+25f1d6b1951a: Download complete
+3a030ca3f633: Download complete
+d4050d56ebf2: Download complete
+25f1d6b1951a: Pull complete
+Digest: sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+Status: Downloaded newer image for alpine:3.20
+Artwork Studio 1.0.32.12: installed
+Bulk Metadata Editor 1.0.1.12: installed
+Content Guard 1.1.0.12: installed
+Pre-Roll Videos 3.0.0.12: installed
+HallFlix plugins are ready.
+--- second run (should skip everything)
+Artwork Studio 1.0.32.12: already installed
+Bulk Metadata Editor 1.0.1.12: already installed
+Content Guard 1.1.0.12: already installed
+Pre-Roll Videos 3.0.0.12: already installed
+HallFlix plugins are ready.
+--- files
+plugins/Artwork Studio_1.0.32.12/Jellyfin.Plugin.ArtworkStudio.dll
+plugins/Bulk Metadata Editor_1.0.1.12/Jellyfin.Plugin.BulkMetadata.dll
+plugins/Bulk Metadata Editor_1.0.1.12/meta.json
+plugins/Content Guard_1.1.0.12/Jellyfin.Plugin.ContentGuard.dll
+plugins/Pre-Roll Videos_3.0.0.12/JellyfinPreroll.dll
