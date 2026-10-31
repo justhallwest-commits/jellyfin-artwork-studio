@@ -707,7 +707,11 @@
                     if (sessionStorage.getItem('as-home-reload') === HL.Stamp) { return; }
                     sessionStorage.setItem('as-home-reload', HL.Stamp);
                 } catch (e) { return; }
-                return dropWebQueryCache().then(function () { location.reload(); });
+                // The cache is saved again within a second of any change, so clear it, let that pass, clear it again, reload.
+                return dropWebQueryCache()
+                    .then(function () { return new Promise(function (r) { setTimeout(r, 1300); }); })
+                    .then(dropWebQueryCache)
+                    .then(function () { location.reload(); });
             });
         }).catch(function () { homeChecked = null; });
     }
