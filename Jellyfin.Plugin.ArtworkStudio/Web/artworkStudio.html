@@ -242,6 +242,7 @@
       <button class="as-tab" data-tab="design">Design</button>
       <button class="as-tab" data-tab="extras">Extras</button>
       <button class="as-tab" data-tab="settings">Settings</button>
+      <button class="as-tab" data-tab="home">Home screen</button>
       <button class="as-tab" data-tab="apps">Other apps</button>
       <button class="as-tab" data-tab="help">Help</button>
     </div>
@@ -549,6 +550,45 @@
 
   <!-- ===================== HELP ===================== -->
 
+  <!-- ===================== HOME SCREEN ===================== -->
+  <section data-section="home" style="display:none">
+    <div class="as-panel">
+      <h3 style="margin:0 0 .3em">Home screen layout</h3>
+      <div class="as-hint">Choose which rows the home screen shows and in what order — for everyone, or for one person. This is the same setting each user has under Settings → Home, so it also applies in the phone apps, Android TV / Fire TV and anything else that uses Jellyfin's home settings.</div>
+      <div class="as-field" style="margin-top:.8em"><label for="hlWho">Set the layout for</label>
+        <select class="as-in" id="hlWho"><option value="">Everyone</option></select></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Rows, top to bottom</h3>
+      <div class="as-hint">Switch rows on or off and move them with the arrows. Jellyfin shows up to 10 rows.</div>
+      <div id="hlSections" style="margin-top:.6em"></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Libraries</h3>
+      <label class="as-row" style="gap:.5em"><input type="checkbox" id="hlLibOn"> Also set the library order and "Recently added" rows</label>
+      <div class="as-hint">Order of the library tiles ("My Media"), and which libraries get a "Recently added in…" row.</div>
+      <div id="hlLibs" style="margin-top:.6em"></div>
+    </div>
+
+    <div class="as-panel" id="hlEveryone">
+      <h3>For everyone</h3>
+      <label class="as-row" style="gap:.5em"><input type="checkbox" id="hlNew"> Give this layout to new users (and anyone who hasn't had it yet) the next time they open HallFlix</label>
+      <label class="as-row" style="gap:.5em;margin-top:.4em"><input type="checkbox" id="hlStep"> Keep everyone on this layout <span class="as-hint">(changes people make under Settings → Home are put back the next time they open HallFlix)</span></label>
+      <div class="as-hint" style="margin-top:.7em">Leave these people alone:</div>
+      <div id="hlExempt" style="margin-top:.2em"></div>
+      <div class="as-hint" style="margin-top:.7em">New users and "keep in step" are applied by HallFlix's web app (browsers, phone apps, HallFlix TV). For someone who only uses Roku or Android TV, use <b>Apply to everyone now</b>.</div>
+    </div>
+
+    <div class="as-row" style="gap:.6em;flex-wrap:wrap">
+      <button class="as-btn primary" id="hlSave"><span class="material-icons">save</span><span id="hlSaveLabel">Save layout</span></button>
+      <button class="as-btn" id="hlApplyAll"><span class="material-icons">group</span>Apply to everyone now</button>
+      <button class="as-btn" id="hlDefaults"><span class="material-icons">restart_alt</span>Jellyfin's default order</button>
+      <span class="as-hint" id="hlStatus"></span>
+    </div>
+  </section>
+
   <!-- ===================== OTHER APPS ===================== -->
   <section data-section="apps" style="display:none">
     <div class="as-panel">
@@ -788,6 +828,179 @@
     }
 
 
+
+    // ============================================================ HOME SCREEN LAYOUT
+    var HOME_SECTIONS = [
+        ['smalllibrarytiles', 'My Media (library tiles)'], ['librarybuttons', 'My Media (small buttons)'],
+        ['resume', 'Continue watching'], ['resumeaudio', 'Continue listening'], ['resumebook', 'Continue reading'],
+        ['nextup', 'Next up'], ['latestmedia', 'Recently added (one row per library)'],
+        ['livetv', 'Live TV'], ['activerecordings', 'Live TV recordings']
+    ];
+    var HOME_DEFAULT = ['smalllibrarytiles', 'resume', 'resumeaudio', 'resumebook', 'livetv', 'nextup', 'latestmedia'];
+    var H = { users: [], libs: [], sections: [], libOrder: [], latestOff: {} };
+    function nid(id) { return String(id || '').replace(/-/g, '').toLowerCase(); }
+    function homeLabel(k) { var m = HOME_SECTIONS.filter(function (x) { return x[0] === k; })[0]; return m ? m[1] : k; }
+    function setSections(enabled) {
+        // enabled sections first (in order), then the rest switched off
+        H.sections = enabled.filter(function (k, i) { return k && k !== 'none' && enabled.indexOf(k) === i && HOME_SECTIONS.some(function (x) { return x[0] === k; }); })
+            .map(function (k) { return { k: k, on: true }; });
+        HOME_SECTIONS.forEach(function (x) { if (!H.sections.some(function (s) { return s.k === x[0]; })) H.sections.push({ k: x[0], on: false }); });
+        renderSections();
+    }
+    function renderSections() {
+        $('#hlSections').innerHTML = H.sections.map(function (s, i) {
+            return '<div class="as-row" style="gap:.6em;padding:.35em 0;border-bottom:1px solid var(--as-line)' + (s.on ? '' : ';opacity:.55') + '">' +
+                '<label class="as-switch"><input type="checkbox" data-hs="' + i + '"' + (s.on ? ' checked' : '') + '><i></i></label>' +
+                '<span style="flex:1">' + (s.on ? '<b>' + (H.sections.slice(0, i).filter(function (x) { return x.on; }).length + 1) + '.</b> ' : '') + esc(homeLabel(s.k)) + '</span>' +
+                '<button class="as-btn small" data-hup="' + i + '" title="Move up"' + (i ? '' : ' disabled') + '>' + icon('arrow_upward') + '</button>' +
+                '<button class="as-btn small" data-hdown="' + i + '" title="Move down"' + (i < H.sections.length - 1 ? '' : ' disabled') + '>' + icon('arrow_downward') + '</button></div>';
+        }).join('');
+    }
+    function renderLibs() {
+        var on = $('#hlLibOn').checked;
+        var order = H.libOrder.length ? H.libOrder : H.libs.map(function (l) { return nid(l.ItemId); });
+        var known = H.libs.map(function (l) { return nid(l.ItemId); });
+        order = order.filter(function (id) { return known.indexOf(id) >= 0; }).concat(known.filter(function (id) { return order.indexOf(id) < 0; }));
+        H.libOrder = order;
+        $('#hlLibs').style.opacity = on ? '' : '.5';
+        $('#hlLibs').innerHTML = order.map(function (id, i) {
+            var l = H.libs.filter(function (x) { return nid(x.ItemId) === id; })[0];
+            return '<div class="as-row" style="gap:.6em;padding:.35em 0;border-bottom:1px solid var(--as-line)">' +
+                '<span style="flex:1"><b>' + (i + 1) + '.</b> ' + esc(l.Name) + '</span>' +
+                '<label class="as-row" style="gap:.3em;font-weight:normal"><input type="checkbox" data-hlatest="' + id + '"' + (H.latestOff[id] ? '' : ' checked') + (on ? '' : ' disabled') + '> Recently added row</label>' +
+                '<button class="as-btn small" data-lup="' + i + '"' + (i && on ? '' : ' disabled') + '>' + icon('arrow_upward') + '</button>' +
+                '<button class="as-btn small" data-ldown="' + i + '"' + (i < order.length - 1 && on ? '' : ' disabled') + '>' + icon('arrow_downward') + '</button></div>';
+        }).join('') || '<div class="as-hint">No libraries.</div>';
+    }
+    function move(arr, i, d) { var j = i + d; if (j < 0 || j >= arr.length) return; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+    $('#hlSections').addEventListener('click', function (e) {
+        var u = e.target.closest('[data-hup]'), d = e.target.closest('[data-hdown]');
+        if (u) { move(H.sections, +u.dataset.hup, -1); renderSections(); }
+        if (d) { move(H.sections, +d.dataset.hdown, 1); renderSections(); }
+    });
+    $('#hlSections').addEventListener('change', function (e) { var c = e.target.closest('[data-hs]'); if (c) { H.sections[+c.dataset.hs].on = c.checked; renderSections(); } });
+    $('#hlLibs').addEventListener('click', function (e) {
+        var u = e.target.closest('[data-lup]'), d = e.target.closest('[data-ldown]');
+        if (u) { move(H.libOrder, +u.dataset.lup, -1); renderLibs(); }
+        if (d) { move(H.libOrder, +d.dataset.ldown, 1); renderLibs(); }
+    });
+    $('#hlLibs').addEventListener('change', function (e) { var c = e.target.closest('[data-hlatest]'); if (c) { H.latestOff[c.dataset.hlatest] = !c.checked; } });
+    $('#hlLibOn').addEventListener('change', renderLibs);
+    $('#hlDefaults').addEventListener('click', function () { setSections(HOME_DEFAULT); });
+
+    function homeSectionList() { return H.sections.filter(function (s) { return s.on; }).map(function (s) { return s.k; }).slice(0, 10); }
+    function libOrderList() { return $('#hlLibOn').checked ? H.libOrder.slice() : []; }
+    function latestOffList() { return $('#hlLibOn').checked ? Object.keys(H.latestOff).filter(function (k) { return H.latestOff[k]; }) : []; }
+
+    function readUserLayout(userId) {
+        return Promise.all([
+            api('GET', 'DisplayPreferences/usersettings', { query: { userId: userId, client: 'emby' } }),
+            api('GET', 'Users/' + userId)
+        ]).then(function (r) {
+            var cp = (r[0] && r[0].CustomPrefs) || {}, list = [];
+            for (var i = 0; i < 10; i++) { list.push(cp['homesection' + i] || (i < HOME_DEFAULT.length ? HOME_DEFAULT[i] : 'none')); }
+            return { prefs: r[0], user: r[1], sections: list };
+        });
+    }
+    // Writes a layout for one user through Jellyfin's own settings (same as Settings → Home)
+    function writeUserLayout(userId, layout, stamp) {
+        return api('GET', 'DisplayPreferences/usersettings', { query: { userId: userId, client: 'emby' } }).then(function (p) {
+            p = p || { Id: 'usersettings', CustomPrefs: {} };
+            p.CustomPrefs = p.CustomPrefs || {};
+            for (var i = 0; i < 10; i++) { p.CustomPrefs['homesection' + i] = layout.Sections[i] || 'none'; }
+            if (stamp) { p.CustomPrefs.asHomeLayout = stamp; }
+            return api('POST', 'DisplayPreferences/usersettings', { query: { userId: userId, client: 'emby' }, json: p });
+        }).then(function () {
+            if (!layout.LibraryOrder.length && !layout.LatestExcludes.length) return null;
+            return api('GET', 'Users/' + userId).then(function (u) {
+                var c = u.Configuration || {};
+                if (layout.LibraryOrder.length) { c.OrderedViews = layout.LibraryOrder; }
+                c.LatestItemsExcludes = layout.LatestExcludes;
+                return api('POST', 'Users/' + userId + '/Configuration', { json: c });
+            });
+        });
+    }
+    function currentLayout() { return { Sections: homeSectionList(), LibraryOrder: libOrderList(), LatestExcludes: latestOffList() }; }
+
+    function showHomeFor(userId) {
+        $('#hlEveryone').style.display = userId ? 'none' : '';
+        $('#hlApplyAll').style.display = userId ? 'none' : '';
+        $('#hlSaveLabel').textContent = userId ? 'Save for ' + ((H.users.filter(function (u) { return u.Id === userId; })[0] || {}).Name || 'this user') : 'Save layout';
+        $('#hlStatus').textContent = '';
+        if (!userId) {
+            var hl = (S.config && S.config.HomeLayout) || {};
+            setSections(hl.Sections && hl.Sections.length ? hl.Sections : HOME_DEFAULT);
+            H.libOrder = (hl.LibraryOrder || []).map(nid);
+            H.latestOff = {}; (hl.LatestExcludes || []).forEach(function (id) { H.latestOff[nid(id)] = true; });
+            $('#hlLibOn').checked = (hl.LibraryOrder || []).length > 0 || (hl.LatestExcludes || []).length > 0;
+            $('#hlNew').checked = hl.ApplyToNewUsers !== false;
+            $('#hlStep').checked = !!hl.KeepInStep;
+            var ex = (hl.ExemptUserIds || []).map(nid);
+            $('#hlExempt').innerHTML = H.users.map(function (u) { return '<label class="as-row" style="display:inline-flex;gap:.3em;margin:.15em .9em .15em 0;font-weight:normal"><input type="checkbox" class="hl-ex" value="' + esc(u.Id) + '"' + (ex.indexOf(nid(u.Id)) >= 0 ? ' checked' : '') + '>' + esc(u.Name) + '</label>'; }).join('');
+            renderLibs();
+            return;
+        }
+        $('#hlSections').innerHTML = '<span class="as-spin"></span>';
+        readUserLayout(userId).then(function (r) {
+            setSections(r.sections);
+            var c = (r.user && r.user.Configuration) || {};
+            H.libOrder = (c.OrderedViews || []).map(nid);
+            H.latestOff = {}; (c.LatestItemsExcludes || []).forEach(function (id) { H.latestOff[nid(id)] = true; });
+            $('#hlLibOn').checked = true;
+            renderLibs();
+        }).catch(function (e) { $('#hlSections').innerHTML = '<div class="as-hint">' + esc(e.message) + '</div>'; });
+    }
+    function loadHomeTab() {
+        return Promise.all([ApiClient.getUsers(), api('GET', 'Library/VirtualFolders')]).then(function (r) {
+            H.users = (r[0] || []).slice().sort(function (a, b) { return a.Name.localeCompare(b.Name); });
+            H.libs = (r[1] || []).filter(function (l) { return l.ItemId; });
+            var who = $('#hlWho').value;
+            $('#hlWho').innerHTML = '<option value="">Everyone</option>' + H.users.map(function (u) { return '<option value="' + esc(u.Id) + '">' + esc(u.Name) + '</option>'; }).join('');
+            $('#hlWho').value = who;
+            showHomeFor($('#hlWho').value);
+        }).catch(function (e) { toast(e.message, true); });
+    }
+    $('#hlWho').addEventListener('change', function () { showHomeFor(this.value); });
+
+    function saveEveryoneTemplate() {
+        var cfg = S.config || {};
+        var l = currentLayout();
+        cfg.HomeLayout = {
+            Sections: l.Sections, LibraryOrder: l.LibraryOrder, LatestExcludes: l.LatestExcludes,
+            ApplyToNewUsers: $('#hlNew').checked, KeepInStep: $('#hlStep').checked,
+            ExemptUserIds: $$('#hlExempt .hl-ex').filter(function (c) { return c.checked; }).map(function (c) { return c.value; }),
+            Stamp: String(Date.now())
+        };
+        return ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function () { S.config = cfg; return cfg.HomeLayout; });
+    }
+    $('#hlSave').addEventListener('click', function () {
+        var who = $('#hlWho').value, b = this; b.disabled = true;
+        if (!homeSectionList().length) { toast('Switch on at least one row.', true); b.disabled = false; return; }
+        var p = who ? writeUserLayout(who, currentLayout(), null) : saveEveryoneTemplate();
+        p.then(function () {
+            $('#hlStatus').textContent = who ? 'Saved. They’ll see it the next time they open HallFlix (or refresh).' : 'Layout saved.' + ($('#hlNew').checked || $('#hlStep').checked ? ' People get it the next time they open HallFlix; use "Apply to everyone now" to change everyone straight away.' : ' Use "Apply to everyone now" to give it to everyone.');
+            toast('Saved');
+        }).catch(function (e) { toast(e.message, true); }).then(function () { b.disabled = false; });
+    });
+    $('#hlApplyAll').addEventListener('click', function () {
+        if (!homeSectionList().length) { toast('Switch on at least one row.', true); return; }
+        if (!confirm('Replace the home screen layout of every user (except the ones you left alone)?')) return;
+        var b = this; b.disabled = true;
+        saveEveryoneTemplate().then(function (hl) {
+            var ex = (hl.ExemptUserIds || []).map(nid);
+            var users = H.users.filter(function (u) { return ex.indexOf(nid(u.Id)) < 0; });
+            var done = 0, failed = [];
+            return users.reduce(function (p, u) {
+                return p.then(function () {
+                    $('#hlStatus').textContent = 'Applying… ' + (++done) + ' / ' + users.length;
+                    return writeUserLayout(u.Id, hl, hl.Stamp).catch(function () { failed.push(u.Name); });
+                });
+            }, Promise.resolve()).then(function () {
+                $('#hlStatus').textContent = 'Applied to ' + (users.length - failed.length) + ' user(s)' + (failed.length ? '; couldn’t update ' + failed.join(', ') : '') + '. Open apps pick it up after a refresh.';
+            });
+        }).catch(function (e) { toast(e.message, true); }).then(function () { b.disabled = false; });
+    });
+
     // ============================================================ OTHER APPS
     function collectEverywhere(prev) {
         var ev = Object.assign({}, prev || (S.config && S.config.Everywhere) || {});
@@ -923,6 +1136,7 @@
             if (b.dataset.tab === 'settings' || b.dataset.tab === 'design') loadConflicts();
             if (b.dataset.tab === 'extras') { if (!S.config) loadSettings(); loadExtrasMedia(); }
             if (b.dataset.tab === 'design') { loadBrandSlots(); loadLoginUsers(); }
+            if (b.dataset.tab === 'home') { (S.config ? Promise.resolve() : loadSettings()).then(loadHomeTab); }
             if (b.dataset.tab === 'apps') { (S.config ? Promise.resolve() : loadSettings()).then(loadEverywhere); }
         });
     });
@@ -1849,7 +2063,9 @@
                 { k: 'SpotlightHeight', type: 'num', label: 'Height (% of screen)', min: 35, max: 85 },
                 { k: 'SpotlightTrailers', type: 'bool', label: 'Play a muted preview in the background' },
                 { k: 'PhonePreviews', type: 'bool', label: 'Also play previews on phones (uses mobile data)' },
-                { k: 'SpotlightVersionPicker', type: 'bool', label: 'When a title has several versions (1080p / 4K…), Play asks which one' }] },
+                { k: 'SpotlightVersionPicker', type: 'bool', label: 'When a title has several versions (1080p / 4K…), Play asks which one' },
+                { k: 'SpotlightLibraryIds', type: 'libs', label: 'Take titles from these libraries (none ticked = all)' },
+                { k: 'PreviewLibraryIds', type: 'libs', label: 'Play background previews only for titles from these libraries (none ticked = all)' }] },
             { k: 'PreviewSourceRow', noSwitch: true, label: 'Preview source', hint: 'Where spotlight and hover previews come from. "Clips from your server" plays a short muted scene from the movie or show itself — nothing goes to YouTube, and it works for every title. Clips play straight from the file; titles the browser can\u2019t play just show their backdrop, unless you allow the server to convert them.', sub: [
                 { k: 'PreviewSource', type: 'select', label: 'Use', opts: [['clips', 'Clips from your server'], ['clips-then-trailers', 'Clips, then trailers'], ['trailers-then-clips', 'Trailers, then clips'], ['trailers', 'Trailers only (local trailer files, then YouTube)']] },
                 { k: 'ClipSeconds', type: 'num', label: 'Clip length (seconds)', min: 8, max: 120 },
@@ -1894,6 +2110,7 @@
             return '<div class="as-panel"><h3>' + esc(sec.title) + '</h3>' + sec.items.map(function (it) {
                 var sub = (it.sub || []).map(function (f) {
                     if (f.type === 'bool') return '<label><input type="checkbox" data-xk="' + f.k + '"> ' + esc(f.label) + '</label>';
+                    if (f.type === 'libs') return '<div class="as-xlibs" data-xlibs="' + f.k + '" style="flex-basis:100%"><div class="as-hint" style="margin:.3em 0 .2em">' + esc(f.label) + '</div><div class="as-xlibs-list"><span class="as-spin"></span></div></div>';
                     if (f.type === 'select') return '<label>' + esc(f.label) + ' <select class="as-in" data-xk="' + f.k + '">' + f.opts.map(function (o) { return '<option value="' + o[0] + '">' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
                     return '<label>' + esc(f.label) + ' <input class="as-in" type="number" style="width:5.5em" min="' + f.min + '" max="' + f.max + '" data-xk="' + f.k + '" data-xnum></label>';
                 }).join('');
@@ -1910,6 +2127,21 @@
             row.classList.toggle('as-x-off', !on);
         });
     }
+    // Library tick-boxes used by Extras options (stored as lists of library ids)
+    function fillExtraLibs(x) {
+        var boxes = $$('#asExtrasForm [data-xlibs]');
+        if (!boxes.length) return;
+        api('GET', 'Library/VirtualFolders').then(function (libs) {
+            libs = (libs || []).filter(function (l) { return l.ItemId; });
+            boxes.forEach(function (box) {
+                var on = (x[box.dataset.xlibs] || []).map(function (id) { return String(id).replace(/-/g, '').toLowerCase(); });
+                $('.as-xlibs-list', box).innerHTML = libs.map(function (l) {
+                    var id = String(l.ItemId).replace(/-/g, '').toLowerCase();
+                    return '<label class="as-row" style="display:inline-flex;gap:.3em;margin:.15em .9em .15em 0;font-weight:normal"><input type="checkbox" class="as-xlib" value="' + esc(id) + '"' + (on.indexOf(id) >= 0 ? ' checked' : '') + '>' + esc(l.Name) + '</label>';
+                }).join('') || '<span class="as-hint">No libraries.</span>';
+            });
+        }).catch(function () { boxes.forEach(function (b) { $('.as-xlibs-list', b).textContent = 'Couldn\u2019t load libraries.'; }); });
+    }
     function fillExtras(x) {
         renderExtrasForm();
         x = x || {};
@@ -1921,6 +2153,7 @@
         S.announcements = (x.Announcements || []).map(function (a) { return Object.assign({}, a); });
         renderAnnouncements();
         syncExtrasRows();
+        fillExtraLibs(x);
     }
     function collectExtras() {
         var x = Object.assign({}, (S.config && S.config.Extras) || {});
@@ -1930,6 +2163,10 @@
             else x[el.dataset.xk] = el.value;
         });
         x.Announcements = (S.announcements || []).filter(function (a) { return a.Text && a.Text.trim(); });
+        $$('#asExtrasForm [data-xlibs]').forEach(function (box) {
+            if ($('.as-spin', box)) return;   // not loaded yet: keep what was saved
+            x[box.dataset.xlibs] = $$('.as-xlib', box).filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+        });
         return x;
     }
 

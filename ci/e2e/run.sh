@@ -98,6 +98,7 @@ log "login backdrop upload: $(cat "$RES/upload-login.json")"
 curl -fsS -X POST "$URL/ArtworkStudio/Backdrops/logo/Upload" -H "$A" -F "file=@work/logo.png;type=image/png" > "$RES/upload-logo.json" || echo '{"error":true}' > "$RES/upload-logo.json"
 log "logo upload: $(cat "$RES/upload-logo.json")"
 AS=7143ab64-23ea-4969-b0b9-672c6893c4b3
+aget /Library/VirtualFolders | python3 -c 'import json,sys; print(" ".join(l["ItemId"] for l in json.load(sys.stdin) if l["Name"]=="Movies"))' > work/movies-lib.txt
 aget "/Plugins/$AS/Configuration" > work/as-config.json
 python3 - <<'PY'
 import json
@@ -106,7 +107,8 @@ t = c.setdefault('Theme', {})
 t.update({'Enabled': True, 'Preset': 'jellyskin', 'AccentColor': '#e50914', 'LoginLayout': 'split', 'LoginMessage': 'Welcome to HallFlix', 'SiteName': 'HallFlix', 'HeaderStyle': 'glass', 'HeaderUserSize': 2.2,
           'NativeTheme': True, 'DrawerLogo': True, 'MenuLinks': [{'Name': 'Request a movie', 'Url': 'https://hallflix.net/requests', 'Icon': 'add_circle'}]})
 x = c.setdefault('Extras', {})
-x.update({'Spotlight': True, 'SpotlightTrailers': False, 'Badges': True, 'SurpriseMe': True, 'QuickSearch': True})
+x.update({'Spotlight': True, 'SpotlightTrailers': False, 'Badges': True, 'SurpriseMe': True, 'QuickSearch': True,
+          'SpotlightLibraryIds': [l for l in open('work/movies-lib.txt').read().split()], 'PreviewLibraryIds': []})
 json.dump(c, open('work/as-config.json', 'w'))
 PY
 curl -fsS -X POST "$URL/Plugins/$AS/Configuration" -H "$A" -H "$J" --data @work/as-config.json >/dev/null && log "Artwork Studio configured"

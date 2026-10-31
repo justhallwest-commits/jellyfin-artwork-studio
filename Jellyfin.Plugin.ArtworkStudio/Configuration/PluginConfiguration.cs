@@ -189,6 +189,12 @@ public class ExtrasSettings
     /// <summary>Gets or sets a value indicating whether the spotlight Play button lets you pick a version.</summary>
     public bool SpotlightVersionPicker { get; set; } = true;
 
+    /// <summary>Gets or sets the libraries the spotlight banner takes titles from (empty = all).</summary>
+    public string[] SpotlightLibraryIds { get; set; } = Array.Empty<string>();
+
+    /// <summary>Gets or sets the libraries whose titles play a background preview in the banner (empty = all).</summary>
+    public string[] PreviewLibraryIds { get; set; } = Array.Empty<string>();
+
     /// <summary>Gets or sets a value indicating whether admins can type "missing poster" etc. into Jellyfin's search (Jellyfin 12).</summary>
     public bool ArtworkSearch { get; set; } = true;
 
@@ -265,12 +271,39 @@ public class EverywhereSettings
     public bool PublishCss { get; set; }
 }
 
+/// <summary>The home screen layout an admin sets for everyone (or one person) from Artwork Studio.</summary>
+public class HomeLayoutSettings
+{
+    /// <summary>Gets or sets the home sections in order (Jellyfin names: smalllibrarytiles, resume, nextup, latestmedia…).</summary>
+    public string[] Sections { get; set; } = Array.Empty<string>();
+
+    /// <summary>Gets or sets the library order for "My Media" (library ids). Empty = leave as is.</summary>
+    public string[] LibraryOrder { get; set; } = Array.Empty<string>();
+
+    /// <summary>Gets or sets libraries left out of the "Recently added" rows.</summary>
+    public string[] LatestExcludes { get; set; } = Array.Empty<string>();
+
+    /// <summary>Gets or sets a value indicating whether people who haven't got this layout yet (e.g. new users) get it when they next open Jellyfin.</summary>
+    public bool ApplyToNewUsers { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether the layout is put back for everyone each time they open Jellyfin (users can't keep their own order).</summary>
+    public bool KeepInStep { get; set; }
+
+    /// <summary>Gets or sets user ids that are left alone.</summary>
+    public string[] ExemptUserIds { get; set; } = Array.Empty<string>();
+
+    /// <summary>Gets or sets a stamp that changes each time the layout is saved.</summary>
+    public string Stamp { get; set; } = string.Empty;
+}
+
 public class PluginConfiguration : BasePluginConfiguration
 {
     /// <summary>Gets or sets the optional web app enhancements.</summary>
     public ExtrasSettings Extras { get; set; } = new ExtrasSettings();
 
     public EverywhereSettings Everywhere { get; set; } = new EverywhereSettings();
+
+    public HomeLayoutSettings HomeLayout { get; set; } = new HomeLayoutSettings();
 
     /// <summary>Gets or sets the site design settings.</summary>
     public ThemeSettings Theme { get; set; } = new ThemeSettings();

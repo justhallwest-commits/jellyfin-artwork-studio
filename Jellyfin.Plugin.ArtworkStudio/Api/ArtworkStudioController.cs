@@ -130,6 +130,7 @@ public class ArtworkStudioController : ControllerBase
             extras = cfg.Extras ?? new ExtrasSettings(),
             loader = ListPageFiles("loader").FirstOrDefault(),
             libanim = ListLibraryCovers(),
+            homeLayout = cfg.HomeLayout ?? new HomeLayoutSettings(),
             everywhere = new
             {
                 syncLoginMessage = cfg.Everywhere?.SyncLoginMessage ?? false,

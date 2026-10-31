@@ -419,7 +419,7 @@
         var count = Math.min(20, Math.max(3, X.SpotlightCount || 8));
         var q = {
             IncludeItemTypes: 'Movie,Series', Recursive: true, Limit: count * 2, ImageTypes: 'Backdrop', ImageTypeLimit: 1,
-            Fields: 'Overview,Genres,RemoteTrailers,CommunityRating,OfficialRating,ProductionYear,RunTimeTicks,ChildCount,LocalTrailerCount',
+            Fields: 'Overview,Genres,RemoteTrailers,CommunityRating,OfficialRating,ProductionYear,RunTimeTicks,ChildCount,LocalTrailerCount,DateCreated',
             EnableImageTypes: 'Backdrop,Logo,Primary'
         };
         switch (X.SpotlightSource) {
@@ -430,15 +430,39 @@
         }
         return { q: q, count: count };
     }
+    function idKey(id) { return String(id || '').replace(/-/g, '').toLowerCase(); }
+    var spotLibs = (X.SpotlightLibraryIds || []).map(idKey).filter(Boolean);
+    var previewLibs = (X.PreviewLibraryIds || []).map(idKey).filter(Boolean);
+    function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    // Libraries to take banner titles from: the chosen ones, or every library when only previews are limited
+    function spotLibraryIds() {
+        if (spotLibs.length) { return Promise.resolve(spotLibs); }
+        if (!previewLibs.length) { return Promise.resolve(null); }
+        return api().getUserViews({}, uid()).then(function (r) { return (r.Items || []).map(function (v) { return idKey(v.Id); }); });
+    }
     function loadSpot() {
         if (spot.items && Date.now() - spot.loadedAt < 600000) { return Promise.resolve(spot.items); }
         var sq = spotQuery();
-        return api().getItems(uid(), sq.q).then(function (r) {
-            spot.items = (r.Items || []).filter(function (i) { return i.BackdropImageTags && i.BackdropImageTags.length; }).slice(0, sq.count);
+        var keep = function (i) { return i.BackdropImageTags && i.BackdropImageTags.length; };
+        return spotLibraryIds().then(function (libs) {
+            if (!libs) { return api().getItems(uid(), sq.q).then(function (r) { return (r.Items || []).filter(keep); }); }
+            // one query per library; each title remembers which library it came from (for the preview setting)
+            return Promise.all(libs.map(function (lib) {
+                return api().getItems(uid(), Object.assign({}, sq.q, { ParentId: lib })).then(function (r) {
+                    return (r.Items || []).filter(keep).map(function (i) { i._asLib = lib; return i; });
+                }).catch(function () { return []; });
+            })).then(function (lists) {
+                var all = [].concat.apply([], lists);
+                if (sq.q.SortBy === 'Random') { return shuffle(all); }
+                return all.sort(function (a, b) { return (Date.parse(b.DateCreated || 0) || 0) - (Date.parse(a.DateCreated || 0) || 0); });
+            });
+        }).then(function (items) {
+            spot.items = items.slice(0, sq.count);
             spot.loadedAt = Date.now();
             return spot.items;
         });
     }
+    function previewAllowedFor(item) { return !previewLibs.length || previewLibs.indexOf(item._asLib) >= 0; }
     function stopSpotTrailer() {
         clearTimeout(spot.tTimer);
         if (spot.el) {
@@ -451,7 +475,7 @@
         spot.media = null;
     }
     function startSpotTrailer(item) {
-        if (!spot.el || !X.SpotlightTrailers || reduceMotion || playing() || document.hidden || !previewsAllowed()) { return; }
+        if (!spot.el || !X.SpotlightTrailers || reduceMotion || playing() || document.hidden || !previewsAllowed() || !previewAllowedFor(item)) { return; }
         trailerFor(item).then(function (t) {
             if (!t || !spot.el || spot.items[spot.idx] !== item) { return; }
             var box = spot.el.querySelector('.as-spot-trailer');
@@ -623,6 +647,73 @@
             }
             btn.click();
         }
+    }
+
+    // ------------------------------------------------------------------ Home screen layout (set by an admin)
+    // New users (or everyone, with "keep in step") get the admin's layout the first time they open the web app.
+    var HL = cfg.homeLayout || {};
+    // Jellyfin 12's web app saves its data cache in IndexedDB ("keyval-store" / "jellyfin-query-cache", via idb-keyval)
+    function dropWebQueryCache() {
+        return new Promise(function (done) {
+            var t = setTimeout(done, 1500);
+            var finish = function () { clearTimeout(t); done(); };
+            try {
+                var req = indexedDB.open('keyval-store');
+                req.onupgradeneeded = function () { try { req.result.createObjectStore('keyval'); } catch (e) { /* ignore */ } };
+                req.onerror = finish;
+                req.onsuccess = function () {
+                    var db = req.result;
+                    try {
+                        if (!db.objectStoreNames.contains('keyval')) { db.close(); finish(); return; }
+                        var tx = db.transaction('keyval', 'readwrite');
+                        var st = tx.objectStore('keyval'); st.delete('jellyfin-query-cache'); st.delete('query-cache');
+                        tx.oncomplete = tx.onerror = tx.onabort = function () { db.close(); finish(); };
+                    } catch (e) { try { db.close(); } catch (x) { /* ignore */ } finish(); }
+                };
+            } catch (e) { finish(); }
+        });
+    }
+    var homeChecked = null;
+    function homeLayoutTick() {
+        var me = uid();
+        if (!me || homeChecked === me || !HL.Stamp || !(HL.Sections || []).length || !(HL.ApplyToNewUsers || HL.KeepInStep)) { return; }
+        homeChecked = me;
+        if ((HL.ExemptUserIds || []).map(idKey).indexOf(idKey(me)) >= 0) { return; }
+        var a = api(), url = a.getUrl('DisplayPreferences/usersettings', { userId: me, client: 'emby' });
+        a.getJSON(url).then(function (p) {
+            p = p || { Id: 'usersettings', CustomPrefs: {} };
+            var cp = p.CustomPrefs = p.CustomPrefs || {};
+            var want = []; for (var i = 0; i < 10; i++) { want.push(HL.Sections[i] || 'none'); }
+            var same = want.every(function (v, i) { return (cp['homesection' + i] || '') === v; });
+            var had = cp.asHomeLayout;
+            if (had === HL.Stamp && (same || !HL.KeepInStep)) { return null; }
+            if (had && !HL.KeepInStep) { return null; }          // already had an earlier layout; only "keep in step" changes it
+            if (!had && !HL.ApplyToNewUsers && !HL.KeepInStep) { return null; }
+            want.forEach(function (v, i) { cp['homesection' + i] = v; });
+            cp.asHomeLayout = HL.Stamp;
+            console.info('[Artwork Studio] applying the home screen layout set by the admin');
+            return a.ajax({ type: 'POST', url: url, data: JSON.stringify(p), contentType: 'application/json' }).then(function () {
+                if (!(HL.LibraryOrder || []).length && !(HL.LatestExcludes || []).length) { return; }
+                return a.getUser(me).then(function (u) {
+                    var c = u.Configuration || {};
+                    if ((HL.LibraryOrder || []).length) { c.OrderedViews = HL.LibraryOrder; }
+                    c.LatestItemsExcludes = HL.LatestExcludes || [];
+                    return a.updateUserConfiguration(me, c);
+                });
+            }).then(function () {
+                // The web app keeps its own copy of these settings (in memory, and in Jellyfin 12 also in a saved
+                // cache), so drop that cache and reload once: it then shows, and keeps, the new layout.
+                try {
+                    if (sessionStorage.getItem('as-home-reload') === HL.Stamp) { return; }
+                    sessionStorage.setItem('as-home-reload', HL.Stamp);
+                } catch (e) { return; }
+                // The cache is saved again within a second of any change, so clear it, let that pass, clear it again, reload.
+                return dropWebQueryCache()
+                    .then(function () { return new Promise(function (r) { setTimeout(r, 1300); }); })
+                    .then(dropWebQueryCache)
+                    .then(function () { location.reload(); });
+            });
+        }).catch(function () { homeChecked = null; });
     }
 
     // ------------------------------------------------------------------ Hover trailers
@@ -1216,6 +1307,7 @@
         try { spotlightTick(); } catch (e) { /* keep going */ }
         try { autoplayTick(); } catch (e) { /* keep going */ }
         try { surpriseTick(); } catch (e) { /* keep going */ }
+        try { homeLayoutTick(); } catch (e) { /* keep going */ }
         try { detailsTick(); } catch (e) { /* keep going */ }
         try { playbackTick(); } catch (e) { /* keep going */ }
         try { seasonTick(); } catch (e) { /* keep going */ }
