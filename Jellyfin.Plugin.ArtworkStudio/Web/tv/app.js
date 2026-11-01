@@ -208,12 +208,11 @@
         return list.filter(function (e) { return e.classList.contains('autofocus'); })[0] || list.filter(function (e) { return !e.closest('.hf-top'); })[0] || list[0];
     }
     function focusFirst() { current = null; setFocus(firstFocus()); }
-    var lastMove = 0, lastXY = '';
+    var lastXY = '';
     document.addEventListener('mousemove', function (e) {
-        var xy = e.clientX + ',' + e.clientY; if (xy === lastXY) { return; } lastXY = xy; lastMove = Date.now();
+        var xy = e.clientX + ',' + e.clientY; if (xy === lastXY) { return; } lastXY = xy;
         var f = e.target.closest && e.target.closest('.f'); if (f && f !== current && focusRoot().contains(f)) { setFocus(f, true); }
     });
-    document.addEventListener('mouseover', function (e) { if (Date.now() - lastMove > 120) { return; } var f = e.target.closest && e.target.closest('.f'); if (f && focusRoot().contains(f)) { setFocus(f, true); } });
 
     // ================================================================== navigation stack
     var stack = [];
@@ -861,11 +860,12 @@
         if (choice.source) { body.MediaSourceId = choice.source; }
         if (choice.audio != null) { body.AudioStreamIndex = choice.audio; }
         if (choice.sub != null) { body.SubtitleStreamIndex = choice.sub; }
+        if (choice.noDirect) { body.EnableDirectPlay = false; body.EnableDirectStream = false; }
         return api('POST', 'Items/' + itemId + '/PlaybackInfo', { userId: uid() }, body).then(function (info) {
             var ms = (info.MediaSources || [])[0];
             if (!ms) { throw new Error(info.ErrorCode || 'This title can’t be played'); }
             var subIndex = choice.sub != null ? choice.sub : pickSubtitle(ms, choice);
-            var direct = ms.SupportsDirectPlay || ms.SupportsDirectStream;
+            var direct = !choice.noDirect && (ms.SupportsDirectPlay || ms.SupportsDirectStream);
             var src, method;
             if (direct && !(subIndex >= 0 && (ms.MediaStreams || []).some(function (x) { return x.Index === subIndex && x.DeliveryMethod === 'Encode'; }))) {
                 method = ms.SupportsDirectPlay ? 'DirectPlay' : 'DirectStream';
@@ -1044,9 +1044,9 @@
         },
         restartAt: function (ticks, change) {
             var st = this.cur, self = this;
-            var choice = extend({ source: st.mediaSourceId, audio: st.audioIndex, sub: st.subIndex }, change);
+            var choice = extend({ source: st.mediaSourceId, audio: st.audioIndex, sub: st.subIndex, noDirect: !!st.retried }, change);
             api('POST', 'Sessions/Playing/Stopped', null, { ItemId: st.itemId, MediaSourceId: st.mediaSourceId, PlaySessionId: st.playSessionId, PositionTicks: this.posTicks() }).catch(function () { });
-            getStream(st.itemId, { start: ticks, choice: choice }).then(function (ns) { ns.item = st.item; self.queue[self.idx] = ns; self.playCurrent(); }, function (e) { toast(e.message); });
+            getStream(st.itemId, { start: ticks, choice: choice }).then(function (ns) { ns.item = st.item; ns.retried = st.retried; self.queue[self.idx] = ns; self.playCurrent(); }, function (e) { toast(e.message); });
         },
         chooseAudio: function () {
             var st = this.cur, self = this, a = (st.ms.MediaStreams || []).filter(function (x) { return x.Type === 'Audio'; });
@@ -1096,7 +1096,21 @@
             this.cleanup(); this.cur = null;
             playItem(ep.Id, {});
         },
-        fail: function () { toast('This video won’t play here. Try a lower streaming quality in Settings.'); if (this.cur && this.cur.intro) { this.next(); } else { this.stop(true); } },
+        fail: function () {
+            var st = this.cur, self = this;
+            // the TV couldn't open the file as it is: ask the server to convert it, once
+            if (st && st.method !== 'Transcode' && !st.retried) {
+                this.spin(true);
+                var at = st.intro ? 0 : Math.max(st.start || 0, this.posTicks());
+                getStream(st.itemId, { start: at, choice: { source: st.mediaSourceId, audio: st.audioIndex, sub: st.subIndex, noDirect: true } }).then(function (ns) {
+                    ns.item = st.item; ns.intro = st.intro; ns.retried = true; self.queue[self.idx] = ns; self.playCurrent();
+                }, function () { st.retried = true; self.fail(); });
+                return;
+            }
+            if (st && st.intro) { this.next(); return; }
+            toast('This video won’t play here. Try a lower streaming quality in Settings.');
+            this.stop(true);
+        },
         cleanup: function () {
             clearInterval(this.progTimer); clearInterval(this.countdown); clearTimeout(this.seekT);
             if (this.hls) { try { this.hls.destroy(); } catch (e) { /* ignore */ } this.hls = null; }

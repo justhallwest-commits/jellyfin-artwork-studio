@@ -34,6 +34,12 @@ Web-based apps (browsers, the Android and iPhone/iPad apps, Jellyfin Media Playe
 
 Item artwork, library tile pictures and user pictures are saved into Jellyfin itself, so every app shows them. Switching any option off restores what Jellyfin had before.
 
+## HallFlix TV app
+
+A remote-control interface for TVs, served by this plugin at `<server>/ArtworkStudio/TV/` and wrapped as apps for **LG (webOS)**, **Samsung (Tizen)**, **Android TV / Google TV** and **Amazon Fire TV**. It's built around the Design and Extras settings (accent, preset, fonts, corners, logo, backdrops, spotlight and its libraries, badges, announcements, the admin's home layout), plays Pre-Roll Videos before titles, and follows Content Guard because everything comes from the server. Android TV / Fire TV hand playback to ExoPlayer for wide format support. Updating the plugin updates every TV.
+
+Downloads: the [tv-app release](https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/tag/tv-app). Fire TV / Android TV: open Downloader and type `<server>/ArtworkStudio/TV/apk`. Step-by-step for every TV: [tv/INSTALL.md](tv/INSTALL.md).
+
 ## Install
 
 ### Option A — plugin repository (recommended)
