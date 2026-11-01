@@ -75,9 +75,10 @@ async function api(p) {
   await step('dpad', async () => {
     const seq = [await focused()];
     await key('ArrowRight'); seq.push(await focused());
-    const t1 = await page.evaluate(() => (document.querySelector('.hf-spot h1') || {}).textContent);
+    const spotIdx = () => page.evaluate(() => [...document.querySelectorAll('.hf-dots i')].findIndex(i => i.classList.contains('on')));
+    const t1 = await spotIdx();
     await key('ArrowRight', 1, 1500); seq.push(await focused());
-    const t2 = await page.evaluate(() => (document.querySelector('.hf-spot h1') || {}).textContent);
+    const t2 = await spotIdx();
     await key('ArrowDown'); seq.push(await focused());
     await key('ArrowRight'); seq.push(await focused());
     await key('ArrowDown'); seq.push(await focused());
@@ -146,15 +147,17 @@ async function api(p) {
     await page.waitForSelector('.hf-search input'); await page.waitForTimeout(500);
     await page.keyboard.type('sin'); await page.waitForTimeout(2500);
     await shot(page, '08-search');
-    return { results: await page.locator('.hf-card').count(), rows: await page.evaluate(() => [...document.querySelectorAll('.hf-row h2')].map(h => h.textContent)) };
+    return { results: await page.locator('.hf-screen:last-child .hf-card').count(), rows: await page.evaluate(() => [...document.querySelectorAll('.hf-screen:last-child .hf-row h2')].map(h => h.textContent)), focus: await focused() };
   });
 
   await step('settings', async () => {
     await page.keyboard.press('Escape'); await page.waitForTimeout(1200);
-    await page.locator('.hf-avatar').first().click(); await page.waitForTimeout(1200);
+    await page.locator('.hf-screen:last-child .hf-avatar').click(); await page.waitForTimeout(1200);
+    const f = await focused();
     await key('Enter', 1, 800); await shot(page, '09-settings-menu');
+    const menu = await page.evaluate(() => [...document.querySelectorAll('#hfOverlay .hf-item')].map(i => i.textContent));
     await key('Escape', 1, 600); await shot(page, '09b-settings');
-    return { items: await page.evaluate(() => [...document.querySelectorAll('.hf-list .hf-item')].map(i => i.textContent)) };
+    return { focusFirst: f, menu, items: await page.evaluate(() => [...document.querySelectorAll('.hf-list .hf-item')].map(i => i.textContent)) };
   });
 
   // the LG / Samsung launcher page (as a local file, like on the TV) finding the server and opening the interface

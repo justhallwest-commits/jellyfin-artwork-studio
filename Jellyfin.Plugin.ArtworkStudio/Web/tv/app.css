@@ -210,3 +210,7 @@ h1, h2, h3 { font-family: var(--head-font); }
 .hf-btns { margin-top: 2.4vh; }
 .hf-details.hf-details-top { min-height: 66vh; }
 .hf-section { margin-top: 1vh; }
+.hf-top { transition: opacity .3s; }
+.hf-screen.scrolled .hf-top { opacity: 0; }
+.hf-badges { right: 2.3rem; }
+.hf-badges .ver { background: rgba(0,0,0,.72); }

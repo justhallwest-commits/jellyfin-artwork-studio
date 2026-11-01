@@ -133,7 +133,7 @@
     function focusables() { return qsa('.f', focusRoot()).filter(visible); }
     function setFocus(e, noScroll) {
         if (!e) { return; }
-        if (current && current !== e) { current.classList.remove('focused'); }
+        qsa('.focused').forEach(function (x) { if (x !== e) { x.classList.remove('focused'); } });
         current = e; e.classList.add('focused');
         if (e.tagName === 'INPUT') { try { e.focus(); } catch (x) { /* ignore */ } } else if (document.activeElement && document.activeElement.tagName === 'INPUT') { document.activeElement.blur(); }
         if (!noScroll) { reveal(e); }
@@ -152,6 +152,13 @@
             }
         }
         var inner = e.closest ? e.closest('.hf-scroll-inner') : null;
+        var screen = e.closest ? e.closest('.hf-screen') : null;
+        if (!inner && screen && e.closest('.hf-top')) {
+            inner = screen.querySelector('.hf-scroll-inner');
+            if (inner) { inner.setAttribute('data-y', '0'); inner.style.transform = ''; }
+            screen.classList.remove('scrolled');
+            return;
+        }
         if (inner) {
             var box = inner.parentNode.getBoundingClientRect(), er = e.getBoundingClientRect();
             var y = parseFloat(inner.getAttribute('data-y') || '0');
@@ -162,6 +169,7 @@
             else if (ar.top < box.top + box.height * 0.12 || er.bottom > box.bottom - box.height * 0.08) { target = y - (ar.top - box.top - box.height * 0.18); }
             target = Math.min(0, Math.max(target, -(inner.scrollHeight - box.height + box.height * 0.1)));
             if (target !== y) { inner.setAttribute('data-y', target); inner.style.transform = 'translateY(' + target + 'px)'; }
+            if (screen) { screen.classList.toggle('scrolled', target < -window.innerHeight * 0.05); }
         }
     }
     function centerOf(r) { return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
@@ -195,9 +203,17 @@
         }
         return !!best;
     }
-    function firstFocus(list) { list = list || focusables(); return list.filter(function (e) { return e.classList.contains('autofocus'); })[0] || list[0]; }
+    function firstFocus(list) {
+        list = list || focusables();
+        return list.filter(function (e) { return e.classList.contains('autofocus'); })[0] || list.filter(function (e) { return !e.closest('.hf-top'); })[0] || list[0];
+    }
     function focusFirst() { current = null; setFocus(firstFocus()); }
-    document.addEventListener('mouseover', function (e) { var f = e.target.closest && e.target.closest('.f'); if (f && focusRoot().contains(f)) { setFocus(f, true); } });
+    var lastMove = 0, lastXY = '';
+    document.addEventListener('mousemove', function (e) {
+        var xy = e.clientX + ',' + e.clientY; if (xy === lastXY) { return; } lastXY = xy; lastMove = Date.now();
+        var f = e.target.closest && e.target.closest('.f'); if (f && f !== current && focusRoot().contains(f)) { setFocus(f, true); }
+    });
+    document.addEventListener('mouseover', function (e) { if (Date.now() - lastMove > 120) { return; } var f = e.target.closest && e.target.closest('.f'); if (f && focusRoot().contains(f)) { setFocus(f, true); } });
 
     // ================================================================== navigation stack
     var stack = [];
@@ -316,7 +332,7 @@
         var name = it.Type === 'Episode' ? (it.SeriesName || it.Name) : it.Name;
         var sub = it.Type === 'Episode' ? (it.ParentIndexNumber != null ? 'S' + it.ParentIndexNumber + ':E' + it.IndexNumber + ' · ' : '') + it.Name : (it.ProductionYear || '');
         c.innerHTML = '<div class="img"' + (src ? ' style="background-image:url(\'' + esc(src) + '\')"' : '') + '>' + (src ? '' : '<div class="ph">' + esc(name) + '</div>') +
-            (it.Type === 'CollectionFolder' || it.Type === 'UserView' ? '<div class="lib-name">' + esc(it.Name) + '</div>' : badgesFor(it)) +
+            (it.Type === 'CollectionFolder' || it.Type === 'UserView' ? (src ? '' : '<div class="lib-name">' + esc(it.Name) + '</div>') : badgesFor(it)) +
             (X.Badges !== false && X.BadgeRating !== false && it.CommunityRating && it.Type !== 'Episode' ? '<div class="hf-rating">★ ' + it.CommunityRating.toFixed(1) + '</div>' : '') +
             (ud.Played && it.Type !== 'Series' ? '<div class="hf-played">✓</div>' : '') +
             (pct > 0 && pct < 100 ? '<div class="hf-progress"><i style="width:' + pct.toFixed(1) + '%"></i></div>' : '') + '</div>' +
@@ -600,6 +616,7 @@
                     s.loading = false; s.total = r.TotalRecordCount || 0;
                     (r.Items || []).forEach(function (it, i) {
                         var c = card(it, shape);
+                        if (s.start === 0 && i === 0) { c.classList.add('autofocus'); }
                         if (s.start + i >= s.total - 20 || (i === (r.Items.length - 12))) { c.onfocusin2 = function () { more(); }; }
                         grid.appendChild(c);
                     });
