@@ -111,8 +111,18 @@ public class ArtworkStudioController : ControllerBase
             script.Append(reader.ReadToEnd()).Append('\n');
         }
 
+        var clientCfg = BuildClientConfig();
+        // "as-js" tells the copy of the design in Branding → Custom CSS that the full script is running here
+        var prefix = "document.documentElement.classList.add('as-js');window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
+        Response.Headers.CacheControl = "no-cache";
+        return Content(prefix + script, "application/javascript; charset=utf-8");
+    }
+
+    /// <summary>The design and Extras settings the site script and the HallFlix TV app use.</summary>
+    private static object BuildClientConfig()
+    {
         var cfg = Config;
-        var clientCfg = new
+        return new
         {
             enabled = cfg.LibraryBackdrops,
             interval = Math.Clamp(cfg.BackdropRotateSeconds, 5, 600),
@@ -136,12 +146,79 @@ public class ArtworkStudioController : ControllerBase
                 syncLoginMessage = cfg.Everywhere?.SyncLoginMessage ?? false,
                 publishCss = cfg.Everywhere?.PublishCss ?? false
             },
-            now = DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture)
+            now = DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture),
+            version = typeof(Plugin).Assembly.GetName().Version?.ToString()
         };
-        // "as-js" tells the copy of the design in Branding → Custom CSS that the full script is running here
-        var prefix = "document.documentElement.classList.add('as-js');window.__artworkStudioCfg=" + System.Text.Json.JsonSerializer.Serialize(clientCfg) + ";\n";
+    }
+
+    // ---------------------------------------------------------------- HallFlix TV app
+
+    /// <summary>The design settings as JSON, for the HallFlix TV app.</summary>
+    [HttpGet("AppConfig")]
+    [AllowAnonymous]
+    public ActionResult GetAppConfig()
+    {
         Response.Headers.CacheControl = "no-cache";
-        return Content(prefix + script, "application/javascript; charset=utf-8");
+        return Content(System.Text.Json.JsonSerializer.Serialize(BuildClientConfig()), "application/json; charset=utf-8");
+    }
+
+    private static readonly Dictionary<string, string> TvFiles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["index.html"] = "text/html; charset=utf-8",
+        ["app.js"] = "application/javascript; charset=utf-8",
+        ["app.css"] = "text/css; charset=utf-8",
+        ["hls.min.js"] = "application/javascript; charset=utf-8"
+    };
+
+    private const string TvReleaseUrl = "https://github.com/justhallwest-commits/jellyfin-artwork-studio/releases/download/tv-app/";
+
+    private static readonly Dictionary<string, string> TvDownloads = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["apk"] = "HallFlix-AndroidTV.apk",
+        ["android"] = "HallFlix-AndroidTV.apk",
+        ["firetv"] = "HallFlix-AndroidTV.apk",
+        ["ipk"] = "HallFlix-LG-webOS.ipk",
+        ["lg"] = "HallFlix-LG-webOS.ipk",
+        ["wgt"] = "HallFlix-Samsung-unsigned.wgt",
+        ["samsung"] = "HallFlix-Samsung-unsigned.wgt"
+    };
+
+    /// <summary>
+    /// Serves the HallFlix TV interface (a remote-control friendly app for TVs). The LG, Samsung and
+    /// Android / Fire TV apps open this page, so updating the plugin updates every TV.
+    /// </summary>
+    [HttpGet("TV")]
+    [HttpGet("TV/{file}")]
+    [AllowAnonymous]
+    public ActionResult GetTvFile([FromRoute] string? file)
+    {
+        if (string.IsNullOrEmpty(file) && !(Request.Path.Value ?? string.Empty).EndsWith('/'))
+        {
+            // relative links (app.js…) need the trailing slash
+            return Redirect(Request.PathBase + Request.Path + "/" + Request.QueryString);
+        }
+
+        file = string.IsNullOrEmpty(file) ? "index.html" : file;
+
+        // short addresses to type on a TV (e.g. in Fire TV's Downloader app): <server>/ArtworkStudio/TV/apk
+        if (TvDownloads.TryGetValue(file, out var download))
+        {
+            return Redirect(TvReleaseUrl + download);
+        }
+
+        if (!TvFiles.TryGetValue(file, out var type))
+        {
+            return NotFound();
+        }
+
+        var stream = typeof(Plugin).Assembly.GetManifestResourceStream(typeof(Plugin).Namespace + ".Web.tv." + file);
+        if (stream is null)
+        {
+            return NotFound();
+        }
+
+        Response.Headers.CacheControl = file == "hls.min.js" ? "public, max-age=604800" : "no-cache";
+        return File(stream, type);
     }
 
     /// <summary>Serves the theme preset definitions (used by the Design tab).</summary>

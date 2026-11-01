@@ -119,6 +119,7 @@ TOKEN="$TOKEN" URL="$URL" RES="$RES" python3 checks12.py 2>&1 | tee -a "$RES/run
 # ---- browser run
 echo "$TOKEN" > work/token
 JF_URL=$URL JF_USER=admin JF_PASS=HallFlix-e2e-1 JF_TOKEN=$TOKEN RES=$RES node e2e.js 2>&1 | tee -a "$RES/run.log" || true
+JF_URL=$URL JF_USER=admin JF_PASS=HallFlix-e2e-1 JF_TOKEN=$TOKEN RES=$RES TV_LAUNCHER="$(cd ../.. && pwd)/tv/launcher/index.html" node tv-e2e.js 2>&1 | tee -a "$RES/run.log" || true
 
 # ---- what the server did with Artwork Studio's branding sync
 aget /Branding/Configuration > "$RES/branding.json" || true

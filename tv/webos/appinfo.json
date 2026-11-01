@@ -1,0 +1,16 @@
+{
+  "id": "net.hallflix.tv",
+  "version": "1.0.0",
+  "vendor": "HallFlix",
+  "type": "web",
+  "main": "index.html",
+  "title": "HallFlix",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "splashBackground": "splash.png",
+  "iconColor": "#0b0b0f",
+  "bgColor": "#0b0b0f",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "requiredMemory": 300
+}

@@ -1,0 +1,109 @@
+name: HallFlix TV apps
+
+# Packages the HallFlix TV apps: LG webOS (.ipk), Samsung Tizen (.wgt, signed on your PC for your TV)
+# and Android TV / Google TV / Fire TV (.apk). The interface itself comes from the Artwork Studio
+# plugin on the server, so these only change when the launchers or the Android player change.
+# Main-branch builds (and manual runs with "release") update the fixed "tv-app" release, whose
+# download links never change: …/releases/download/tv-app/<file>.
+on:
+  push:
+    branches: [ main, tv-app ]
+    paths: [ 'tv/**', '.github/workflows/tv-apps.yml' ]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Publish to the tv-app release'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tv-apps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Version
+        id: v
+        run: echo "v=$(tr -d ' \n' < tv/VERSION)" >> "$GITHUB_OUTPUT"
+
+      - name: LG webOS and Samsung Tizen
+        run: |
+          bash tv/build.sh "${{ steps.v.outputs.v }}"
+          mkdir -p out
+          npx -y -p @webos-tools/cli@3 ares-package tv/dist/webos -o out/webos --no-minify
+          mv out/webos/*.ipk out/HallFlix-LG-webOS.ipk && rmdir out/webos
+          (cd tv/dist/tizen && zip -qr "$GITHUB_WORKSPACE/out/HallFlix-Samsung-unsigned.wgt" .)
+          ls -la out
+
+      - name: Android TV / Fire TV
+        working-directory: tv/android
+        env:
+          KS_B64: ${{ secrets.HALLFLIX_KEYSTORE_B64 }}
+          KS_PW: ${{ secrets.HALLFLIX_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            export HALLFLIX_KEYSTORE="$RUNNER_TEMP/release.jks" HALLFLIX_KEYSTORE_PASSWORD="$KS_PW"
+            echo "signing with the HALLFLIX_KEYSTORE_B64 secret"
+          else
+            export HALLFLIX_KEYSTORE="$PWD/hallflix-sideload.jks" HALLFLIX_KEYSTORE_PASSWORD="$(cat hallflix-sideload.password)"
+            echo "signing with the sideload key in the repository"
+          fi
+          gradle --no-daemon assembleRelease -PhallflixVersion=${{ steps.v.outputs.v }}
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/out/HallFlix-AndroidTV.apk"
+          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME"/build-tools | sort -V | tail -1)/aapt2 dump badging "$GITHUB_WORKSPACE/out/HallFlix-AndroidTV.apk" | head -5 || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hallflix-tv-${{ steps.v.outputs.v }}
+          path: out/
+
+      - name: Publish to the tv-app release
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.release)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=${{ steps.v.outputs.v }}
+          git tag -f tv-app && git push -f origin tv-app
+          cat > notes.md <<EOF
+          **HallFlix TV $V** for LG, Samsung, Android TV, Google TV and Fire TV.
+
+          These apps open the HallFlix TV interface that **Artwork Studio** (1.0.35 or newer) serves from your Jellyfin server, so the design, spotlight, badges, pre-rolls and Content Guard rules always match the server. Updating the plugin updates every TV.
+
+          | TV | File | How to install |
+          |---|---|---|
+          | Fire TV, Android TV, Google TV | HallFlix-AndroidTV.apk | Downloader app → \`<your server>/ArtworkStudio/TV/apk\` |
+          | LG (webOS 4+) | HallFlix-LG-webOS.ipk | Developer Mode app + webOS Dev Manager |
+          | Samsung (Tizen 4+) | HallFlix-Samsung-unsigned.wgt | Apps2Samsung → Custom WGT (signs it for your TV) |
+
+          Full steps: [tv/INSTALL.md](https://github.com/${{ github.repository }}/blob/main/tv/INSTALL.md)
+
+          Built from ${{ github.sha }}.
+          EOF
+          if gh release view tv-app >/dev/null 2>&1; then
+            gh release edit tv-app --title "HallFlix TV apps $V" --notes-file notes.md --latest=false
+          else
+            gh release create tv-app --title "HallFlix TV apps $V" --notes-file notes.md --latest=false
+          fi
+          gh release upload tv-app out/* --clobber

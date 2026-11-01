@@ -48,6 +48,7 @@
     <EmbeddedResource Include="Web\presets.js" />
     <None Remove="Web\enhancements.js" />
     <EmbeddedResource Include="Web\enhancements.js" />
+    <EmbeddedResource Include="Web\tv\*" />
     <None Remove="Web\siteTheme.js" />
     <EmbeddedResource Include="Web\siteTheme.js" />
   </ItemGroup>
