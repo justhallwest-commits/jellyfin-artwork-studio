@@ -123,6 +123,7 @@ const probe = () => {
       }, i);
     }
     await p.reload(); await p.waitForTimeout(5000);
+    await p.click('#asLibChips [data-lib="LIBS"]'); await p.waitForTimeout(3000);
     const card = p.locator('#asGrid .as-card[data-id="page-login"]').first();
     await card.click(); await p.waitForSelector('#asSlots .as-tile', { timeout: 15000 });
     const before = await p.locator('#asSlots .as-tile').count();
