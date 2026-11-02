@@ -109,6 +109,38 @@ const probe = () => {
     return out;
   });
 
+  // removing a login backdrop asks once (the editor used to stack one prompt per redraw)
+  await step('backdrop-remove-once', async () => {
+    const p = await browser.newPage(); watch(p, 'remove');
+    await login(p);
+    await p.goto(URL + '/web/#/configurationpage?name=ArtworkStudio'); await p.waitForTimeout(5000);
+    // three login backdrops, so the editor redraws a few times
+    for (let i = 0; i < 2; i++) {
+      await p.evaluate(async (n) => {
+        const c = document.createElement('canvas'); c.width = 320; c.height = 180; const g = c.getContext('2d'); g.fillStyle = n ? '#3355aa' : '#aa5533'; g.fillRect(0, 0, 320, 180);
+        const blob = await new Promise(r => c.toBlob(r, 'image/png')); const fd = new FormData(); fd.append('file', blob, 'extra' + n + '.png');
+        await fetch(ApiClient.getUrl('ArtworkStudio/Backdrops/login/Upload'), { method: 'POST', body: fd, headers: { Authorization: 'MediaBrowser Token="' + ApiClient.accessToken() + '"' } });
+      }, i);
+    }
+    await p.reload(); await p.waitForTimeout(5000);
+    const card = p.locator('#asGrid .as-card[data-id="page-login"]').first();
+    await card.click(); await p.waitForSelector('#asSlots .as-tile', { timeout: 15000 });
+    const before = await p.locator('#asSlots .as-tile').count();
+    let prompts = 0;
+    p.on('dialog', d => { prompts++; d.accept().catch(() => {}); });
+    // remove two, one after the other (the second happens after a redraw)
+    for (let i = 0; i < 2; i++) {
+      await p.locator('#asSlots .as-tile').last().hover();
+      await p.locator('#asSlots .as-tile').last().locator('[data-act="delete"]').click();
+      await p.waitForTimeout(3000);
+    }
+    const after = await p.locator('#asSlots .as-tile').count();
+    await shot(p, '17-backdrop-removed');
+    await p.close();
+    if (prompts !== 2) throw new Error('expected 2 prompts for 2 removals, got ' + prompts);
+    return { before, after, prompts };
+  });
+
   await step('home-layout', async () => {
     page.on('dialog', d => d.accept().catch(() => {}));
     await page.goto(URL + '/web/#/configurationpage?name=ArtworkStudio'); await page.waitForTimeout(5000);
