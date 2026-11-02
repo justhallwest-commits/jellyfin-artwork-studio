@@ -1517,6 +1517,10 @@
     }
 
     function bindSlotEvents(wrap) {
+        // renderSlots redraws the inside of the same wrapper, so the handlers go on once per editor;
+        // binding on every redraw stacked them (one "Remove?" prompt, upload or picker per redraw)
+        if (wrap._asBound) return;
+        wrap._asBound = true;
         wrap.addEventListener('click', function (e) {
             var tg = targetOf(e.target); if (!tg) return;
             setLast(tg);
