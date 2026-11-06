@@ -1,0 +1,61 @@
+[e2e] image jellyfin/jellyfin:12.4
+[e2e] plugin ArtworkStudio: Jellyfin.Plugin.ArtworkStudio.dll 
+[e2e] plugin BulkMetadata: Jellyfin.Plugin.BulkMetadata.dll 
+[e2e] plugin ContentGuard: Jellyfin.Plugin.ContentGuard.dll 
+[e2e] plugin PreRollVideos: JellyfinPreroll.dll 
+[e2e] media ready
+[e2e] wizard done
+[e2e] movies in library: 3
+[e2e] plugin Artwork Studio 1.0.0.0 Active
+[e2e] plugin AudioDB 12.4.0.0 Active
+[e2e] plugin Bulk Metadata Editor 1.0.0.0 Active
+[e2e] plugin Content Guard 1.1.0.12 Active
+[e2e] plugin ListenBrainz Similarity Provider 12.4.0.0 Active
+[e2e] plugin MusicBrainz 12.4.0.0 Active
+[e2e] plugin OMDb 12.4.0.0 Active
+[e2e] plugin Pre-Roll Videos 3.0.0.0 Active
+[e2e] plugin Studio Images 12.4.0.0 Active
+[e2e] plugin TMDb 12.4.0.0 Active
+[e2e] index.html: data-artwork-studio defer src="../ArtworkStudio/ClientScript"
+[e2e] login backdrop upload: {"success":true,"Name":"20261106075204-ff75ca81.png"}
+[e2e] logo upload: {"success":true,"Name":"20261106075204-d0b44969.png"}
+[e2e] Artwork Studio configured
+[e2e] versions-grouped ok {"ok": true, "movies": ["Big Buck Bunny", "Sintel", "Tears of Steel"], "sintelVersions": 2}
+[e2e] as-menu-links ok {"ok": true, "menuLinks": [{"name": "Request a movie", "url": "https://hallflix.net/requests", "icon": "add_circle"}]}
+[e2e] as-search-shortcut ok {"ok": true, "missingBanner": ["Big Buck Bunny", "Sintel", "Tears of Steel"], "normalSearch": ["Tears of Steel"]}
+[e2e] pr-preview ok {"ok": true, "preview": {"Reason": "no match, general clips", "Clips": [{"Id": "b969bdc7fe1aec0fbba604a6b4612388", "Name": "HallFlix Intro", "Tags": [], "Seconds": 4, "Enabled": true, "TooLong": false, "AvailableNow": true, "Schedule": "", "Plays": 0, "LastPlayed": ""}]}}
+[e2e] pr-versions ok {"ok": true, "perVersion": {"1080p": "no match, general clips", "720p": "no match, general clips"}}
+[e2e] pr-playlist ok {"ok": true, "reason": "playlist \"Pre-roll line-up\" (next 1 of 1)"}
+[e2e] pr-skippable-segment ok {"ok": true, "segments": [{"Id": "b53b9da4e19a455ea53ab50437b4493e", "ItemId": "b969bdc7fe1aec0fbba604a6b4612388", "Type": "Intro", "StartTicks": 0, "EndTicks": 37500000}]}
+[e2e] cg-blocking ok {"ok": true, "animation": ["Big Buck Bunny", "Sintel", "Tears of Steel"], "kidSees": [], "kidRecs": [], "kidSearchSintel": []}
+[e2e] login-page ok
+[e2e] sign-in ok
+[e2e] home-modern ok
+[e2e] item-details ok
+[e2e] page-artwork-studio ok
+[e2e] page-preroll ok
+[e2e] page-bulk-metadata ok
+[e2e] page-content-guard ok
+[e2e] artwork-studio-tabs ok
+[e2e] backdrop-remove-once ok
+[e2e] home-layout ok
+[e2e] bulk-versions-tab ok
+[e2e] preroll-jf12-tab ok
+[e2e] drawer-logo ok
+[e2e] other-apps-apply ok
+[e2e] home-after-design ok
+[e2e] home-legacy ok
+[e2e] home-tv ok
+[e2e] home-phone ok
+[e2e] wrote results.json
+[tv] login ok
+[tv] home ok
+[tv] dpad ok
+[tv] details ok
+[tv] playback ok
+[tv] library ok
+[tv] search ok
+[tv] settings ok
+[tv] launcher ok
+[tv] wrote tv-results.json
+[e2e] done

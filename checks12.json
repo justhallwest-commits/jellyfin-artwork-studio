@@ -1,0 +1,86 @@
+{
+  "versions-grouped": {
+    "ok": true,
+    "movies": [
+      "Big Buck Bunny",
+      "Sintel",
+      "Tears of Steel"
+    ],
+    "sintelVersions": 2
+  },
+  "as-menu-links": {
+    "ok": true,
+    "menuLinks": [
+      {
+        "name": "Request a movie",
+        "url": "https://hallflix.net/requests",
+        "icon": "add_circle"
+      }
+    ]
+  },
+  "as-search-shortcut": {
+    "ok": true,
+    "missingBanner": [
+      "Big Buck Bunny",
+      "Sintel",
+      "Tears of Steel"
+    ],
+    "normalSearch": [
+      "Tears of Steel"
+    ]
+  },
+  "pr-preview": {
+    "ok": true,
+    "preview": {
+      "Reason": "no match, general clips",
+      "Clips": [
+        {
+          "Id": "b969bdc7fe1aec0fbba604a6b4612388",
+          "Name": "HallFlix Intro",
+          "Tags": [],
+          "Seconds": 4,
+          "Enabled": true,
+          "TooLong": false,
+          "AvailableNow": true,
+          "Schedule": "",
+          "Plays": 0,
+          "LastPlayed": ""
+        }
+      ]
+    }
+  },
+  "pr-versions": {
+    "ok": true,
+    "perVersion": {
+      "1080p": "no match, general clips",
+      "720p": "no match, general clips"
+    }
+  },
+  "pr-playlist": {
+    "ok": true,
+    "reason": "playlist \"Pre-roll line-up\" (next 1 of 1)"
+  },
+  "pr-skippable-segment": {
+    "ok": true,
+    "segments": [
+      {
+        "Id": "b53b9da4e19a455ea53ab50437b4493e",
+        "ItemId": "b969bdc7fe1aec0fbba604a6b4612388",
+        "Type": "Intro",
+        "StartTicks": 0,
+        "EndTicks": 37500000
+      }
+    ]
+  },
+  "cg-blocking": {
+    "ok": true,
+    "animation": [
+      "Big Buck Bunny",
+      "Sintel",
+      "Tears of Steel"
+    ],
+    "kidSees": [],
+    "kidRecs": [],
+    "kidSearchSintel": []
+  }
+}

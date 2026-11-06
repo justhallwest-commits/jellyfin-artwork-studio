@@ -1,0 +1,7 @@
+as-1010: ok
+as-1011: ok
+pr-1010: ok
+pr-1011: ok
+bm-1010: ok
+cg-1010: ok
+cg-1011: ok

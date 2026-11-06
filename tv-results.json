@@ -1,0 +1,167 @@
+{
+  "steps": {
+    "login": {
+      "ok": true,
+      "users": 0,
+      "firstFocus": "f.hf-btn.autofocus.focused | Enter user name",
+      "title": "HallFlix"
+    },
+    "home": {
+      "ok": true,
+      "spotlight": true,
+      "spotTitle": "logo image",
+      "rows": [
+        "Recently added in Movies",
+        "Recently added in Prerolls",
+        "My Media"
+      ],
+      "cards": 7,
+      "badges": [
+        "NEW",
+        "NEW",
+        "2 VERSIONS",
+        "NEW",
+        "NEW"
+      ],
+      "accent": "#e50914",
+      "radius": "22.4px",
+      "logo": true,
+      "nav": [
+        "Home",
+        "Search",
+        "Movies",
+        "Prerolls"
+      ],
+      "background": true
+    },
+    "dpad": {
+      "ok": true,
+      "seq": [
+        "f.hf-btn.primary.autofocus.focused | ▶Play",
+        "f.hf-btn.more.focused | More info",
+        "f.hf-btn.more.focused | More info",
+        "f.hf-card.focused | NEW2 VERSIONS★ 7.3Sintel2010",
+        "f.hf-card.focused | NEW★ 6.5Big Buck Bunny2008",
+        "f.hf-card.wide.focused | NEWHallFlix Intro",
+        "f.hf-card.wide.focused | ",
+        "f.hf-btn.primary.autofocus.focused | ▶Play"
+      ],
+      "spotlightChangedOnRight": true,
+      "scrolledBy": "-1008.9593994140625"
+    },
+    "details": {
+      "ok": true,
+      "title": "logo image",
+      "buttons": [
+        "▶Play",
+        "Version: 1080p",
+        "♡ Favorite",
+        "Mark watched"
+      ],
+      "chips": [
+        "PG",
+        "HD"
+      ],
+      "sections": [
+        "Cast",
+        "More like this"
+      ],
+      "focus": "f.hf-btn.primary.autofocus.focused | ▶Play",
+      "afterDown": "f.hf-card.focused | NEW★ 6.5Big Buck Bunny2008"
+    },
+    "playback": {
+      "ok": true,
+      "first": {
+        "tag": true,
+        "title": "HallFlix Intro",
+        "t": 1.988295,
+        "err": null
+      },
+      "main": {
+        "on": true,
+        "tag": false,
+        "title": "Sintel",
+        "t": 2.971,
+        "paused": false
+      },
+      "sessions": [
+        {
+          "device": "Web browser",
+          "playing": "Sintel",
+          "method": "DirectPlay",
+          "pos": 29723680
+        }
+      ],
+      "closed": true,
+      "focusAfter": "f.hf-btn.primary.autofocus.focused | ▶Play"
+    },
+    "library": {
+      "ok": true,
+      "cards": 3,
+      "focus": "f.hf-card.focused | NEW2 VERSIONS★ 7.3✓Sintel2010"
+    },
+    "search": {
+      "ok": true,
+      "results": 1,
+      "rows": [
+        "Movies"
+      ],
+      "focus": "f.hf-input.autofocus.focused | "
+    },
+    "settings": {
+      "ok": true,
+      "focusFirst": "f.hf-item.focused | Streaming qualityMaximum",
+      "menu": [
+        "Maximum",
+        "60 Mbps",
+        "40 Mbps (4K)",
+        "20 Mbps",
+        "10 Mbps (1080p)",
+        "4 Mbps (720p)",
+        "1.5 Mbps"
+      ],
+      "items": [
+        "Streaming qualityMaximum",
+        "SubtitlesShow when the language differs",
+        "Switch useradmin",
+        "AboutHallFlix TV 1.0.0 · Web browser · Artwork Studio 1.0.0.0"
+      ]
+    },
+    "launcher": {
+      "ok": true,
+      "frameUrl": "http://localhost:8096/ArtworkStudio/TV/?platform=browser",
+      "inside": {
+        "login": true,
+        "home": false,
+        "framed": true
+      },
+      "focusInFrame": "f hf-btn focused",
+      "msg": "Looking for your server…"
+    }
+  },
+  "console": [
+    "[tv] error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[tv] error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[launcher] warning: Allow attribute will take precedence over 'allowfullscreen'."
+  ],
+  "failedRequests": [],
+  "requests": [
+    "[tv] 200 GET /ArtworkStudio/AppConfig",
+    "[tv] 200 GET /Items/5f8c4a5e46b9d0db590477a620ef0432/Intros?userId=eed771fc7519489cad98e7c8e7120f89",
+    "[tv] 200 POST /Items/b969bdc7fe1aec0fbba604a6b4612388/PlaybackInfo?userId=eed771fc7519489cad98e7c8e7120f89",
+    "[tv] 200 POST /Items/5f8c4a5e46b9d0db590477a620ef0432/PlaybackInfo?userId=eed771fc7519489cad98e7c8e7120f89",
+    "[tv] 206 GET /Videos/b969bdc7fe1aec0fbba604a6b4612388/stream.mp4?Static=true&MediaSourceId=b969bdc7fe1aec0fbba604a6b4612388&PlaySessionId=e093b87447b740c3809fbf637965f54f&DeviceId=hf-cbd0186321f049529bbdcf988de91e",
+    "[tv] 206 GET /Videos/b969bdc7fe1aec0fbba604a6b4612388/stream.mp4?Static=true&MediaSourceId=b969bdc7fe1aec0fbba604a6b4612388&PlaySessionId=e093b87447b740c3809fbf637965f54f&DeviceId=hf-cbd0186321f049529bbdcf988de91e",
+    "[tv] 206 GET /Videos/b969bdc7fe1aec0fbba604a6b4612388/stream.mp4?Static=true&MediaSourceId=b969bdc7fe1aec0fbba604a6b4612388&PlaySessionId=e093b87447b740c3809fbf637965f54f&DeviceId=hf-cbd0186321f049529bbdcf988de91e",
+    "[tv] 206 GET /Videos/5f8c4a5e46b9d0db590477a620ef0432/stream.mp4?Static=true&MediaSourceId=5f8c4a5e46b9d0db590477a620ef0432&PlaySessionId=29281b98ac0646589309fc79df176e64&DeviceId=hf-cbd0186321f049529bbdcf988de91e",
+    "[tv] 206 GET /Videos/5f8c4a5e46b9d0db590477a620ef0432/stream.mp4?Static=true&MediaSourceId=5f8c4a5e46b9d0db590477a620ef0432&PlaySessionId=29281b98ac0646589309fc79df176e64&DeviceId=hf-cbd0186321f049529bbdcf988de91e",
+    "[tv] 206 GET /Videos/5f8c4a5e46b9d0db590477a620ef0432/stream.mp4?Static=true&MediaSourceId=5f8c4a5e46b9d0db590477a620ef0432&PlaySessionId=29281b98ac0646589309fc79df176e64&DeviceId=hf-cbd0186321f049529bbdcf988de91e",
+    "[tv] 204 POST /Sessions/Playing",
+    "[tv] 204 POST /Sessions/Playing/Progress",
+    "[tv] 204 POST /Sessions/Playing/Progress",
+    "[tv] 204 POST /Sessions/Playing/Stopped",
+    "[launcher] 200 GET /ArtworkStudio/AppConfig",
+    "[launcher] 200 GET /ArtworkStudio/AppConfig"
+  ],
+  "browser": "chrome"
+}

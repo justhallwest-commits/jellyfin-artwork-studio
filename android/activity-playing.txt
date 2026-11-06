@@ -1,0 +1,2 @@
+    mResumedActivity: ActivityRecord{99d126 u0 net.hallflix.tv/.PlayerActivity t5}
+  ResumedActivity: ActivityRecord{99d126 u0 net.hallflix.tv/.PlayerActivity t5}

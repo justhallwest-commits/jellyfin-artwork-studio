@@ -1,0 +1,54 @@
+{
+  "sessions-preroll": [
+    {
+      "client": "HallFlix TV",
+      "device": "Android TV",
+      "playing": "Big Buck Bunny",
+      "method": "DirectPlay",
+      "pos": 51850000
+    },
+    {
+      "client": "HallFlix TV",
+      "device": "Web browser",
+      "playing": null,
+      "method": null,
+      "pos": null
+    }
+  ],
+  "sessions-movie": [
+    {
+      "client": "HallFlix TV",
+      "device": "Android TV",
+      "playing": "Big Buck Bunny",
+      "method": "DirectPlay",
+      "pos": 172070000
+    },
+    {
+      "client": "HallFlix TV",
+      "device": "Web browser",
+      "playing": null,
+      "method": null,
+      "pos": null
+    }
+  ],
+  "sessions-after": [
+    {
+      "client": "HallFlix TV",
+      "device": "Android TV",
+      "playing": null,
+      "method": null,
+      "pos": null
+    },
+    {
+      "client": "HallFlix TV",
+      "device": "Web browser",
+      "playing": null,
+      "method": null,
+      "pos": null
+    }
+  ],
+  "activity-playing": "mResumedActivity: ActivityRecord{99d126 u0 net.hallflix.tv/.PlayerActivity t5}\n  ResumedActivity: ActivityRecord{99d126 u0 net.hallflix.tv/.PlayerActivity t5}",
+  "activity-after": "mResumedActivity: ActivityRecord{5764c5a u0 com.google.android.tvlauncher/.MainActivity t4}\n  ResumedActivity: ActivityRecord{5764c5a u0 com.google.android.tvlauncher/.MainActivity t4}",
+  "activity-exit": "mResumedActivity: ActivityRecord{5764c5a u0 com.google.android.tvlauncher/.MainActivity t4}\n  ResumedActivity: ActivityRecord{5764c5a u0 com.google.android.tvlauncher/.MainActivity t4}",
+  "crash": false
+}
