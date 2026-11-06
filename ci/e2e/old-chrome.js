@@ -1,4 +1,4 @@
-// The sign-in page in an old Chromium (85, like the Jellyfin Media Player desktop app's engine),
+// The sign-in page in Chromium 83 (Qt 5.15 WebEngine, the Jellyfin Media Player desktop app's engine),
 // with the split-screen login layout, once with Artwork Studio's old-browser CSS switched off
 // (to show the problem) and once with it on. Results: old-chrome.json, old-chrome-*.png.
 const puppeteer = require('puppeteer');
