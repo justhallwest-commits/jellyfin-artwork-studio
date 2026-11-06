@@ -15,11 +15,15 @@ UID_=$(curl -fsS "$URL/Users" -H "$H" | python3 -c "import json,sys; print(json.
 curl -fsS "$URL/Users/$UID_" -H "$H" | python3 -c "import json,sys; p=json.load(sys.stdin)['Policy']; p['IsHidden']=False; json.dump(p, open('work/policy.json','w'))"
 curl -fsS -X POST "$URL/Users/$UID_/Policy" -H "$H" -H 'Content-Type: application/json' --data @work/policy.json
 curl -fsS "$URL/Users/Public" | head -c 300; echo
-export QTWEBENGINE_CHROMIUM_FLAGS="--remote-debugging-port=9222"
-xvfb-run -a -s "-screen 0 1920x1080x24" jellyfinmediaplayer --remote-debugging-port=9222 > "$RES/jmp-app.log" 2>&1 &
-APP=$!
-JF_URL=$URL RES=$RES NODE_PATH=$PWD/oldchrome/node_modules timeout 240 node jmp.js
-kill $APP 2>/dev/null; pkill -f jellyfinmediaplayer; pkill -f QtWebEngineProcess 2>/dev/null
+docker rm -f jmp >/dev/null 2>&1
+docker run -d --name jmp --network host -v /tmp/jmp.deb:/jmp.deb:ro ubuntu:22.04 bash -c '
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq && apt-get install -y -qq /jmp.deb xvfb xauth > /tmp/apt.log 2>&1; echo "apt exit $?"; tail -3 /tmp/apt.log
+  dpkg -s libqt5webenginecore5 | grep -i ^version
+  export QTWEBENGINE_DISABLE_SANDBOX=1 QTWEBENGINE_CHROMIUM_FLAGS="--remote-debugging-port=9222 --no-sandbox"
+  xvfb-run -a -s "-screen 0 1920x1080x24" jellyfinmediaplayer --remote-debugging-port=9222'
+JF_URL=$URL RES=$RES NODE_PATH=$PWD/oldchrome/node_modules timeout 480 node jmp.js
+docker logs jmp > "$RES/jmp-app.log" 2>&1; docker rm -f jmp >/dev/null 2>&1
 curl -fsS -X POST "$URL/Plugins/$AS/Configuration" -H "$H" -H 'Content-Type: application/json' --data @work/as-config.json
 tail -40 "$RES/jmp-app.log"
 exit 0
