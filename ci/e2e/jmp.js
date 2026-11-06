@@ -18,17 +18,18 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   for (let i = 0; i < 30; i++) { pages = await browser.pages(); if (pages.length) break; await wait(1000); }
   out.pagesAtStart = pages.map(p => p.url());
   const page = pages.find(p => /^(file|qrc|http)/.test(p.url())) || pages[0];
+  page.on('error', e => { out.crashes = (out.crashes || 0) + 1; });
   await wait(5000);
   await page.screenshot({ path: path.join(RES, 'jmp-00-start.png') });
   // warm-up load: the first page load after the app starts can come up empty
   await page.goto(URL + '/web/index.html?run=0#/login', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
   await wait(15000);
   let n = 0;
-  for (const mode of ['compat-off', 'compat-on']) {
+  for (const mode of ['compat-on', 'compat-off', 'compat-off-2']) {
     n++;
     await page.goto(URL + '/web/index.html?run=' + n + 'a', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(e => { out[mode + '-goto'] = String(e); });
     await wait(3000);
-    await page.evaluate(m => { try { localStorage.clear(); sessionStorage.clear(); if (m === 'compat-off') localStorage.setItem('as-no-compat', '1'); } catch (e) { } }, mode);
+    await page.evaluate(m => { try { localStorage.clear(); sessionStorage.clear(); if (/compat-off/.test(m)) localStorage.setItem('as-no-compat', '1'); } catch (e) { } }, mode);
     await page.goto(URL + '/web/index.html?run=' + n + 'b#/login', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     await wait(15000);
     await page.screenshot({ path: path.join(RES, 'jmp-' + mode + '.png') });
