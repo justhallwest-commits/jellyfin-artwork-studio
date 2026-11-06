@@ -116,6 +116,18 @@ jobs:
           JELLYFIN_TAGS: ${{ github.event.inputs.jellyfin_tag || '12.4' }}
         run: bash run.sh
 
+      # ---- the Jellyfin Media Player desktop app (old Chromium inside), against the same server
+      - name: Jellyfin Media Player desktop app
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq flatpak xvfb > /dev/null
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y --noninteractive flathub com.github.iwalton3.jellyfin-media-player > /tmp/flatpak.log 2>&1 || tail -20 /tmp/flatpak.log
+          flatpak info --user com.github.iwalton3.jellyfin-media-player | head -8 || true
+          bash ci/e2e/jmp.sh
+
       # ---- the Android TV / Fire TV app on an emulator, against the same server
       - uses: actions/setup-java@v4
         if: always()
