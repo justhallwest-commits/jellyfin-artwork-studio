@@ -20,12 +20,14 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const page = pages.find(p => /^(file|qrc|http)/.test(p.url())) || pages[0];
   await wait(5000);
   await page.screenshot({ path: path.join(RES, 'jmp-00-start.png') });
+  let n = 0;
   for (const mode of ['compat-off', 'compat-on']) {
-    await page.goto(URL + '/web/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(e => { out[mode + '-goto'] = String(e); });
-    await page.evaluate(m => { try { localStorage.clear(); if (m === 'compat-off') localStorage.setItem('as-no-compat', '1'); } catch (e) { } }, mode);
-    await page.goto(URL + '/web/index.html#/login', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
-    await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
-    await wait(14000);
+    n++;
+    await page.goto(URL + '/web/index.html?run=' + n + 'a', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(e => { out[mode + '-goto'] = String(e); });
+    await wait(3000);
+    await page.evaluate(m => { try { localStorage.clear(); sessionStorage.clear(); if (m === 'compat-off') localStorage.setItem('as-no-compat', '1'); } catch (e) { } }, mode);
+    await page.goto(URL + '/web/index.html?run=' + n + 'b#/login', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    await wait(15000);
     await page.screenshot({ path: path.join(RES, 'jmp-' + mode + '.png') });
     out[mode] = await page.evaluate(() => {
       const r = el => { if (!el) return null; const b = el.getBoundingClientRect(); return { x: Math.round(b.left), y: Math.round(b.top), w: Math.round(b.width), h: Math.round(b.height) }; };
@@ -37,7 +39,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
       return {
         ua: navigator.userAgent, url: location.href, isWorks, hasWorks,
         scriptRan: !!window.__artworkStudioTheme, appHost: !!(window.NativeShell || window.jmpInfo),
-        loginPage: !!pg, classes: pg && pg.className, page: r(pg), brand: r(brand), heading: r(head),
+        loginPage: !!pg, classes: pg && pg.className, pageBg: pg && getComputedStyle(pg).backgroundColor, page: r(pg), brand: r(brand), heading: r(head),
         imageSide: r(document.getElementById('asLoginSplit')),
         themeCssHasIs: ((document.getElementById('artworkStudioTheme') || {}).textContent || '').indexOf(':is(') >= 0,
         vw: innerWidth, vh: innerHeight

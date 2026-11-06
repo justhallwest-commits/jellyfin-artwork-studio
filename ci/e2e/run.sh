@@ -120,9 +120,8 @@ TOKEN="$TOKEN" URL="$URL" RES="$RES" python3 checks12.py 2>&1 | tee -a "$RES/run
 echo "$TOKEN" > work/token
 JF_URL=$URL JF_USER=admin JF_PASS=HallFlix-e2e-1 JF_TOKEN=$TOKEN RES=$RES node e2e.js 2>&1 | tee -a "$RES/run.log" || true
 JF_URL=$URL JF_USER=admin JF_PASS=HallFlix-e2e-1 JF_TOKEN=$TOKEN RES=$RES TV_LAUNCHER="$(cd ../.. && pwd)/tv/launcher/index.html" node tv-e2e.js 2>&1 | tee -a "$RES/run.log" || true
-# the sign-in page in Chromium 83, the engine of the Jellyfin Media Player desktop app (Qt 5.15)
-(mkdir -p oldchrome && cd oldchrome && npm init -y >/dev/null 2>&1 && npm i --silent puppeteer@3.1.0 > "$RES/old-chrome-install.log" 2>&1) || true
-JF_URL=$URL JF_TOKEN=$TOKEN RES=$RES NODE_PATH=$PWD/oldchrome/node_modules node old-chrome.js 2>&1 | tee -a "$RES/run.log" || true
+# puppeteer for jmp.js (drives the Jellyfin Media Player desktop app over its debugging port)
+(mkdir -p oldchrome && cd oldchrome && npm init -y >/dev/null 2>&1 && npm i --silent puppeteer@3.1.0 > "$RES/puppeteer-install.log" 2>&1) || true
 
 # ---- what the server did with Artwork Studio's branding sync
 aget /Branding/Configuration > "$RES/branding.json" || true

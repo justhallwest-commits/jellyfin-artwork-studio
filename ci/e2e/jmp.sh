@@ -15,6 +15,21 @@ UID_=$(curl -fsS "$URL/Users" -H "$H" | python3 -c "import json,sys; print(json.
 curl -fsS "$URL/Users/$UID_" -H "$H" | python3 -c "import json,sys; p=json.load(sys.stdin)['Policy']; p['IsHidden']=False; json.dump(p, open('work/policy.json','w'))"
 curl -fsS -X POST "$URL/Users/$UID_/Policy" -H "$H" -H 'Content-Type: application/json' --data @work/policy.json
 curl -fsS "$URL/Users/Public" | head -c 300; echo
+# Another theme in Branding -> Custom CSS that styles the sign-in page itself (like an ElegantFin-based
+# theme): Artwork Studio's split layout has to win over it
+curl -fsS "$URL/System/Configuration/branding" -H "$H" > work/branding.json
+python3 - <<'PY'
+import json
+b = json.load(open('work/branding.json'))
+b['CustomCss'] = (b.get('CustomCss') or '') + '''
+/* stand-in for another login theme */
+#loginPage{width:auto!important;max-width:none!important;margin:0 auto!important;padding:0!important;background:#182030!important;display:flex!important;justify-content:center!important;align-items:center!important}
+#loginPage .padded-left.padded-right{max-width:15em!important;margin:0 auto!important;padding:2em 1.5em!important;background:#1e2636!important;border-radius:16px!important;text-align:center!important}
+#loginPage h1{text-align:center!important;position:relative!important;margin-top:-3.2em!important}
+'''
+json.dump(b, open('work/branding-theme.json', 'w'))
+PY
+curl -fsS -X POST "$URL/System/Configuration/branding" -H "$H" -H 'Content-Type: application/json' --data @work/branding-theme.json
 docker rm -f jmp >/dev/null 2>&1
 docker run -d --name jmp --network host -v /tmp/jmp.deb:/jmp.deb:ro ubuntu:22.04 bash -c '
   export DEBIAN_FRONTEND=noninteractive
@@ -28,5 +43,6 @@ docker exec jmp bash -c 'DISPLAY=:99 import -window root /tmp/x.png; ps aux | gr
 docker cp jmp:/tmp/x.png "$RES/jmp-screen.png" 2>/dev/null
 docker logs jmp > "$RES/jmp-app.log" 2>&1; docker rm -f jmp >/dev/null 2>&1
 curl -fsS -X POST "$URL/Plugins/$AS/Configuration" -H "$H" -H 'Content-Type: application/json' --data @work/as-config.json
+curl -fsS -X POST "$URL/System/Configuration/branding" -H "$H" -H 'Content-Type: application/json' --data @work/branding.json
 tail -40 "$RES/jmp-app.log"
 exit 0
