@@ -121,13 +121,18 @@ jobs:
         if: always()
         continue-on-error: true
         timeout-minutes: 15
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq flatpak xvfb > /dev/null
-          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y --noninteractive flathub com.github.iwalton3.jellyfin-media-player > /tmp/flatpak.log 2>&1; echo "install exit $?"
-          tail -15 /tmp/flatpak.log
-          flatpak list --app || true
-          flatpak info com.github.iwalton3.jellyfin-media-player | head -8 || true
+          # Flathub has moved this app on to Jellyfin Desktop 2, so take Jellyfin Media Player 1.12
+          # (Qt 5.15 WebEngine, the old Chromium people still have on Windows) from its own release
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb > /dev/null
+          gh api repos/jellyfin/jellyfin-media-player/releases --jq '.[0:3][] | .tag_name as $t | .assets[] | [$t, .name, .browser_download_url] | @tsv' | tee /tmp/jmp-assets.txt
+          DEB=$(grep -E 'noble.*amd64\.deb|amd64.*noble.*\.deb' /tmp/jmp-assets.txt | head -1 | cut -f3)
+          [ -z "$DEB" ] && DEB=$(grep -E 'jammy.*amd64\.deb|amd64.*jammy.*\.deb' /tmp/jmp-assets.txt | head -1 | cut -f3)
+          echo "deb: $DEB"
+          curl -fsSL -o /tmp/jmp.deb "$DEB" && sudo apt-get install -y -qq /tmp/jmp.deb > /tmp/jmp-apt.log 2>&1; echo "apt exit $?"; tail -5 /tmp/jmp-apt.log
+          which jellyfinmediaplayer && dpkg -s libqt5webenginecore5 2>/dev/null | grep -i '^version' || true
           bash ci/e2e/jmp.sh
 
       # ---- the Android TV / Fire TV app on an emulator, against the same server
