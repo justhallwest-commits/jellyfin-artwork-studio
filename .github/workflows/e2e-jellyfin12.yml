@@ -130,7 +130,10 @@ jobs:
           gh api repos/jellyfin/jellyfin-desktop/releases --jq '.[0:6][] | .tag_name as $t | .assets[] | [$t, .name, .browser_download_url] | @tsv' | tee /tmp/jmp-assets.txt
           DEB=$(grep -E 'jellyfin-media-player_[0-9.]+-noble\.deb' /tmp/jmp-assets.txt | head -1 | cut -f3)
           echo "deb: $DEB"
-          curl -fsSL -o /tmp/jmp.deb "$DEB" && sudo apt-get install -y -qq /tmp/jmp.deb > /tmp/jmp-apt.log 2>&1; echo "apt exit $?"; tail -5 /tmp/jmp-apt.log
+          set +e
+          curl -fsSL -o /tmp/jmp.deb "$DEB"; ls -la /tmp/jmp.deb
+          dpkg-deb -f /tmp/jmp.deb Depends
+          sudo apt-get install -y /tmp/jmp.deb > /tmp/jmp-apt.log 2>&1; echo "apt exit $?"; tail -25 /tmp/jmp-apt.log
           which jellyfinmediaplayer && dpkg -s libqt5webenginecore5 2>/dev/null | grep -i '^version' || true
           bash ci/e2e/jmp.sh
 
