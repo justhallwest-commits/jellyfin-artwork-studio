@@ -979,7 +979,7 @@
                 if (pg) { pg.classList.add('as-amb-page'); }
                 st.textContent = '.as-amb-page{background:radial-gradient(120% 85% at 12% 0%,rgba(' + col + ',.34),rgba(' + col + ',0) 62%),linear-gradient(0deg,rgba(' + col + ',.16),rgba(' + col + ',0) 45%)!important;transition:background .8s}' +
                     '.as-amb-page .mainDetailButtons .btnPlay{background:rgb(' + col + ')!important;color:#fff!important}' +
-                    'html.transparentDocument :is(.itemDetailPage,#itemDetailPage){background:none!important}';
+                    'html.transparentDocument .itemDetailPage,html.transparentDocument #itemDetailPage{background:none!important}';
             } catch (e) { /* ignore */ }
         };
         img.src = url;
