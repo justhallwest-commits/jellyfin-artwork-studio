@@ -20,6 +20,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const page = pages.find(p => /^(file|qrc|http)/.test(p.url())) || pages[0];
   await wait(5000);
   await page.screenshot({ path: path.join(RES, 'jmp-00-start.png') });
+  // warm-up load: the first page load after the app starts can come up empty
+  await page.goto(URL + '/web/index.html?run=0#/login', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+  await wait(15000);
   let n = 0;
   for (const mode of ['compat-off', 'compat-on']) {
     n++;
