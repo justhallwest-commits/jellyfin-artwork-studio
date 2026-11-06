@@ -26,7 +26,7 @@
         }
         var seen = [];
         return {
-            css: r.css.join('\n'),
+            css: compatCss(r.css.join('\n'), false),
             imports: r.fonts.filter(function (f) { if (seen.indexOf(f) >= 0) { return false; } seen.push(f); return true; })
                 .map(function (f) { return '@import url(' + cssString(fontUrl(f)) + ');'; }).join('\n')
         };
@@ -49,6 +49,92 @@
     var favicon = brandUrl('favicon', brand.favicon);
 
     function cssString(v) { return '"' + String(v).replace(/["\\\n\r]/g, '') + '"'; }
+
+    // ---------------------------------------------------------------- older browsers
+    // The desktop app (Jellyfin Media Player, Chromium 83-87) and older TVs don't know :is() or
+    // :has(), and a browser drops a whole rule when one selector in it is unknown. So :is() is
+    // written out as plain selectors everywhere (padded with :not() so each keeps the specificity
+    // :is() gave it), and the two :has() rules become classes that this script keeps up to date.
+    function cssSplitTop(s) {
+        var out = [], depth = 0, cur = '', q = null;
+        for (var i = 0; i < s.length; i++) {
+            var c = s.charAt(i);
+            if (q) { cur += c; if (c === q && s.charAt(i - 1) !== '\\') { q = null; } continue; }
+            if (c === '"' || c === "'") { q = c; } else if (c === '(' || c === '[') { depth++; } else if (c === ')' || c === ']') { depth--; } else if (c === ',' && depth === 0) { out.push(cur); cur = ''; continue; }
+            cur += c;
+        }
+        out.push(cur);
+        return out;
+    }
+    function cssSpecificity(sel) {
+        var s = sel.replace(/"[^"]*"|'[^']*'/g, '').replace(/\[[^\]]*\]/g, '.a').replace(/:not\(/g, '(').replace(/::[\w-]+/g, ' e');
+        return [(s.match(/#[\w-]+/g) || []).length, (s.match(/\.[\w-]+|:[\w-]+/g) || []).length, (s.match(/(^|[\s>+~(])[a-zA-Z][\w-]*/g) || []).length];
+    }
+    function cssRepeat(s, n) { var r = ''; for (var i = 0; i < n; i++) { r += s; } return r; }
+    function cssExpandIs(sel) {
+        var i = sel.indexOf(':is(');
+        if (i < 0) { return [sel]; }
+        var depth = 0, j = i + 3;
+        for (; j < sel.length; j++) { var c = sel.charAt(j); if (c === '(') { depth++; } else if (c === ')') { depth--; if (!depth) { break; } } }
+        var args = cssSplitTop(sel.slice(i + 4, j)).map(function (a) { return a.trim(); }).filter(Boolean);
+        var sp = args.map(cssSpecificity), max = [0, 0, 0];
+        sp.forEach(function (x) { for (var k = 0; k < 3; k++) { max[k] = Math.max(max[k], x[k]); } });
+        var before = sel.slice(0, i), after = sel.slice(j + 1), out = [];
+        args.forEach(function (a, k) {
+            if (/^(#[\w-]+)\1+$/.test(a)) { return; }   // "#x#x#x" only raises specificity; it never matches
+            var pad = cssRepeat(':not(#as-x)', max[0] - sp[k][0]) + cssRepeat(':not(.as-x)', max[1] - sp[k][1]) + cssRepeat(':not(as-x)', max[2] - sp[k][2]);
+            out = out.concat(cssExpandIs(before + a + pad + after));
+        });
+        return out;
+    }
+    function cssFixSelector(prelude, noHas) {
+        var p = prelude.replace(/\/\*[\s\S]*?\*\//g, '');
+        if (noHas) {
+            p = p.replace(/body:has\(\.as-login-visible\)/g, 'body.as-login-on').replace(/html:has\(\.as-login-split\.as-login-visible\)/g, 'html.as-split-login-html');
+        }
+        if (p.indexOf(':is(') < 0) { return p; }
+        var out = [];
+        cssSplitTop(p).forEach(function (s) { out = out.concat(cssExpandIs(s.trim())); });
+        return out.join(',');
+    }
+    // index of the "}" that closes the block opened just before `from`
+    function cssBlockEnd(s, from) {
+        var depth = 1, q = null;
+        for (var i = from; i < s.length; i++) {
+            var c = s.charAt(i);
+            if (q) { if (c === q && s.charAt(i - 1) !== '\\') { q = null; } continue; }
+            if (c === '/' && s.charAt(i + 1) === '*') { var e = s.indexOf('*/', i + 2); i = e < 0 ? s.length : e + 1; continue; }
+            if (c === '"' || c === "'") { q = c; } else if (c === '{') { depth++; } else if (c === '}') { depth--; if (!depth) { return i; } }
+        }
+        return s.length;
+    }
+    function compatCss(css, noHas) {
+        if (css.indexOf(':is(') < 0 && !(noHas && css.indexOf(':has(') >= 0)) { return css; }
+        try {
+            var res = '', i = 0;
+            while (i < css.length) {
+                var k = i, q = null, depth = 0;
+                for (; k < css.length; k++) {
+                    var c = css.charAt(k);
+                    if (q) { if (c === q && css.charAt(k - 1) !== '\\') { q = null; } continue; }
+                    if (c === '/' && css.charAt(k + 1) === '*') { var ce = css.indexOf('*/', k + 2); k = ce < 0 ? css.length : ce + 1; continue; }
+                    if (c === '"' || c === "'") { q = c; } else if (c === '(') { depth++; } else if (c === ')') { depth--; } else if (depth === 0 && (c === '{' || c === ';' || c === '}')) { break; }
+                }
+                if (k >= css.length) { res += css.slice(i); break; }
+                if (css.charAt(k) !== '{') { res += css.slice(i, k + 1); i = k + 1; continue; }
+                var e = cssBlockEnd(css, k + 1), prelude = css.slice(i, k), body = css.slice(k + 1, e), p = prelude.trim();
+                if (/^@(media|supports|document|layer|container)\b/i.test(p)) { res += prelude + '{' + compatCss(body, noHas) + '}'; }
+                else if (p.charAt(0) === '@') { res += prelude + '{' + body + '}'; }
+                else { res += cssFixSelector(prelude, noHas) + '{' + body + '}'; }
+                i = e + 1;
+            }
+            return res;
+        } catch (err) { return css; }
+    }
+    function supportsIs() { try { return !!(window.CSS && CSS.supports && CSS.supports('selector(:is(a))')); } catch (e) { return false; } }
+    function supportsHas() { try { return !!(window.CSS && CSS.supports && CSS.supports('selector(:has(a))')); } catch (e) { return false; } }
+    function compatOff() { try { return localStorage.getItem('as-no-compat') === '1'; } catch (e) { return false; } }
+
     function safeColor(v) { return /^#[0-9a-f]{3,8}$/i.test(v || '') ? v : ''; }
     // Black text on light accents (e.g. white / pastel), white text otherwise
     function onAccent(h) {
@@ -389,7 +475,7 @@
 
     var style = document.createElement('style');
     style.id = 'artworkStudioTheme';
-    style.textContent = css.join('\n');
+    style.textContent = compatOff() || (supportsIs() && supportsHas()) ? css.join('\n') : compatCss(css.join('\n'), !supportsHas());
     document.head.appendChild(style);
 
     // One request per font, so a font with a single weight (e.g. Bebas Neue) can't break the others
@@ -444,6 +530,9 @@
     }
     function loginBrand() {
         var page = findLoginPage();
+        // classes for browsers without :has() (see compatCss)
+        document.body.classList.toggle('as-login-on', !!page);
+        document.documentElement.classList.toggle('as-split-login-html', !!page && /^split/.test(t.LoginLayout || ''));
         // only the sign-in page that is really on screen gets the sign-in styling
         Array.prototype.forEach.call(document.querySelectorAll('.as-login-visible'), function (el) { if (el !== page) { el.classList.remove('as-login-visible'); } });
         if (!page) { return; }
