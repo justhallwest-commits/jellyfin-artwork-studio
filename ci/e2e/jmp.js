@@ -40,7 +40,14 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
       const head = pg && [...pg.querySelectorAll('h1,h2')].find(h => h.offsetParent);
       let isWorks = null; try { document.querySelector(':is(body)'); isWorks = true; } catch (e) { isWorks = false; }
       let hasWorks = null; try { document.querySelector(':has(body)'); hasWorks = true; } catch (e) { hasWorks = false; }
+      const probe = document.createElement('div'); probe.className = 'as-probe-a'; document.body.appendChild(probe);
+      const ps = document.createElement('style'); ps.textContent = ':is(.as-probe-a,#zz#zz#zz){width:7px;height:3px}.as-probe-a.as-probe-a.as-probe-a.as-probe-a{height:5px}#as-none,.as-probe-a{display:block}'; document.head.appendChild(ps);
+      const cssIs = probe.getBoundingClientRect().width === 7, isSpecHigh = probe.getBoundingClientRect().height === 3;
+      probe.remove(); ps.remove();
+      const allCss = [...document.querySelectorAll('style')].map(x => x.textContent).join('\n');
+      const links = [...document.querySelectorAll('link[rel=stylesheet]')].map(l => l.href).filter(h => /Branding|ElegantFin|css/i.test(h)).slice(0, 8);
       return {
+        cssIs, isSpecHigh, brandingCssLoaded: /stand-in for another login theme|ElegantFin/.test(allCss) || links.some(h => /Branding/.test(h)), links,
         ua: navigator.userAgent, url: location.href, isWorks, hasWorks,
         scriptRan: !!window.__artworkStudioTheme, appHost: !!(window.NativeShell || window.jmpInfo),
         loginPage: !!pg, classes: pg && pg.className, pageBg: pg && getComputedStyle(pg).backgroundColor, page: r(pg), brand: r(brand), heading: r(head),

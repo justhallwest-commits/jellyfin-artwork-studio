@@ -21,7 +21,7 @@ curl -fsS "$URL/System/Configuration/branding" -H "$H" > work/branding.json
 python3 - <<'PY'
 import json
 b = json.load(open('work/branding.json'))
-b['CustomCss'] = (b.get('CustomCss') or '') + '''
+b['CustomCss'] = '@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");\n' + (b.get('CustomCss') or '') + '''
 /* stand-in for another login theme */
 #loginPage{width:auto!important;max-width:none!important;margin:0 auto!important;padding:0!important;background:#182030!important;display:flex!important;justify-content:center!important;align-items:center!important}
 #loginPage .padded-left.padded-right{max-width:15em!important;margin:0 auto!important;padding:2em 1.5em!important;background:#1e2636!important;border-radius:16px!important;text-align:center!important}
@@ -30,6 +30,7 @@ b['CustomCss'] = (b.get('CustomCss') or '') + '''
 json.dump(b, open('work/branding-theme.json', 'w'))
 PY
 curl -fsS -X POST "$URL/System/Configuration/branding" -H "$H" -H 'Content-Type: application/json' --data @work/branding-theme.json
+JF_URL=$URL RES=$RES node chrome-login.js || true
 docker rm -f jmp >/dev/null 2>&1
 docker run -d --name jmp --network host -v /tmp/jmp.deb:/jmp.deb:ro ubuntu:22.04 bash -c '
   export DEBIAN_FRONTEND=noninteractive
