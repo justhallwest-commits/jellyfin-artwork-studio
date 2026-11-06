@@ -9,7 +9,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
 (async () => {
   let browser = null;
-  for (let i = 0; i < 180 && !browser; i++) {
+  for (let i = 0; i < 130 && !browser; i++) {
     try { browser = await puppeteer.connect({ browserURL: 'http://127.0.0.1:9222', defaultViewport: null }); } catch (e) { await wait(2000); }
   }
   if (!browser) { throw new Error('could not reach the app on port 9222'); }

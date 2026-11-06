@@ -18,11 +18,14 @@ curl -fsS "$URL/Users/Public" | head -c 300; echo
 docker rm -f jmp >/dev/null 2>&1
 docker run -d --name jmp --network host -v /tmp/jmp.deb:/jmp.deb:ro ubuntu:22.04 bash -c '
   export DEBIAN_FRONTEND=noninteractive
-  apt-get update -qq && apt-get install -y -qq /jmp.deb xvfb xauth > /tmp/apt.log 2>&1; echo "apt exit $?"; tail -3 /tmp/apt.log
+  apt-get update -qq && apt-get install -y -qq /jmp.deb xvfb xauth imagemagick iproute2 procps > /tmp/apt.log 2>&1; echo "apt exit $?"; tail -3 /tmp/apt.log
   dpkg -s libqt5webenginecore5 | grep -i ^version
-  export QTWEBENGINE_DISABLE_SANDBOX=1 QTWEBENGINE_CHROMIUM_FLAGS="--remote-debugging-port=9222 --no-sandbox"
-  xvfb-run -a -s "-screen 0 1920x1080x24" jellyfinmediaplayer --remote-debugging-port=9222'
-JF_URL=$URL RES=$RES NODE_PATH=$PWD/oldchrome/node_modules timeout 480 node jmp.js
+  export QTWEBENGINE_DISABLE_SANDBOX=1 QTWEBENGINE_REMOTE_DEBUGGING=0.0.0.0:9222 QTWEBENGINE_CHROMIUM_FLAGS="--remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 --no-sandbox"
+  Xvfb :99 -screen 0 1920x1080x24 & sleep 2
+  DISPLAY=:99 jellyfinmediaplayer --remote-debugging-port=9222 2>&1 | tail -200'
+JF_URL=$URL RES=$RES NODE_PATH=$PWD/oldchrome/node_modules timeout 300 node jmp.js
+docker exec jmp bash -c 'DISPLAY=:99 import -window root /tmp/x.png; ps aux | grep -iE "jelly|webengine" | grep -v grep | cut -c1-200; ss -ltnp; tail -60 /root/.local/share/jellyfinmediaplayer/logs/*.log' > "$RES/jmp-debug.log" 2>&1
+docker cp jmp:/tmp/x.png "$RES/jmp-screen.png" 2>/dev/null
 docker logs jmp > "$RES/jmp-app.log" 2>&1; docker rm -f jmp >/dev/null 2>&1
 curl -fsS -X POST "$URL/Plugins/$AS/Configuration" -H "$H" -H 'Content-Type: application/json' --data @work/as-config.json
 tail -40 "$RES/jmp-app.log"
