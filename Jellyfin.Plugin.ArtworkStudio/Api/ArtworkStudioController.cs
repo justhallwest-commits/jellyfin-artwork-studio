@@ -97,6 +97,8 @@ public class ArtworkStudioController : ControllerBase
     [Produces("application/javascript")]
     public ActionResult GetClientScript()
     {
+        // apps that keep their own cache (e.g. the Jellyfin Media Player desktop app) must not hold on to an old design
+        Response.Headers["Cache-Control"] = "no-cache";
         var asm = typeof(Plugin).Assembly;
         var script = new System.Text.StringBuilder();
         foreach (var name in new[] { "libraryBackdrops.js", "presets.js", "siteTheme.js", "enhancements.js" })

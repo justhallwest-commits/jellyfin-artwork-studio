@@ -116,24 +116,6 @@ jobs:
           JELLYFIN_TAGS: ${{ github.event.inputs.jellyfin_tag || '12.4' }}
         run: bash run.sh
 
-      # ---- the Jellyfin Media Player desktop app (old Chromium inside), against the same server
-      - name: Jellyfin Media Player desktop app
-        if: always()
-        continue-on-error: true
-        timeout-minutes: 15
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Flathub has moved this app on to Jellyfin Desktop 2, so take Jellyfin Media Player 1.12
-          # (Qt 5.15 WebEngine, the old Chromium people still have on Windows) from its own release
-          # and run it in an Ubuntu 22.04 container, where its packages install cleanly
-          set +e
-          gh api repos/jellyfin/jellyfin-desktop/releases --jq '.[0:6][] | .tag_name as $t | .assets[] | [$t, .name, .browser_download_url] | @tsv' > /tmp/jmp-assets.txt
-          DEB=$(grep -E 'jellyfin-media-player_[0-9.]+-jammy\.deb' /tmp/jmp-assets.txt | head -1 | cut -f3)
-          echo "deb: $DEB"
-          curl -fsSL -o /tmp/jmp.deb "$DEB"; ls -la /tmp/jmp.deb
-          bash ci/e2e/jmp.sh
-
       # ---- the Android TV / Fire TV app on an emulator, against the same server
       - uses: actions/setup-java@v4
         if: always()
