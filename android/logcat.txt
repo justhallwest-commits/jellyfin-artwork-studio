@@ -1,0 +1,255 @@
+11-09 16:02:49.457  2428  2428 I chromium: [2428:2428:INFO:debug_endpoint_manager_grpc_client.cc(365)] gRPC client channel state changed to GRPC_CHANNEL_TRANSIENT_FAILURE
+11-09 16:02:50.207  2428  2465 I chromium: [2428:2465:INFO:crl_downloader.cc(155)] CRL processed.
+11-09 16:02:50.208  2428  2428 I chromium: [2428:2428:INFO:ccs_transport_gcm.cc(244)] Registered GCM handler
+11-09 16:02:50.208  2428  2428 W chromium: [2428:2428:WARNING:ccs_manager_impl.cc(1522)] Device does not have a weave device id
+11-09 16:02:50.208  2428  2428 I chromium: [2428:2428:INFO:ccs_transport_https.cc(1242)] No cloud settings for register request
+11-09 16:02:50.208  2428  2428 W chromium: [2428:2428:WARNING:client_auth_signer.cc(168)] No private key, hence empty signature.
+11-09 16:02:50.208  2428  2428 I chromium: [2428:2428:INFO:ccs_manager_impl.cc(1452)] Registering device with CCS: message_id = d4ce71a6-05e7-4c97-9752-760eafe3753e
+11-09 16:02:50.208  2428  2428 I chromium: [2428:2428:INFO:application_identification_settings.cc(1442)] Missing signature, return empty JWT
+11-09 16:02:50.208  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1198)] CreateAndSignJwtAsync() returned invalid JWT. Not attaching to headers.
+11-09 16:02:50.208  2428  2465 I chromium: [2428:2465:INFO:metrics_recorder.cc(188)] cast event: Cast.CRL.DownloadSuccess
+11-09 16:02:50.208  2428  2465 E chromium: [2428:2465:ERROR:cert_util.cc(174)] Certs missing,
+11-09 16:02:50.208  2428  2428 E chromium: [2428:2428:ERROR:cast_auth_headers.cc(169)] Unable to update signature header
+11-09 16:02:50.208  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.Register.Out
+11-09 16:02:50.208  2428  2465 E chromium: [2428:2465:ERROR:client_auth_signer.cc(205)] Cast certificate verification: CastCertError::ERR_CERTS_MISSING
+11-09 16:02:50.208  2428  2465 I chromium: [2428:2465:INFO:metrics_recorder.cc(188)] cast event: Cast.Auth.Error.CertMissing
+11-09 16:02:50.277  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1846)] Received response code 403 for message_id = d4ce71a6-05e7-4c97-9752-760eafe3753e - 
+11-09 16:02:50.277  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.Register.Out.Error
+11-09 16:02:50.277  2428  2428 I chromium: [2428:2428:INFO:ccs_manager_impl.cc(2465)] Scheduling next register for device in time: 57.986 s
+11-09 16:02:51.304  2428  2428 I chromium: [2428:2428:INFO:lycra_gcm.cc(207)] Registered GCM handler
+11-09 16:02:51.305  2428  2471 I chromium: [2428:2471:INFO:structure_storage.cc(35)] Writing state to file: /data/user/0/com.google.android.apps.mediashell/cache/usonia_trusted_devices_fcm_connected_time
+11-09 16:02:51.692   386   391 V installd: DexInv: --- END '/data/app/~~j8xRdkte7gff9_81g7wu6g==/net.hallflix.tv-fT2ndXhk0vKA0zp1X5pbnQ==/base.apk' (success) ---
+11-09 16:02:51.694   471   524 V BackupManagerService: [UserID:0] restoreAtInstall pkg=net.hallflix.tv token=1 restoreSet=0
+11-09 16:02:51.818  1255  1255 I MediaProvider: Invalidating LocalCallingIdentity cache for package net.hallflix.tv. Reason: package android.intent.action.PACKAGE_ADDED
+11-09 16:02:51.820   667   667 D AvrcpMediaPlayerList: Name of package changed: net.hallflix.tv
+11-09 16:02:51.820   471   508 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:net.hallflix.tv flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+11-09 16:02:51.820   471   508 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:net.hallflix.tv flg=0x4000010 (has extras) } to com.android.vending/com.google.android.finsky.packagemanager.impl.PackageMonitorReceiverImpl$RegisteredReceiver
+11-09 16:02:51.820   471   508 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:net.hallflix.tv flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+11-09 16:02:51.820   471   508 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:net.hallflix.tv flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+11-09 16:02:51.820   471   508 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:net.hallflix.tv flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+11-09 16:02:51.820   471   508 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:net.hallflix.tv flg=0x4000010 (has extras) } to com.google.android.tv/com.android.tv.receiver.PackageIntentsReceiver
+11-09 16:02:51.821  2168  2168 I Finsky  : [2] kwn.n(8): Invalidating cached PackageState for net.hallflix.tv
+11-09 16:02:51.826  2168  3043 I Finsky  : [326] euw.accept(35): Asset module storage cleared for package net.hallflix.tv.
+11-09 16:02:52.007   471   661 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=net.hallflix.tv/.MainActivity} from uid 2000
+11-09 16:02:52.026   471   509 I ActivityManager: Start proc 3239:net.hallflix.tv/u0a76 for pre-top-activity {net.hallflix.tv/net.hallflix.tv.MainActivity}
+11-09 16:02:52.083  3239  3239 W net.hallflix.t: Unexpected CPU variant for X86 using defaults: x86
+11-09 16:02:52.084  3239  3239 E net.hallflix.t: Not starting debugger since process cannot load the jdwp agent.
+11-09 16:02:52.237  3239  3239 I TetheringManager: registerTetheringEventCallback:net.hallflix.tv
+11-09 16:02:52.245   471   509 I ActivityManager: Start proc 3268:com.google.android.webview:webview_service/u0a65 for service {com.google.android.webview/org.chromium.android_webview.services.VariationsSeedServer}
+11-09 16:02:52.320   471   509 I ActivityManager: Start proc 3277:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0ai9000 for  {net.hallflix.tv/org.chromium.content.app.SandboxedProcessService0:0}
+11-09 16:02:52.371   471  2450 D ConnectivityService: requestNetwork for uid/pid:10076/3239 NetworkRequest [ TRACK_DEFAULT id=28, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10076 AdministratorUids: [] RequestorUid: 10076 RequestorPackageName: net.hallflix.tv] ]
+11-09 16:02:52.372   471   650 D Ethernet: got request NetworkRequest [ TRACK_DEFAULT id=28, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10076 AdministratorUids: [] RequestorUid: 10076 RequestorPackageName: net.hallflix.tv] ] with score 60 and providerId 2
+11-09 16:02:52.372   471   618 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=28, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10076 AdministratorUids: [] RequestorUid: 10076 RequestorPackageName: net.hallflix.tv] ] with score 60 and providerId 2
+11-09 16:02:52.372   471   618 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=28, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10076 AdministratorUids: [] RequestorUid: 10076 RequestorPackageName: net.hallflix.tv] ] with score 60 and providerId 2
+11-09 16:02:52.625   471   507 D ArtManagerInternalImpl: /data/misc/iorapd/net.hallflix.tv/10000/net.hallflix.tv.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+11-09 16:02:52.626   471   507 I ActivityTaskManager: Displayed net.hallflix.tv/.MainActivity: +594ms
+11-09 16:02:53.864  2168  2478 D GetConfigurationSnapsho: 9kdWxlbWV0YWRhdGEKHmNvbS5nb29nbGUubWFpbmxpbmUuZ28ucHJpbWFyeQ', 5, 0), Flag(AutoUpdateCodegen__rapid_auto_update_listing, 'com.google.android.googlequicksearchbox,301143294,0,4', 4, 0), Flag(AutoUpdateCodegen__rapid_auto_update_listing_v3, '', 4, 0), Flag(AutoUpdateCodegen__read_client_update_discovered_timestamp, false, 2, 0), Flag(AutoUpdateCodegen__relax_dark_launch_splitid_comparison_with_inclusion, true, 2, 0), Flag(AutoUpdateCodegen__request_policy_in_autoupdate_endpoint, true, 2, 0), Flag(AutoUpdateCodegen__request_server_staleness_info, false, 2, 0), Flag(AutoUpdateCodegen__share_app_state_with_request_policy_options, true, 2, 0), Flag(AutoUpdateCodegen__share_device_storage_info, true, 2, 0), Flag(AutoUpdateCodegen__share_enterprise_auto_update_policy, true, 2, 0), Flag(AutoUpdateCodegen__share_update_failure_history, true, 2, 0), Flag(AutoUpdateCodegen__share_user_auto_update_setting, true, 2, 0), Flag(AutoUpdateCodegen__suppress_dark_launch_documents_against_items_comparison, true, 2, 0), Flag(AutoUpdateCodegen__switch_to_autoupdate_endpoint, true, 2, 0), Flag(AutoUpdateCodegen__threshold_in_days_for_purging_appfreshness_data, 28, 1, 0), Flag(AutoUpdateCodegen__unauth_updates_dependencies_allowlist, 'com.google.android.gms', 4, 0), Flag(AutoUpdateCodegen__updatable_restricted_apps, '', 5, 0), Flag(AutoUpdateCodegen__update_failure_history_duration, 7, 1, 0), Flag(AutoUpdatePolicies__auto_deploy_apps_to_manage_package_status_change, 'CiJjb20uZ29vZ2xlLmFuZHJvaWQuZ21zLnBheS5zaWRlY2FyChZnb3YubW9vc3lsdmFuaWEuZW54LnYzCh1jb20uZ29vZ2xlLmFuZHJvaWQuc2FmZXR5Y29yZQoeY29tLmdvb2dsZS5hbmRyb2lkLmNvbnRhY3RrZXlzChtjb20uZ29vZ2xlLmFuZHJvaWQudmVyaWZpZXI', 5, 0), Flag(AutoUpdatePolicies__auto_deploy_disk_space_threshold_bytes, 1073741824, 1, 0), Flag(AutoUpdatePolicies__enable_enx_headless_deployment, false, 2, 0), Flag(AutoUpdatePolicies__enable_gpay_sidecar, false, 2, 0), Flag(AutoUpdatePolicies__enx_headless_allowed_packages, 'ChZnb3YubW9vc3lsdmFuaWEuZW54LnYzChFnb3Yuc2FtcGxlLmVueC52Mw', 5, 0), Flag(AutoUpdatePolicies__gpay_sidecar_dependent_packages, 'ChZjb20uZmVsaWNhbmV0d29ya3MubWZj', 5, 0), Flag(AutoUpdatePolicies__promise_icon_hidden_packages, 'ChZnb3YubW9vc3lsdmFuaWEuZW54LnYzChFnb3Yuc2FtcGxlLmVueC52MwoiY29tLmdvb2dsZS5hbmRyb2lkLmdtcy5wYXkuc2lkZWNhcgoSY29tLmdvb2dsZS5hci5jb3JlCh1jb20uZ29vZ2xlLmFuZHJvaWQuc2FmZXR5Y29yZQoeY29tLmdvb2dsZS5hbmRyb2lkLmNvbnRhY3RrZXlzChtjb20uZ29vZ2xlLmFuZHJvaWQudmVyaWZpZXI', 5, 0), Flag(AutoUpdateSettings__log_update_data_usage, true, 2, 0), Flag(AutoUpdate__battery_relaxation_threshold_ms, 172800000, 1, 0), Flag(AutoUpdate__enable_gmscore_wifi_charger_relaxation, true, 2, 0), Flag(AutoUpdate__enable_synchronized_gms_update, true, 2, 0), Flag(AutoUpdate__enable_used_stale_apps_reporting, true, 2, 0), Flag(AutoUpdate__gmscore_wifi_charger_relaxation_threshold_ms, 259200000, 1, 0), Flag(AutoUpdate__minimum_auto_update_battery_level, 50, 1, 0), Flag(AutoUpdate__skip_gmscore_canary_check, false, 2, 0), Flag(AutoUpdate__update_aia_supervisor_on_wifi, true, 2, 0), Flag(AutoplayExoPlayerVideos__enable_exo_player_video_page_level_autoplay, false, 2, 0), Flag(AutoplayVideos__delay_video_autoplay_start_ms, 300, 1, 0), Flag(AutoplayVideos__enable_full_screen_activity, false, 2, 0), Flag(AutoplayVideos__enable_full_screen_support, false, 2, 0), Flag(AutoplayVideos__enable_overlay_on_pause, true, 2, 0), Flag(AutoplayVideos__enable_video_autoplaying, false, 2, 0), Flag(AutoplayVideos__enable_video_autoplaying_ads_cluster, true, 2, 0), Flag(AutoplayVideos__enable_video_autoplaying_dp, false, 2, 0), Flag(AutoplayVideos__enable_video_autoplaying_mdp, false, 2, 0), Flag(AutoplayVideos__resume_video_after_full_screen, false, 2, 0), Flag(AutoplayVideos__send_youtube_update_notification, false, 2, 0), Flag(AutoplayVideos__use_restricted_api_key, true, 2, 0), Flag(AvoidBulkCancelNetworkRequests__avoid_bulk_cancel_deep_links_and_details_requests, false, 2, 0), Flag(AvoidBulkCancelNetworkRequests__avoid_bulk_cancel_image_requests, false, 2, 0),
+11-09 16:02:53.864  2168  2478 D GetConfigurationSnapsho: using_response_bundle_in_acquire_result, false, 2, 0), Flag(Phoenix__kill_switch_enable_inapp_purchase_info_purchase_params_model, true, 2, 0), Flag(Phoenix__kill_switch_fixed_bottomsheet_dialog_use_content_transition_none, true, 2, 0), Flag(Phoenix__kill_switch_fixed_bottomsheet_dialog_use_screen_transition_none, true, 2, 0), Flag(Phoenix__kill_switch_to_phoenix_dedupe_free_apps_request, false, 2, 0), Flag(Phoenix__phoenix_trigger_install_after_activity_close, false, 2, 0), Flag(Phoenix__trigger_install_after_activity_close, false, 2, 0), Flag(PhoneskyDumpsys__enable_phonesky_dumpsys_in_prod_versions, true, 2, 0), Flag(PhoneskyHeader__enable_phonesky_header, true, 2, 0), Flag(PhoneskyHeader__enable_phonesky_header_multiproc_value_store, true, 2, 0), Flag(PhoneskyHeaders__migrate_setup_flow_to_url_param, false, 2, 0), Flag(PhoneskyMoviesShutdown__enable_dp_message, false, 2, 0), Flag(PhoneskyScheduler__killswitch_data_subscription_roaming, false, 2, 0), Flag(PhoneskySetup__enable_all_setup_service_api_usage_logging, true, 2, 0), Flag(PhoneskySetup__enable_deferred_setup_intent_in_progress_notification, true, 2, 0), Flag(PhoneskySetup__enable_get_recommended_preinstalls_caller_allowlist, true, 2, 0), Flag(PhoneskySetup__enable_persistent_pause_app_updates_calls, true, 2, 0), Flag(PhoneskySetup__enable_setup_notification_navigate_to_pending_downloads, false, 2, 0), Flag(PhoneskySetup__get_recommended_preinstalls_caller_allowlist, 'org.chromium.arc.applauncher:D78D2C53EEFD3E5A34DAAA1006CCD21C170887FCB76E04CF48414B86504C3C78,830FC77C05BADE2C6DA9941243F4B23AB493C50B8A6149729EBD5C72FA11ECF4;org.chromium.arc.gms:577117617082BA9730616E23CEB970D7557FDFB32284D75DE07E228230D7627B,FBA8B1BC667CC9789D1F366C29E2A4BAC9A1FE5D93E23C7540E4976C816CEE03;com.google.android.gms:F0FD6C5B410F25CB25C3B53346C8972FAE30F8EE7411DF910480AD6B2D60DB83,1975B2F17177BC89A5DFF31F9E64A6CAE281A53DC1D1D59B1D147FE1C82AFA00;com.google.android.car.setupwizard:94FCE8BDCB45B42F6228822D675F83A67A77202CAE30E3EADDE7D6E8E2F04DCF,934546A89F3B21F7C4F3DE926CB6050599BB391A25C50C7C6F6726A29092DCCD;com.google.android.wearable.setupwizard:6365B3F75FB737ACB91C25C6F25C4D6787101760888405AC0633FD0CAE881845,301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA;com.google.android.xr.setupwizard:EDCFAB6AD5A341370A733D0D0F7FB21F142DB94F26A97BA499602F0A1C891671,5578C495C9DF4B1E2E682C41389B597F949EE1ECDB455F0BB63C9A3B7C0C31F6', 4, 0), Flag(PhoneskySetup__killswitch_early_update, true, 2, 0), Flag(PhoneskySetup__pai_fetch_timeout, 'CB4', 5, 0), Flag(PhoneskySetup__pause_app_updates_caller_allowlist, 'com.android.vending:F0FD6C5B410F25CB25C3B53346C8972FAE30F8EE7411DF910480AD6B2D60DB83,1975B2F17177BC89A5DFF31F9E64A6CAE281A53DC1D1D59B1D147FE1C82AFA00;com.google.android.apps.pixelmigrate:AFEE62FB653C9D863D1A6D6046B35225BF6380DD4657B105E8331A1DE49F9F91,E52BF33122251A20E747BA9D26AED7A4B4A75692C579171A425F72D6EED5760C;com.google.android.apps.restore:56BE132B780656FE2444CD34326EB5D7AAC91D2096ABF0FE673A99270622EC87,CE74646CCC647C1640C4571023E1CF71B90E4D1D07167C184BE29136449E4C7F;com.google.android.setupwizard:F0FD6C5B410F25CB25C3B53346C8972FAE30F8EE7411DF910480AD6B2D60DB83,1975B2F17177BC89A5DFF31F9E64A6CAE281A53DC1D1D59B1D147FE1C82AFA00;com.google.android.gms:F0FD6C5B410F25CB25C3B53346C8972FAE30F8EE7411DF910480AD6B2D60DB83,1975B2F17177BC89A5DFF31F9E64A6CAE281A53DC1D1D59B1D147FE1C82AFA00;com.google.android.wearable.setupwizard:6365B3F75FB737ACB91C25C6F25C4D6787101760888405AC0633FD0CAE881845,301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA;com.google.android.car.setupwizard:94FCE8BDCB45B42F6228822D675F83A67A77202CAE30E3EADDE7D6E8E2F04DCF,934546A89F3B21F7C4F3DE926CB6050599BB391A25C50C7C6F6726A29092DCCD;com.google.android.apps.work.clouddpc:23962F4B43B9857638EA66F4D419518EAE282491ACDA4B94707BD59003C45E58,E78F85844EBCBC47ED78B4213DCF5E6603137B8EC5160294DA33632C31FED147;com.google.android.docksetup:09D0F80AC553A679B8B4ACF67EAEC15FB8ABCCED21ECA57765743DF97C7D0F53,301AA3CB081134501C45F1422ABC6
+11-09 16:02:53.913  2428  2428 I chromium: [2428:2428:INFO:debug_endpoint_manager_grpc_client.cc(365)] gRPC client channel state changed to GRPC_CHANNEL_TRANSIENT_FAILURE
+11-09 16:02:59.556  2428  2428 I chromium: [2428:2428:INFO:debug_endpoint_manager_grpc_client.cc(365)] gRPC client channel state changed to GRPC_CHANNEL_TRANSIENT_FAILURE
+11-09 16:03:02.462  2428  2496 I chromium: [2428:2496:INFO:structure_info_from_trusted_devices.cc(311)] Getting trusted devices from HDS, num_in_flight_requests = 1
+11-09 16:03:02.462  2428  2428 W chromium: [2428:2428:WARNING:client_auth_signer.cc(168)] No private key, hence empty signature.
+11-09 16:03:02.462  2428  2428 I chromium: [2428:2428:INFO:application_identification_settings.cc(1437)] CreateJwt completed; running all done signing callbacks.
+11-09 16:03:02.462  2428  2428 I chromium: [2428:2428:INFO:application_identification_settings.cc(1442)] Missing signature, return empty JWT
+11-09 16:03:02.462  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1198)] CreateAndSignJwtAsync() returned invalid JWT. Not attaching to headers.
+11-09 16:03:02.462  2428  2428 E chromium: [2428:2428:ERROR:cast_auth_headers.cc(169)] Unable to update signature header
+11-09 16:03:02.462  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.GetTrustedDevices.Out
+11-09 16:03:02.563  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1846)] Received response code 401 for message_id = 22f94915-970c-4af2-ab92-0ec78fbd2d49 - 
+11-09 16:03:02.563  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.GetTrustedDevices.Out.Error
+11-09 16:03:02.563  2428  2496 E chromium: [2428:2496:ERROR:structure_info_from_trusted_devices.cc(379)] Failed to get trusted devices from HDS.
+11-09 16:03:07.603  3874  3874 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:07.604  3874  3874 I AndroidRuntime: Using default boot image
+11-09 16:03:07.604  3874  3874 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:07.653  3874  3874 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:07.678  1072  1072 I AndroidIME: AbstractIme.onActivate():86 LatinTVIme.onActivate() : EditorInfo = inputType=Text imeActionName=GO dump=[inputType=0x880a1 imeOptions=0x12000002 privateImeOptions=null actionLabel=null actionId=0 initialSelStart=0 initialSelEnd=0 initialCapsMode=0x0 hintText=null label=null packageName=net.hallflix.tv autofillId=1073741824 fieldId=-1 fieldName=null extras=null hintLocales=null contentMimeTypes=null ], IncognitoMode = false, DeviceLocked = false
+11-09 16:03:08.598  2428  2428 I chromium: [2428:2428:INFO:debug_endpoint_manager_grpc_client.cc(365)] gRPC client channel state changed to GRPC_CHANNEL_TRANSIENT_FAILURE
+11-09 16:03:08.625  3681  3707 D HeterodyneSyncer: updateFlag: com.google.android.finsky.regular, 83521958, 3, , AutoplayExoPlayerVideos__enable_exo_player_video_page_level_autoplay
+11-09 16:03:08.782  3874  3874 D AndroidRuntime: Shutting down VM
+11-09 16:03:09.211  3681  3707 D HeterodyneSyncer: updateFlag: com.google.android.finsky.regular, 83521958, 3, , AutoplayExoPlayerVideos__enable_exo_player_video_page_level_autoplay
+11-09 16:03:10.235  3969  3969 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:10.237  3969  3969 I AndroidRuntime: Using default boot image
+11-09 16:03:10.237  3969  3969 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:10.299  3969  3969 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:10.302  3969  3969 D AndroidRuntime: Shutting down VM
+11-09 16:03:14.468  2428  2428 W chromium: [2428:2428:WARNING:debug_endpoint_manager_grpc_client.cc(393)] Giving up queueing debug endpoint manager gRPC client RPC requests, discarding 4 RPC calls.
+11-09 16:03:23.128  4055  4055 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:23.128  4055  4055 I AndroidRuntime: Using default boot image
+11-09 16:03:23.128  4055  4055 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:23.160  4055  4055 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:23.165  4055  4055 D AndroidRuntime: Shutting down VM
+11-09 16:03:23.165  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:23.177  1072  1072 I AndroidIME: AbstractIme.onActivate():86 LatinTVIme.onActivate() : EditorInfo = inputType=Text imeActionName=GO dump=[inputType=0xc0a1 imeOptions=0x12000002 privateImeOptions=null actionLabel=null actionId=0 initialSelStart=0 initialSelEnd=0 initialCapsMode=0x0 hintText=null label=null packageName=net.hallflix.tv autofillId=1073741824 fieldId=-1 fieldName=null extras=null hintLocales=null contentMimeTypes=null ], IncognitoMode = false, DeviceLocked = false
+11-09 16:03:27.638  4087  4087 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:27.645  4087  4087 I AndroidRuntime: Using default boot image
+11-09 16:03:27.645  4087  4087 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:27.684  4087  4087 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:27.694  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:27.711  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:27.782  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:27.798  4087  4087 D AndroidRuntime: Shutting down VM
+11-09 16:03:27.802  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:28.229  2428  2428 I chromium: [2428:2428:INFO:debug_endpoint_manager_grpc_client.cc(365)] gRPC client channel state changed to GRPC_CHANNEL_TRANSIENT_FAILURE
+11-09 16:03:28.285  4100  4100 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:28.292  4100  4100 I AndroidRuntime: Using default boot image
+11-09 16:03:28.295  4100  4100 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:28.343  4100  4100 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:28.346  4100  4100 D AndroidRuntime: Shutting down VM
+11-09 16:03:28.348  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:30.842  4113  4113 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:30.843  4113  4113 I AndroidRuntime: Using default boot image
+11-09 16:03:30.843  4113  4113 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:30.891  4113  4113 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:30.924  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:31.412  3277  3320 W chromium: [WARNING:autofill_agent.cc(798)] Autofill suggestions are disabled because the document isn't a secure context.
+11-09 16:03:31.426  4113  4113 D AndroidRuntime: Shutting down VM
+11-09 16:03:31.887  4126  4126 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:31.888  4126  4126 I AndroidRuntime: Using default boot image
+11-09 16:03:31.888  4126  4126 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:32.002  4126  4126 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:32.004  4126  4126 D AndroidRuntime: Shutting down VM
+11-09 16:03:32.013  4126  4139 I AndroidRuntime: NOTE: attach of thread 'Binder:4126_2' failed
+11-09 16:03:36.282  4151  4212 I Finsky  : [311] ItemStore: Not cached: net.hallflix.tv
+11-09 16:03:36.959  4151  4212 E Finsky  : [311] ItemStore: getItems RPC failed for item net.hallflix.tv
+11-09 16:03:37.207  2428  2496 I chromium: [2428:2496:INFO:structure_info_from_trusted_devices.cc(311)] Getting trusted devices from HDS, num_in_flight_requests = 1
+11-09 16:03:37.207  2428  2428 W chromium: [2428:2428:WARNING:client_auth_signer.cc(168)] No private key, hence empty signature.
+11-09 16:03:37.207  2428  2428 I chromium: [2428:2428:INFO:application_identification_settings.cc(1437)] CreateJwt completed; running all done signing callbacks.
+11-09 16:03:37.207  2428  2428 I chromium: [2428:2428:INFO:application_identification_settings.cc(1442)] Missing signature, return empty JWT
+11-09 16:03:37.207  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1198)] CreateAndSignJwtAsync() returned invalid JWT. Not attaching to headers.
+11-09 16:03:37.207  2428  2428 E chromium: [2428:2428:ERROR:cast_auth_headers.cc(169)] Unable to update signature header
+11-09 16:03:37.207  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.GetTrustedDevices.Out
+11-09 16:03:37.268  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1846)] Received response code 401 for message_id = 8c6cd9bb-39f9-4cb3-80fc-ede843f7d1e5 - 
+11-09 16:03:37.268  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.GetTrustedDevices.Out.Error
+11-09 16:03:37.268  2428  2496 E chromium: [2428:2496:ERROR:structure_info_from_trusted_devices.cc(379)] Failed to get trusted devices from HDS.
+11-09 16:03:44.518  2428  2428 I chromium: [2428:2428:INFO:metrics_stat_logger.cc(55)] Metrics stat for the past 60 secs : total=30
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] AppReady=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] AppStarted=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Auth.Error.CertMissing=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.CRL.DownloadSuccess=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.DCS.DownloadSuccess=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Discovery.Mdns.ResponderStarted=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Discovery.Mdns.ResponderStopped=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Discovery.Mdns.SocketCreated=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Discovery.Mdns.SocketDestroyed=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Network.LocalIpFragment=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Network.Up=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Platform.OutputResolution=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.System.Timezone.ChangeSuccessful=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cast.Usonia.CommonTime.BecomeSource=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] CastV2.Connection.Connect.In=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] CastV2.Ipc.System.In.Internal=5
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] CastV2.Ipc.System.Out.Internal=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] CastV2.Receiver.DeviceStatus.Out=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] CastV2.Receiver.DeviceStatus.Out.Broadcast=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] CastV2.Transport.Accept=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cloud.Transport.Https.GetTrustedDevices.Out=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cloud.Transport.Https.GetTrustedDevices.Out.Error=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cloud.Transport.Https.Register.Out=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Cloud.Transport.Https.Register.Out.Error=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Dial.SsdpDeviceDesc.Linux=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Dial.SsdpDeviceDesc.Linux.200=1
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Gcm.Register.Out=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Gcm.Register.Success=2
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Setup.eureka_info.Local=4
+11-09 16:03:44.518  2428  2428 I chromium: [metrics_stat_logger] Setup.eureka_info.Local.200=4
+11-09 16:03:48.263  2428  2428 W chromium: [2428:2428:WARNING:ccs_manager_impl.cc(1522)] Device does not have a weave device id
+11-09 16:03:48.263  2428  2428 I chromium: [2428:2428:INFO:ccs_transport_https.cc(1242)] No cloud settings for register request
+11-09 16:03:48.263  2428  2428 W chromium: [2428:2428:WARNING:client_auth_signer.cc(168)] No private key, hence empty signature.
+11-09 16:03:48.263  2428  2428 I chromium: [2428:2428:INFO:ccs_manager_impl.cc(1452)] Registering device with CCS: message_id = da160ed6-9e85-4cc3-b1af-cda12a160806
+11-09 16:03:48.263  2428  2428 I chromium: [2428:2428:INFO:application_identification_settings.cc(1437)] CreateJwt completed; running all done signing callbacks.
+11-09 16:03:48.263  2428  2428 I chromium: [2428:2428:INFO:application_identification_settings.cc(1442)] Missing signature, return empty JWT
+11-09 16:03:48.263  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1198)] CreateAndSignJwtAsync() returned invalid JWT. Not attaching to headers.
+11-09 16:03:48.263  2428  2428 E chromium: [2428:2428:ERROR:cast_auth_headers.cc(169)] Unable to update signature header
+11-09 16:03:48.263  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.Register.Out
+11-09 16:03:48.331  2428  2428 E chromium: [2428:2428:ERROR:ccs_transport_https.cc(1846)] Received response code 403 for message_id = da160ed6-9e85-4cc3-b1af-cda12a160806 - 
+11-09 16:03:48.331  2428  2428 I chromium: [2428:2428:INFO:metrics_recorder.cc(188)] cast event: Cloud.Transport.Https.Register.Out.Error
+11-09 16:03:48.331  2428  2428 I chromium: [2428:2428:INFO:ccs_manager_impl.cc(2465)] Scheduling next register for device in time: 114.805 s
+11-09 16:03:51.937  4512  4512 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:51.938  4512  4512 I AndroidRuntime: Using default boot image
+11-09 16:03:51.938  4512  4512 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:51.975  4512  4512 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:51.979  4512  4512 D AndroidRuntime: Shutting down VM
+11-09 16:03:52.363  1135  4531 W chromium: [FTL:1135:4531:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.363  1135  4531 W chromium: "assistant.api.events.RecognitionEvent" from publisher "InitializeInternal"
+11-09 16:03:52.466  1135  4531 W chromium: [FTL:1135:4531:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.466  1135  4531 W chromium: "assistant.api.events.DeviceStateEvent" from publisher "InitializeInternal"
+11-09 16:03:52.466  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.466  1135  4536 W chromium: "assistant.api.events.MetricEvent" from publisher "RecordCastEventImpl"
+11-09 16:03:52.466  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.466  1135  4536 W chromium: "assistant.api.events.ConversationEvent" from publisher "ActivityManagerImpl"
+11-09 16:03:52.542  1135  4536 I katniss_interactor_UiActionExecutor: Foreground app = net.hallflix.tv
+11-09 16:03:52.551  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.551  1135  4536 W chromium: "assistant.api.events.ConversationEvent" from publisher "S3Session"
+11-09 16:03:52.779  1135  4536 E chromium: [FTL:1135:4536:ERROR:action_processor.cc(537)] Module "feedback" tried to
+11-09 16:03:52.779  1135  4536 E chromium: shadow action_path "feedback.UPLOAD_CRASH_REPORT", but it is already registered
+11-09 16:03:52.779  1135  4536 E chromium: by "android_feedback"
+11-09 16:03:52.779  1135  4536 W chromium: [FTL:1135:4536:WARNING:action_processor.cc(197)] Failed to find
+11-09 16:03:52.779  1135  4536 W chromium: |conversation_id| for |interaction_id|: 0
+11-09 16:03:52.779  1135  4536 W chromium: [FTL:1135:4536:WARNING:action_processor.cc(197)] Failed to find
+11-09 16:03:52.779  1135  4536 W chromium: |conversation_id| for |interaction_id|: 66
+11-09 16:03:52.779  1135  4542 W chromium: [FTL:1135:4542:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.779  1135  4542 W chromium: "assistant.api.events.MetricEvent" from publisher "RecordCastEventImpl"
+11-09 16:03:52.779  1135  4542 W chromium: [FTL:1135:4542:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.779  1135  4542 W chromium: "assistant.api.events.MetricEvent" from publisher "RecordCastEventImpl"
+11-09 16:03:52.779  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.779  1135  4536 W chromium: "assistant.api.events.DeviceStateEvent" from publisher "ProcessSettingsAction"
+11-09 16:03:52.779  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.779  1135  4536 W chromium: "assistant.api.events.DeviceStateEvent" from publisher "ProcessSettingsAction"
+11-09 16:03:52.779  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.779  1135  4536 W chromium: "assistant.api.events.ConversationEvent" from publisher "S3Session"
+11-09 16:03:52.787  1135  4531 W chromium: [FTL:1135:4531:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.787  1135  4531 W chromium: "assistant.api.events.DeviceStateEvent" from publisher "InitializeInternal"
+11-09 16:03:52.788  1135  4531 W chromium: [FTL:1135:4531:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.788  1135  4531 W chromium: "assistant.api.events.MetricEvent" from publisher "UmaMetricsForwarder"
+11-09 16:03:52.821  1135  4536 I katniss_interactor_UiActionExecutor: Foreground app = net.hallflix.tv
+11-09 16:03:52.824  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.824  1135  4536 W chromium: "assistant.api.events.ConversationEvent" from publisher "S3Session"
+11-09 16:03:52.826  1135  4531 W chromium: [FTL:1135:4531:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.826  1135  4531 W chromium: "assistant.api.events.DeviceStateEvent" from publisher "InitializeInternal"
+11-09 16:03:52.944  1135  4531 W chromium: [FTL:1135:4531:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:52.944  1135  4531 W chromium: "assistant.api.events.DeviceStateEvent" from publisher "InitializeInternal"
+11-09 16:03:53.210  1135  4536 E chromium: [FTL:1135:4536:ERROR:action_processor.cc(537)] Module "feedback" tried to
+11-09 16:03:53.210  1135  4536 E chromium: shadow action_path "feedback.UPLOAD_CRASH_REPORT", but it is already registered
+11-09 16:03:53.210  1135  4536 E chromium: by "android_feedback"
+11-09 16:03:53.210  1135  4536 W chromium: [FTL:1135:4536:WARNING:publisher.cc(34)] No subscribers for event
+11-09 16:03:53.210  1135  4536 W chromium: "assistant.api.events.ConversationEvent" from publisher "S3Session"
+11-09 16:03:54.489  4575  4575 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:54.490  4575  4575 I AndroidRuntime: Using default boot image
+11-09 16:03:54.490  4575  4575 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:54.528  4575  4575 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:54.531  4575  4575 D AndroidRuntime: Shutting down VM
+11-09 16:03:57.210  2428  2428 I chromium: [2428:2428:INFO:debug_endpoint_manager_grpc_client.cc(365)] gRPC client channel state changed to GRPC_CHANNEL_TRANSIENT_FAILURE
+11-09 16:03:57.763  4592  4592 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:03:57.764  4592  4592 I AndroidRuntime: Using default boot image
+11-09 16:03:57.764  4592  4592 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:03:57.795  4592  4592 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:03:57.799  4592  4592 D AndroidRuntime: Shutting down VM
+11-09 16:03:58.028   471   661 I ActivityTaskManager: START u0 {cmp=net.hallflix.tv/.PlayerActivity (has extras)} from uid 10076
+11-09 16:03:58.130  3239  3239 I ExoPlayerImpl: Init 2029747 [AndroidXMedia3/1.5.1] [generic_x86, AOSP TV on x86, Google, 30]
+11-09 16:03:58.135  3239  3239 W net.hallflix.t: Accessing hidden method Landroid/media/MediaRouter2$RoutingController;->getRoutingSessionInfo()Landroid/media/RoutingSessionInfo; (blacklist, linking, denied)
+11-09 16:03:58.294  3239  4615 I MediaCodec: [OMX.google.h264.decoder] setting surface generation to 3316737
+11-09 16:03:58.391  3239  4615 D MediaCodec: [OMX.google.h264.decoder] setting dataspace on output surface to #104
+11-09 16:03:58.495   471   507 I ActivityTaskManager: Displayed net.hallflix.tv/.PlayerActivity: +466ms
+11-09 16:04:20.082  5166  5166 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:04:20.083  5166  5166 I AndroidRuntime: Using default boot image
+11-09 16:04:20.083  5166  5166 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:04:20.132  5166  5166 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:04:20.139  5166  5166 D AndroidRuntime: Shutting down VM
+11-09 16:04:21.171  3239  4615 I MediaCodec: [OMX.google.h264.decoder] setting surface generation to 3316738
+11-09 16:04:21.173  3239  3239 I ExoPlayerImpl: Release 2029747 [AndroidXMedia3/1.5.1] [generic_x86, AOSP TV on x86, Google, 30] [media3.common, media3.ui, media3.exoplayer, media3.decoder, media3.datasource, media3.extractor]
+11-09 16:04:24.398  5402  5402 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:04:24.399  5402  5402 I AndroidRuntime: Using default boot image
+11-09 16:04:24.399  5402  5402 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:04:24.431  5402  5402 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:04:24.435  5402  5402 D AndroidRuntime: Shutting down VM
+11-09 16:04:24.591   471   622 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=28, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10076 AdministratorUids: [] RequestorUid: 10076 RequestorPackageName: net.hallflix.tv] ] (release request)
+11-09 16:04:24.603   471   943 I ActivityManager: Killing 3277:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a76i0 (adj 0): isolated not needed
+11-09 16:04:26.942  5444  5444 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:04:26.951  5444  5444 I AndroidRuntime: Using default boot image
+11-09 16:04:26.951  5444  5444 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:04:27.034  5444  5444 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:04:27.091  5444  5444 D AndroidRuntime: Shutting down VM
+11-09 16:04:32.854  5465  5465 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-09 16:04:32.855  5465  5465 I AndroidRuntime: Using default boot image
+11-09 16:04:32.855  5465  5465 I AndroidRuntime: Leaving lock profiling enabled
+11-09 16:04:32.887  5465  5465 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-09 16:04:32.889  5465  5465 D AndroidRuntime: Shutting down VM

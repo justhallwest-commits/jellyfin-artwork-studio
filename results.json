@@ -1,0 +1,245 @@
+{
+  "steps": {
+    "login-page": {
+      "ok": true,
+      "split": true,
+      "splitImage": true,
+      "brand": "Welcome to HallFlix",
+      "disclaimerShown": false
+    },
+    "sign-in": {
+      "ok": true,
+      "hash": "#/home"
+    },
+    "home-modern": {
+      "ok": true,
+      "htmlClass": "layout-desktop as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "modern",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 7,
+      "versionBadges": [
+        "2 VERSIONS"
+      ],
+      "nativeAccent": "#e50914",
+      "avatar": 33,
+      "blurOverlays": []
+    },
+    "item-details": {
+      "ok": true,
+      "title": "Please sign in",
+      "playBtn": true,
+      "endsAt": true
+    },
+    "page-artwork-studio": {
+      "ok": true,
+      "textLength": 583,
+      "sample": "photo_library Artwork Studio Browse Design Extras Settings Home screen Screensaver Other apps Help 🖼 Library artwork All libraries Prerolls Movies Type: Auto M",
+      "blurOverlays": []
+    },
+    "page-preroll": {
+      "ok": true,
+      "textLength": 558,
+      "sample": "Pre-Roll Videos v3.0.0.0 Overview General Matching Schedules Clips Jellyfin 12 Test Activity PRE-ROLL LIBRARY Prerolls 1 clips · 1 on · 1 playable now WEB PLAYE",
+      "blurOverlays": []
+    },
+    "page-bulk-metadata": {
+      "ok": true,
+      "textLength": 965,
+      "sample": "Bulk Metadata Editor v1.0.0.0 1 · Find items 2 · Edit selected0 Genres, tags & studios Spreadsheet (CSV) History & undo Versions, collections & libraries Search",
+      "blurOverlays": []
+    },
+    "page-content-guard": {
+      "ok": true,
+      "textLength": 1647,
+      "sample": "Content Guard Hide titles from specific users by tag, genre or rating. Rules apply on every client and every screen, including home rows, search, Next Up, Cont",
+      "blurOverlays": []
+    },
+    "artwork-studio-tabs": {
+      "ok": true,
+      "browse": 484,
+      "design": 5900,
+      "extras": 4663,
+      "settings": 2023,
+      "apps": 3095,
+      "help": 3567,
+      "browseCards": 4
+    },
+    "backdrop-remove-once": {
+      "ok": true,
+      "before": 3,
+      "after": 1,
+      "prompts": 2
+    },
+    "home-layout": {
+      "ok": true,
+      "status": "Applied to 2 user(s). Open apps pick it up after a refresh.",
+      "kid": [
+        "latestmedia",
+        "smalllibrarytiles",
+        "resume",
+        "resumebook",
+        "stamped"
+      ],
+      "newbie": [
+        "latestmedia",
+        "smalllibrarytiles",
+        "resume",
+        "resumebook",
+        "stamped"
+      ],
+      "newbieFirstRows": [
+        ":",
+        "section0:Recently Added in Movies",
+        "section1:My Media",
+        "section4:",
+        "section6:"
+      ],
+      "timeline": [
+        "8ms nav /web/#/login",
+        "219ms nav /web/#/login",
+        "4364ms GET /DisplayPreferences/usersettings?userId=aa5cfc162fc94676a2053deffa2381ef&client=emby",
+        "4417ms nav /web/#/home",
+        "4494ms GET /DisplayPreferences/usersettings?userId=aa5cfc162fc94676a2053deffa2381ef&client=emby",
+        "4535ms console [Artwork Studio] applying the home screen layout set by the admin",
+        "4535ms POST /DisplayPreferences/usersettings?userId=aa5cfc162fc94676a2053deffa2381ef&client=emby",
+        "6203ms nav /web/#/home",
+        "6570ms GET /DisplayPreferences/usersettings?userId=aa5cfc162fc94676a2053deffa2381ef&client=emby",
+        "6681ms GET /DisplayPreferences/usersettings?userId=aa5cfc162fc94676a2053deffa2381ef&client=emby"
+      ]
+    },
+    "bulk-versions-tab": {
+      "ok": true,
+      "found": "1 titles have more than one version. Click to select them for editing.\nSintel ×2",
+      "libraryRows": 9,
+      "targets": 1
+    },
+    "preroll-jf12-tab": {
+      "ok": true,
+      "playlists": 2,
+      "skippable": true,
+      "panels": 8
+    },
+    "drawer-logo": {
+      "ok": true,
+      "drawer": false,
+      "logo": null,
+      "links": []
+    },
+    "other-apps-apply": {
+      "ok": true,
+      "splashState": "Showing your backdrop (preview above).",
+      "cssState": "Published (23 KB).Heads-up: this page is open at http://localhost:8096/, so the published design links to images there — apps outside your home network can’t reach that. Open the dashboard through your public address (e.g. hallflix.net) before saving.",
+      "devices": [
+        "Jellyfin Web",
+        "HallFlix E2E"
+      ]
+    },
+    "home-after-design": {
+      "ok": true,
+      "htmlClass": "layout-desktop as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "modern",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 7,
+      "versionBadges": [
+        "2 VERSIONS"
+      ],
+      "nativeAccent": "#e50914",
+      "avatar": 33,
+      "blurOverlays": []
+    },
+    "home-legacy": {
+      "ok": true,
+      "htmlClass": "layout-desktop as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "legacy",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 7,
+      "versionBadges": [
+        "2 VERSIONS"
+      ],
+      "nativeAccent": "#e50914",
+      "avatar": 40,
+      "blurOverlays": []
+    },
+    "home-tv": {
+      "ok": true,
+      "htmlClass": "layout-tv as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "legacy",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": true,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 7,
+      "versionBadges": [
+        "2 VERSIONS"
+      ],
+      "nativeAccent": "#e50914",
+      "avatar": 54,
+      "blurOverlays": [],
+      "focused": "BUTTON.card.overflowSquareCard.show-focus"
+    },
+    "home-phone": {
+      "ok": true,
+      "htmlClass": "layout-mobile as-js",
+      "script": true,
+      "themeStyle": true,
+      "headerKind": "modern",
+      "headerBg": "rgba(16, 16, 16, 0.55) / blur(14px) saturate(1.4)",
+      "logoShown": false,
+      "surprise": true,
+      "spotlight": true,
+      "spotTitle": "img",
+      "badges": 4,
+      "cards": 7,
+      "versionBadges": [
+        "2 VERSIONS"
+      ],
+      "nativeAccent": "#e50914",
+      "avatar": 32,
+      "blurOverlays": [],
+      "drawer": {
+        "found": true,
+        "logo": true,
+        "links": [
+          "add_circleRequest a movie"
+        ]
+      }
+    }
+  },
+  "console": [
+    "[desktop] warning: Not initializing chromecast: chrome object is missing",
+    "[desktop] error: Translation key is missing from dictionary: ",
+    "[remove] warning: Not initializing chromecast: chrome object is missing",
+    "[remove] warning: Not initializing chromecast: chrome object is missing",
+    "[newbie] warning: Not initializing chromecast: chrome object is missing",
+    "[newbie] warning: Not initializing chromecast: chrome object is missing",
+    "[desktop] warning: Not initializing chromecast: chrome object is missing",
+    "[legacy] warning: Not initializing chromecast: chrome object is missing",
+    "[tv] warning: Not initializing chromecast: chrome object is missing"
+  ],
+  "failedRequests": []
+}

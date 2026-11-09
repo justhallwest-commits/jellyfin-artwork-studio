@@ -1,0 +1,2 @@
+    mResumedActivity: ActivityRecord{56f55a0 u0 com.google.android.tvlauncher/.MainActivity t4}
+  ResumedActivity: ActivityRecord{56f55a0 u0 com.google.android.tvlauncher/.MainActivity t4}

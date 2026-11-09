@@ -1,0 +1,160 @@
+{
+  "versions-grouped": {
+    "ok": true,
+    "movies": [
+      "Big Buck Bunny",
+      "Sintel",
+      "Tears of Steel"
+    ],
+    "sintelVersions": 2
+  },
+  "as-menu-links": {
+    "ok": true,
+    "menuLinks": [
+      {
+        "name": "Request a movie",
+        "url": "https://hallflix.net/requests",
+        "icon": "add_circle"
+      }
+    ]
+  },
+  "as-search-shortcut": {
+    "ok": true,
+    "missingBanner": [
+      "Big Buck Bunny",
+      "Sintel",
+      "Tears of Steel"
+    ],
+    "normalSearch": [
+      "Tears of Steel"
+    ]
+  },
+  "pr-preview": {
+    "ok": true,
+    "preview": {
+      "Reason": "no match, general clips",
+      "Clips": [
+        {
+          "Id": "b969bdc7fe1aec0fbba604a6b4612388",
+          "Name": "HallFlix Intro",
+          "Tags": [],
+          "Seconds": 4,
+          "Enabled": true,
+          "TooLong": false,
+          "AvailableNow": true,
+          "Schedule": "",
+          "Plays": 0,
+          "LastPlayed": ""
+        }
+      ]
+    }
+  },
+  "pr-versions": {
+    "ok": true,
+    "perVersion": {
+      "1080p": "no match, general clips",
+      "720p": "no match, general clips"
+    }
+  },
+  "pr-playlist": {
+    "ok": true,
+    "reason": "playlist \"Pre-roll line-up\" (next 1 of 1)"
+  },
+  "pr-skippable-segment": {
+    "ok": true,
+    "segments": [
+      {
+        "Id": "92f6cca9e3f8443fa803c0a48946c7a8",
+        "ItemId": "b969bdc7fe1aec0fbba604a6b4612388",
+        "Type": "Intro",
+        "StartTicks": 0,
+        "EndTicks": 37500000
+      }
+    ]
+  },
+  "cg-blocking": {
+    "ok": true,
+    "animation": [
+      "Big Buck Bunny",
+      "Sintel",
+      "Tears of Steel"
+    ],
+    "kidSees": [],
+    "kidRecs": [],
+    "kidSearchSintel": []
+  },
+  "as-screensaver-upload": {
+    "ok": true,
+    "libraryBefore": [
+      "Tears of Steel",
+      "Sintel",
+      "Big Buck Bunny"
+    ],
+    "gallery": [
+      "20261109155538-9d9324bd.png",
+      "20261109155538-f4ffb5f8.png"
+    ]
+  },
+  "as-screensaver-firetv": {
+    "ok": true,
+    "slides": [
+      {
+        "id": "290e610af1487c42c1c1639683789033",
+        "type": "image/png",
+        "bytes": 1484
+      },
+      {
+        "id": "c1392d87aa5a4b502ed326c19563e26b",
+        "type": "image/png",
+        "bytes": 1485
+      }
+    ]
+  },
+  "as-screensaver-web": {
+    "ok": true,
+    "legacyRoute": 2,
+    "itemsRoute": 2,
+    "imageType": "image/png"
+  },
+  "as-screensaver-leaves-others": {
+    "ok": true,
+    "browse": [
+      "Tears of Steel",
+      "Big Buck Bunny",
+      "Sintel"
+    ],
+    "spotlight": [
+      "Big Buck Bunny",
+      "Tears of Steel",
+      "Sintel"
+    ]
+  },
+  "as-screensaver-mix": {
+    "ok": true,
+    "slides": 3,
+    "gallery": 2,
+    "library": [
+      "Tears of Steel"
+    ]
+  },
+  "as-screensaver-switches": {
+    "ok": true,
+    "fireTvOff": [
+      "Tears of Steel",
+      "Sintel",
+      "Big Buck Bunny"
+    ],
+    "appConfig": {
+      "enabled": true,
+      "files": [
+        "20261109155538-9d9324bd.png",
+        "20261109155538-f4ffb5f8.png"
+      ],
+      "mode": "only",
+      "mixPercent": 50,
+      "idleMinutes": 5,
+      "seconds": 20,
+      "clock": true
+    }
+  }
+}
