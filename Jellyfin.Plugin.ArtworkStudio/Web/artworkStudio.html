@@ -96,6 +96,17 @@
 #artworkStudioPage .as-srctab.active { color:#fff; border-bottom-color:var(--as-accent); }
 #artworkStudioPage .as-bigdrop { border:2px dashed rgba(255,255,255,.25); border-radius:12px; min-height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.6em; text-align:center; padding:1.2em; cursor:pointer; }
 #artworkStudioPage .as-bigdrop.over { border-color:var(--as-accent); background:rgba(0,164,220,.08); }
+#artworkStudioPage .as-ss-drop { min-height:150px; margin-top:.8em; }
+#artworkStudioPage .as-ss-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:.7em; margin-top:1em; }
+#artworkStudioPage .as-ss-pic { position:relative; aspect-ratio:16/9; border-radius:10px; background:#111 center/cover no-repeat; border:1px solid var(--as-line); overflow:hidden; }
+#artworkStudioPage .as-ss-pic .as-ibtn { position:absolute; top:.35em; right:.35em; }
+#artworkStudioPage .as-ss-where { display:grid; grid-template-columns:auto 1fr; gap:.55em .9em; align-items:start; margin-top:.6em; }
+#artworkStudioPage .as-ss-where .y { color:#4caf50; font-weight:700; }
+#artworkStudioPage .as-ss-where .n { color:#999; font-weight:700; }
+.as-ss-preview { position:fixed; inset:0; z-index:100000; background:#000; cursor:pointer; }
+.as-ss-preview div { position:absolute; inset:0; background:center/cover no-repeat; opacity:0; transition:opacity 1.2s ease, transform 8s linear; transform:scale(1); }
+.as-ss-preview div.on { opacity:1; transform:scale(1.06); }
+.as-ss-preview span { position:absolute; left:1.2em; bottom:1em; color:#fff; font:600 1rem system-ui,sans-serif; opacity:.75; text-shadow:0 1px 4px #000; }
 #artworkStudioPage .as-bigdrop img { max-height:340px; max-width:100%; border-radius:8px; }
 #artworkStudioPage .as-hint { font-size:.82em; opacity:.65; line-height:1.45; }
 #artworkStudioPage .as-row { display:flex; gap:.6em; align-items:center; flex-wrap:wrap; }
@@ -243,6 +254,7 @@
       <button class="as-tab" data-tab="extras">Extras</button>
       <button class="as-tab" data-tab="settings">Settings</button>
       <button class="as-tab" data-tab="home">Home screen</button>
+      <button class="as-tab" data-tab="screensaver">Screensaver</button>
       <button class="as-tab" data-tab="apps">Other apps</button>
       <button class="as-tab" data-tab="help">Help</button>
     </div>
@@ -586,6 +598,70 @@
       <button class="as-btn" id="hlApplyAll"><span class="material-icons">group</span>Apply to everyone now</button>
       <button class="as-btn" id="hlDefaults"><span class="material-icons">restart_alt</span>Jellyfin's default order</button>
       <span class="as-hint" id="hlStatus"></span>
+    </div>
+  </section>
+
+  <!-- ===================== SCREENSAVER ===================== -->
+  <section data-section="screensaver" style="display:none">
+    <div class="as-panel">
+      <h3 style="margin:0 0 .3em">Screensaver pictures</h3>
+      <div class="as-hint">Pictures you add here show in the screensaver of your TV apps: the Jellyfin app on Fire TV / Android TV, Jellyfin on LG and Samsung TVs and in browsers, and your HallFlix TV app.
+        Landscape pictures look best (1920×1080 or bigger). Big photos are shrunk to 4K (3840×2160) as they upload, so TVs load them quickly.</div>
+      <input type="file" id="ssFiles" accept="image/*" multiple style="display:none">
+      <div class="as-bigdrop as-ss-drop" id="ssDrop"><span class="material-icons">add_photo_alternate</span><div><b>Drop pictures here</b> or click to choose — you can pick as many as you like at once</div><div class="as-hint">JPG, PNG, WebP, GIF or BMP</div></div>
+      <div class="as-row" style="gap:.6em;flex-wrap:wrap;margin-top:.8em;align-items:center">
+        <button class="as-btn" id="ssMore"><span class="material-icons">add_link</span>Add from a web link, your NAS or online</button>
+        <button class="as-btn" id="ssPreview"><span class="material-icons">slideshow</span>Preview</button>
+        <span class="as-hint" id="ssCount"></span>
+      </div>
+      <div class="as-ss-grid" id="ssGrid"></div>
+    </div>
+
+    <div class="as-panel">
+      <h3>Settings</h3>
+      <div class="as-ev-opt">
+        <label class="as-switch"><input type="checkbox" id="ssOn"><i></i></label>
+        <div><b>Show my pictures in the TV apps' screensavers</b>
+          <div class="as-hint">With no pictures added (or this off), the screensavers show your movies' and shows' backdrops as usual.</div>
+          <div class="as-row" style="gap:1em;flex-wrap:wrap;margin-top:.6em;align-items:center">
+            <select class="as-in" id="ssMode" style="width:auto"><option value="only">Only my pictures</option><option value="mix">My pictures mixed with movie &amp; show backdrops</option></select>
+            <label id="ssMixRow" class="as-row" style="gap:.5em;align-items:center">Share of my pictures <input type="range" id="ssMix" min="10" max="90" step="10"> <b id="ssMixVal">50%</b></label>
+          </div>
+        </div>
+      </div>
+      <div class="as-ev-opt">
+        <label class="as-switch"><input type="checkbox" id="ssNative"><i></i></label>
+        <div><b>Jellyfin app on Fire TV / Android TV</b>
+          <div class="as-hint">Nothing to switch on: the app's own screensaver is on by default and starts after 5 minutes (in the app: Settings → Screensaver). On Fire TV it runs while the Jellyfin app is open.</div></div>
+      </div>
+      <div class="as-ev-opt">
+        <label class="as-switch"><input type="checkbox" id="ssWeb"><i></i></label>
+        <div><b>Jellyfin on LG and Samsung TVs, browsers and Jellyfin Media Player</b>
+          <div class="as-hint">Their screensaver is off until you pick it: in each app go to Settings → Display → Screensaver → <b>Backdrop</b> (once per TV or browser).</div></div>
+      </div>
+      <div class="as-ev-opt">
+        <label class="as-switch"><input type="checkbox" id="ssTv"><i></i></label>
+        <div><b>HallFlix TV app: built-in screensaver</b>
+          <div class="as-hint">Starts when nobody has pressed a button for a while, never during playback. Any button closes it. It also stops a still picture sitting on the TV for hours.</div>
+          <div class="as-row" style="gap:1.2em;flex-wrap:wrap;margin-top:.6em;align-items:center">
+            <label class="as-row" style="gap:.4em;align-items:center">Start after <input class="as-in" type="number" id="ssIdle" min="1" max="120" style="width:4.5em"> minutes</label>
+            <label class="as-row" style="gap:.4em;align-items:center">Each picture for <input class="as-in" type="number" id="ssSecs" min="5" max="300" style="width:4.5em"> seconds</label>
+            <label class="as-row" style="gap:.4em;align-items:center"><input type="checkbox" id="ssClock"> Show the time</label>
+          </div>
+        </div>
+      </div>
+      <button class="as-btn primary" id="ssSave"><span class="material-icons">save</span>Save</button>
+    </div>
+
+    <div class="as-panel">
+      <h3>Where your pictures show</h3>
+      <div class="as-ss-where">
+        <span class="y">✔</span><div><b>Jellyfin app on Fire TV / Android TV</b><div class="as-hint">In the app's screensaver. On Android TV / Google TV you can also choose Jellyfin as the TV's own screensaver in the system settings. Fire TV only allows Amazon's screensaver outside the app.</div></div>
+        <span class="y">✔</span><div><b>Jellyfin on LG and Samsung TVs, browsers, Jellyfin Media Player, Xbox</b><div class="as-hint">After choosing Settings → Display → Screensaver → Backdrop in the app.</div></div>
+        <span class="y">✔</span><div><b>HallFlix TV app</b> (Fire TV, Android TV, LG, Samsung)<div class="as-hint">Built in, with the timing above. No reinstall needed: it comes from your server.</div></div>
+        <span class="n">—</span><div><b>Apple TV (Swiftfin, Infuse)</b><div class="as-hint">Apple doesn't let apps provide a screensaver on Apple TV. Apple TV's own screensaver can show your photos instead: put these pictures in an album in iCloud Photos and pick it under Settings → General → Screen Saver.</div></div>
+        <span class="n">—</span><div><b>Roku</b><div class="as-hint">Jellyfin's Roku app has no screensaver of its own.</div></div>
+      </div>
     </div>
   </section>
 
@@ -1059,7 +1135,8 @@
         ['Split-screen sign-in layout', 'y', 'n', 'n', 'n', 'n'],
         ['Rotating home / library backdrops', 'y', 'n', 'n', 'n', 'n'],
         ['Extras (spotlight, previews, badges, effects …)', 'y', 'n', 'n', 'n', 'n'],
-        ['Animated library covers and video loops', 'y', 'n', 'n', 'n', 'n']
+        ['Animated library covers and video loops', 'y', 'n', 'n', 'n', 'n'],
+        ['Screensaver pictures (Screensaver tab)', 'y', 'y', 'n', 'y', 'n']
     ];
     function renderMatrix() {
         var ev = collectEverywhere();
@@ -1127,6 +1204,129 @@
         (S.config ? Promise.resolve() : loadSettings()).then(saveConfig).then(loadEverywhere).then(function () { b.disabled = false; }, function () { b.disabled = false; });
     });
 
+    // ============================================================ SCREENSAVER
+    var SS = { files: [] };
+    var SS_PAGE = { page: 'screensaver', name: 'Screensaver', hint: 'Pictures for the TV apps\' screensavers.' };
+    function fillScreensaver(s) {
+        s = s || {};
+        $('#ssOn').checked = s.Enabled !== false;
+        $('#ssMode').value = s.Mode === 'mix' ? 'mix' : 'only';
+        $('#ssMix').value = s.MixPercent || 50;
+        $('#ssNative').checked = s.NativeApps !== false;
+        $('#ssWeb').checked = s.WebApps !== false;
+        $('#ssTv').checked = s.TvApp !== false;
+        $('#ssIdle').value = s.TvIdleMinutes || 5;
+        $('#ssSecs').value = s.SlideSeconds || 20;
+        $('#ssClock').checked = s.ShowClock !== false;
+        syncScreensaver();
+    }
+    function collectScreensaver(prev) {
+        var s = Object.assign({}, prev || {});
+        s.Enabled = $('#ssOn').checked;
+        s.Mode = $('#ssMode').value;
+        s.MixPercent = Math.max(10, Math.min(90, parseInt($('#ssMix').value, 10) || 50));
+        s.NativeApps = $('#ssNative').checked;
+        s.WebApps = $('#ssWeb').checked;
+        s.TvApp = $('#ssTv').checked;
+        s.TvIdleMinutes = Math.max(1, Math.min(120, parseInt($('#ssIdle').value, 10) || 5));
+        s.SlideSeconds = Math.max(5, Math.min(300, parseInt($('#ssSecs').value, 10) || 20));
+        s.ShowClock = $('#ssClock').checked;
+        return s;
+    }
+    function syncScreensaver() {
+        $('#ssMixRow').style.display = $('#ssMode').value === 'mix' ? '' : 'none';
+        $('#ssMixVal').textContent = ($('#ssMix').value || 50) + '%';
+    }
+    $('#ssMode').addEventListener('change', syncScreensaver);
+    $('#ssMix').addEventListener('input', syncScreensaver);
+    function loadScreensaver() {
+        return api('GET', 'ArtworkStudio/Backdrops/screensaver').catch(function () { return { Files: [] }; }).then(function (r) {
+            SS.files = (r && r.Files) || [];
+            $('#ssCount').textContent = SS.files.length ? SS.files.length + ' picture' + (SS.files.length > 1 ? 's' : '') : 'No pictures yet: the screensavers show your library\u2019s backdrops as usual.';
+            $('#ssGrid').innerHTML = SS.files.map(function (f) {
+                return '<div class="as-ss-pic" title="' + esc(f.Name) + ' · ' + fmtSize(f.Size) + '" style="background-image:url(\'' + pageImgUrl('screensaver', f.Name) + '\')"><button class="as-ibtn" data-del="' + esc(f.Name) + '" title="Remove">' + icon('delete') + '</button></div>';
+            }).join('');
+        });
+    }
+    // Big photos are fitted inside 4K as JPEG before they upload, so TVs load them quickly. Small images and GIFs go up as they are.
+    function shrinkForTv(file) {
+        return new Promise(function (resolve) {
+            if (!/^image\/(jpeg|png|webp|bmp)$/.test(file.type)) { resolve(file); return; }
+            var u = URL.createObjectURL(file), im = new Image();
+            im.onload = function () {
+                var w = im.naturalWidth, h = im.naturalHeight, k = Math.min(1, 3840 / w, 2160 / h);
+                if (k >= 1 && file.size <= 6 * 1048576) { URL.revokeObjectURL(u); resolve(file); return; }
+                var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+                var g = c.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+                URL.revokeObjectURL(u);
+                c.toBlob(function (b) { resolve(b ? new File([b], (file.name || 'picture').replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }) : file); }, 'image/jpeg', 0.9);
+            };
+            im.onerror = function () { URL.revokeObjectURL(u); resolve(file); };
+            im.src = u;
+        });
+    }
+    function uploadScreensaver(list) {
+        var files = Array.prototype.filter.call(list || [], function (f) { return /^image\//.test(f.type); });
+        if (!files.length) { toast('Please choose picture files (JPG, PNG, WebP, GIF or BMP).', true); return; }
+        var ok = 0, bad = 0, chain = Promise.resolve();
+        files.forEach(function (f, i) {
+            chain = chain.then(function () {
+                $('#ssCount').textContent = 'Uploading ' + (i + 1) + ' of ' + files.length + '\u2026';
+                return shrinkForTv(f).then(function (small) {
+                    var fd = new FormData(); fd.append('file', small, small.name || 'picture.jpg');
+                    return api('POST', 'ArtworkStudio/Backdrops/screensaver/Upload', { form: fd });
+                }).then(function () { ok++; }, function (e) { bad++; toast((f.name || 'Picture') + ': ' + e.message, true); });
+            });
+        });
+        chain.then(function () {
+            if (ok) toast(ok + ' picture' + (ok === 1 ? '' : 's') + ' added' + (bad ? ' (' + bad + ' failed)' : ''));
+            return loadScreensaver();
+        });
+    }
+    (function () {
+        var dz = $('#ssDrop'), fi = $('#ssFiles');
+        dz.onclick = function () { fi.click(); };
+        fi.onchange = function () { uploadScreensaver(fi.files); fi.value = ''; };
+        dz.ondragover = function (e) { e.preventDefault(); dz.classList.add('over'); };
+        dz.ondragleave = function () { dz.classList.remove('over'); };
+        dz.ondrop = function (e) { e.preventDefault(); dz.classList.remove('over'); uploadScreensaver(e.dataTransfer && e.dataTransfer.files); };
+    })();
+    $('#ssGrid').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-del]'); if (!b) return;
+        if (!confirm('Remove this picture from the screensaver?')) return;
+        api('DELETE', 'ArtworkStudio/Backdrops/screensaver/' + encodeURIComponent(b.dataset.del)).then(loadScreensaver).catch(function (err) { toast(err.message, true); });
+    });
+    $('#ssMore').addEventListener('click', function () {
+        loadPageCard(SS_PAGE).then(function (item) {
+            openEditor(item);
+            var ov = editor && editor.ov; if (!ov) return;
+            var close = ov._close;
+            ov._close = function () { close(); loadScreensaver(); };
+            $('[data-close]', ov).onclick = ov._close;
+        });
+    });
+    $('#ssPreview').addEventListener('click', function () {
+        if (!SS.files.length) { toast('Add a few pictures first.', true); return; }
+        var ov = document.createElement('div'); ov.className = 'as-ss-preview';
+        ov.innerHTML = '<div></div><div></div><span>Preview · click or press any key to close</span>';
+        document.body.appendChild(ov);
+        var layers = ov.querySelectorAll('div'), i = 0, which = 0, order = SS.files.slice().sort(function () { return Math.random() - 0.5; });
+        function next() {
+            var l = layers[which]; which = 1 - which;
+            l.style.backgroundImage = 'url("' + pageImgUrl('screensaver', order[i % order.length].Name) + '")';
+            l.classList.remove('on'); void l.offsetWidth; l.classList.add('on'); layers[which].classList.remove('on');
+            i++;
+        }
+        next();
+        var t = setInterval(next, 4500);
+        function close() { clearInterval(t); ov.remove(); document.removeEventListener('keydown', close, true); }
+        ov.onclick = close; document.addEventListener('keydown', close, true);
+    });
+    $('#ssSave').addEventListener('click', function () {
+        var b = $('#ssSave'); b.disabled = true;
+        (S.config ? Promise.resolve() : loadSettings()).then(saveConfig).then(loadScreensaver).then(function () { b.disabled = false; }, function () { b.disabled = false; });
+    });
+
     // ============================================================ TABS
     $$('.as-tab').forEach(function (b) {
         b.addEventListener('click', function () {
@@ -1138,6 +1338,7 @@
             if (b.dataset.tab === 'design') { loadBrandSlots(); loadLoginUsers(); }
             if (b.dataset.tab === 'home') { (S.config ? Promise.resolve() : loadSettings()).then(loadHomeTab); }
             if (b.dataset.tab === 'apps') { (S.config ? Promise.resolve() : loadSettings()).then(loadEverywhere); }
+            if (b.dataset.tab === 'screensaver') { (S.config ? Promise.resolve() : loadSettings()).then(loadScreensaver); }
         });
     });
 
@@ -1245,7 +1446,8 @@
     // ---- Home & login page backgrounds (stored by the plugin, not on an item)
     var PAGES = [
         { page: 'home', name: 'Home page', hint: 'Background of the home screen. Several images rotate.' },
-        { page: 'login', name: 'Login page', hint: 'Background of the sign-in screen. Several images rotate.' }
+        { page: 'login', name: 'Login page', hint: 'Background of the sign-in screen. Several images rotate.' },
+        { page: 'screensaver', name: 'Screensaver', hint: 'Pictures for the TV apps\' screensavers (see the Screensaver tab).' }
     ];
     function pageImgUrl(page, file) { return ApiClient.getUrl('ArtworkStudio/Backdrops/' + page + '/' + encodeURIComponent(file)); }
     function loadPageCard(p) {
@@ -1277,17 +1479,17 @@
         var bg = '';
         if (tag) bg = 'background-image:url(\'' + imgUrl(item.Id, 'Primary', null, tag, wide ? 420 : 300) + '\')';
         if (item._page && item._thumb) { bg = 'background-image:url(\'' + item._thumb + '\')'; tag = true; }
-        var sub = item._page ? 'Page background' : item._lib ? (item._ct || 'library') : [item.Type === 'BoxSet' ? 'Collection' : item.Type, item.ProductionYear].filter(Boolean).join(' · ');
+        var sub = item._page ? (item._page === 'screensaver' ? 'TV screensaver' : 'Page background') : item._lib ? (item._ct || 'library') : [item.Type === 'BoxSet' ? 'Collection' : item.Type, item.ProductionYear].filter(Boolean).join(' · ');
         if (item.SeriesName) sub = item.SeriesName + (item.Type === 'Season' ? '' : ' · ' + sub);
         var badges = item._page
-            ? '<span class="as-badge' + (item.BackdropImageTags.length ? '' : ' off') + '" title="Backdrops">' + (item.BackdropImageTags.length ? item.BackdropImageTags.length + ' image' + (item.BackdropImageTags.length > 1 ? 's' : '') : 'Jellyfin default') + '</span>'
+            ? '<span class="as-badge' + (item.BackdropImageTags.length ? '' : ' off') + '" title="Backdrops">' + (item.BackdropImageTags.length ? item.BackdropImageTags.length + ' image' + (item.BackdropImageTags.length > 1 ? 's' : '') : (item._page === 'screensaver' ? 'Library backdrops' : 'Jellyfin default')) + '</span>'
             : BADGES.map(function (b) {
             var has = itemHas(item, b[0]);
             var n = b[0] === 'Backdrop' ? (item.BackdropImageTags || []).length : 0;
             return '<span class="as-badge' + (has ? '' : ' off') + '" title="' + SLOT[b[0]].label + (has ? '' : ' missing') + '">' + b[1] + (n > 1 ? n : '') + '</span>';
         }).join('');
         return '<div class="as-card' + (wide ? ' wide' : '') + (S.selected[item.Id] ? ' selected' : '') + '" data-id="' + esc(item.Id) + '">' +
-            '<div class="as-poster" style="' + bg + '">' + (tag ? '' : icon(item._page ? (item._page === 'login' ? 'login' : 'home') : item._lib ? 'folder' : 'image_not_supported')) + '</div>' +
+            '<div class="as-poster" style="' + bg + '">' + (tag ? '' : icon(item._page ? (item._page === 'login' ? 'login' : item._page === 'screensaver' ? 'slideshow' : 'home') : item._lib ? 'folder' : 'image_not_supported')) + '</div>' +
             (item._lib ? '' : '<div class="as-check" title="Select">' + icon('check') + '</div>') +
             '<div class="as-meta"><div class="as-name" title="' + esc(item.Name) + '">' + esc(item.Name) + '</div><div class="as-sub">' + esc(sub) + '</div><div class="as-badges">' + badges + '</div></div></div>';
     }
@@ -1495,7 +1697,7 @@
                     icon(imgs.length ? 'add_photo_alternate' : 'add_photo_alternate') + '<span>' + (slot.multi && imgs.length ? 'Add another' : 'Add ' + slot.label.toLowerCase()) + '</span><span style="opacity:.6">drop · paste · click</span></div>';
             }
             return '<div class="as-slot' + (slot.wide ? ' wide' : '') + '" data-slot="' + slot.type + '">' +
-                '<div class="as-slot-title"><b>' + slot.label + (slot.multi && imgs.length ? ' (' + imgs.length + ')' : '') + '</b><span>' + (ed.item._page ? ed.item._hint + ' With none, Jellyfin\'s normal background is used.' : slot.hint) + '</span></div>' +
+                '<div class="as-slot-title"><b>' + slot.label + (slot.multi && imgs.length ? ' (' + imgs.length + ')' : '') + '</b><span>' + (ed.item._page ? ed.item._hint + (ed.item._page === 'screensaver' ? ' With none, the screensavers show your library\'s backdrops.' : ' With none, Jellyfin\'s normal background is used.') : slot.hint) + '</span></div>' +
                 '<div class="as-tiles">' + tiles + '</div></div>';
         }).join('');
         var wrap = $('#asSlots', ed.ov);
@@ -1874,6 +2076,7 @@
             fillDesign(cfg.Theme || {});
             fillExtras(cfg.Extras || {});
             fillEverywhere(cfg.Everywhere || {});
+            fillScreensaver(cfg.Screensaver || {});
             $('#asRoots').innerHTML = (cfg.NasRoots || []).map(rootRow).join('') || '';
             if (!(cfg.NasRoots || []).length) $('#asRoots').innerHTML = rootRow({ Name: 'NAS Artwork', Path: '' });
             $('#asNasMode').value = cfg.DefaultNasMode || 'copy';
@@ -1926,6 +2129,7 @@
         cfg.Theme = collectDesign();
         cfg.Extras = collectExtras();
         cfg.Everywhere = collectEverywhere(cfg.Everywhere);
+        cfg.Screensaver = collectScreensaver(cfg.Screensaver);
         return ApiClient.updatePluginConfiguration(PLUGIN_ID, cfg).then(function () {
             S.roots = null;
             return applyEverywhere(cfg).catch(function (e) { toast('Saved, but couldn\u2019t update the other apps: ' + e.message, true); });

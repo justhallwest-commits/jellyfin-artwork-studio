@@ -148,10 +148,23 @@ public class ArtworkStudioController : ControllerBase
                 syncLoginMessage = cfg.Everywhere?.SyncLoginMessage ?? false,
                 publishCss = cfg.Everywhere?.PublishCss ?? false
             },
+            screensaver = ScreensaverForApp(cfg.Screensaver ?? new ScreensaverSettings()),
             now = DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture),
             version = typeof(Plugin).Assembly.GetName().Version?.ToString()
         };
     }
+
+    /// <summary>What the HallFlix TV app needs for its built-in screensaver.</summary>
+    private static object ScreensaverForApp(ScreensaverSettings s) => new
+    {
+        enabled = s.Enabled && s.TvApp,
+        files = ListPageFiles(Screensaver.ScreensaverGallery.Page),
+        mode = string.Equals(s.Mode, "mix", StringComparison.OrdinalIgnoreCase) ? "mix" : "only",
+        mixPercent = Math.Clamp(s.MixPercent, 10, 90),
+        idleMinutes = Math.Clamp(s.TvIdleMinutes, 1, 120),
+        seconds = Math.Clamp(s.SlideSeconds, 5, 300),
+        clock = s.ShowClock
+    };
 
     // ---------------------------------------------------------------- HallFlix TV app
 
@@ -255,7 +268,7 @@ public class ArtworkStudioController : ControllerBase
     // ---------------------------------------------------------------- Home & login page backdrops
 
     // "home"/"login" hold several rotating backdrops; the brand slots hold a single image each.
-    private static readonly string[] Pages = { "home", "login", "logo", "loginlogo", "favicon", "loader" };
+    private static readonly string[] Pages = { "home", "login", "logo", "loginlogo", "favicon", "loader", Screensaver.ScreensaverGallery.Page };
 
     private static readonly string[] SingleImagePages = { "logo", "loginlogo", "favicon", "loader" };
 
@@ -419,6 +432,11 @@ public class ArtworkStudioController : ControllerBase
             return BadRequest(new { message = "Logos and the tab icon need to be an image (PNG, JPG, WebP or GIF)." });
         }
 
+        if (mime.StartsWith("video/", StringComparison.Ordinal) && page == Screensaver.ScreensaverGallery.Page)
+        {
+            return BadRequest(new { message = "Screensaver pictures need to be images (JPG, PNG, WebP, GIF or BMP): the TV apps' screensavers can't play videos." });
+        }
+
         var ext = mime switch
         {
             "video/mp4" => ".mp4",
@@ -449,6 +467,12 @@ public class ArtworkStudioController : ControllerBase
     /// <summary>Keeps Jellyfin's splashscreen (used by Roku, Android TV and Swiftfin) in step with the backdrops.</summary>
     private void AfterPageChange(string page)
     {
+        if (page == Screensaver.ScreensaverGallery.Page)
+        {
+            Screensaver.ScreensaverGallery.Invalidate();
+            return;
+        }
+
         if (page is not ("login" or "home") || Config.Everywhere?.SyncSplashscreen != true)
         {
             return;

@@ -214,3 +214,13 @@ h1, h2, h3 { font-family: var(--head-font); }
 .hf-screen.scrolled .hf-top { opacity: 0; }
 .hf-badges { right: 2.3rem; }
 .hf-badges .ver { background: rgba(0,0,0,.72); }
+
+/* ---- screensaver (pictures from Artwork Studio → Screensaver) */
+#hfSaver { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 70; background: #000; opacity: 0; transition: opacity 1s ease; cursor: none; }
+#hfSaver.on { opacity: 1; }
+#hfSaver .hf-saver-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #000 center center / cover no-repeat; opacity: 0; transform: scale(1); -webkit-transform: scale(1); transition-property: opacity, transform; transition-timing-function: ease, linear; }
+#hfSaver .hf-saver-layer.on { opacity: 1; transform: scale(1.08); -webkit-transform: scale(1.08); }
+#hfSaver .hf-saver-shade { position: absolute; left: 0; right: 0; bottom: 0; height: 35%; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.55)); }
+#hfSaver .hf-saver-info { position: absolute; left: 4vw; bottom: 6vh; max-width: 50vw; color: #fff; font-size: 2.1vw; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,.6); transition: opacity 1s ease; }
+#hfSaver .hf-saver-info img { display: block; max-height: 11vh; max-width: 32vw; }
+#hfSaver .hf-saver-clock { position: absolute; right: 4vw; bottom: 6vh; color: #fff; font-size: 3.2vw; font-weight: 300; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: .9; }

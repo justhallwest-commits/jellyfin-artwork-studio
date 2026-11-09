@@ -160,6 +160,24 @@ async function api(p) {
     return { focusFirst: f, menu, items: await page.evaluate(() => [...document.querySelectorAll('.hf-list .hf-item')].map(i => i.textContent)) };
   });
 
+  // built-in screensaver with the pictures from Artwork Studio → Screensaver
+  await step('screensaver', async () => {
+    await page.goto(URL + '/ArtworkStudio/TV/?platform=browser', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.hf-top', { timeout: 30000 }); await page.waitForTimeout(3000);
+    const cfg = await page.evaluate(() => fetch('../AppConfig').then(r => r.json()).then(c => c.screensaver));
+    await page.evaluate(() => window.HallFlix.screensaver());
+    await page.waitForSelector('#hfSaver.on', { timeout: 15000 }); await page.waitForTimeout(2500);
+    const on = await page.evaluate(() => { const l = document.querySelector('#hfSaver .hf-saver-layer.on'); return { bg: l ? l.style.backgroundImage : null, clock: document.querySelector('#hfSaver .hf-saver-clock').textContent }; });
+    await shot(page, '12-screensaver');
+    if (!on.bg || !/Backdrops\/screensaver\//.test(on.bg)) { throw new Error('no gallery picture showing: ' + JSON.stringify(on)); }
+    await page.waitForTimeout(7000);
+    const next = await page.evaluate(() => { const l = document.querySelector('#hfSaver .hf-saver-layer.on'); return l ? l.style.backgroundImage : null; });
+    await page.keyboard.press('Enter'); await page.waitForTimeout(1500);
+    const closed = await page.evaluate(() => !document.querySelector('#hfSaver') || !document.querySelector('#hfSaver').classList.contains('on'));
+    if (!closed) { throw new Error('a button press did not close it'); }
+    return { cfg, first: on.bg, second: next, changed: next !== on.bg, clock: on.clock, closed };
+  });
+
   // the LG / Samsung launcher page (as a local file, like on the TV) finding the server and opening the interface
   await step('launcher', async () => {
     if (!LAUNCHER) { throw new Error('no launcher path'); }

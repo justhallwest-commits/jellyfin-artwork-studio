@@ -2,7 +2,7 @@
 
 A friendly place in the Jellyfin dashboard to add and manage artwork for your libraries and everything in them — posters, backdrops, logos, thumbs, banners, clear art, disc art, box art and more.
 
-**Works with Jellyfin 10.10 and 10.11** — each release contains a build for both, and the plugin catalog picks the right one.
+**Works with Jellyfin 10.10, 10.11 and 12**: each release contains a build for each, and the plugin catalog picks the right one.
 
 ## What it does
 
@@ -23,6 +23,21 @@ A friendly place in the Jellyfin dashboard to add and manage artwork for your li
 - **Fill from online:** select items and fill missing artwork with the best-rated provider image.
 - **Backup:** export/import all settings as a file.
 - **Bulk apply:** select many items and put the same image on all of them, optionally skipping ones that already have it.
+
+## Screensaver gallery
+
+The **Screensaver** tab holds a gallery of your own pictures for your TVs' screensavers. Drop in as many as you like (big photos are shrunk to 4K as they upload), or add them from a web link, your NAS or online through the editor.
+
+| App | How your pictures show |
+|---|---|
+| Jellyfin app on **Fire TV / Android TV** | Automatically, in the app's own screensaver (on by default, after 5 minutes; app Settings → Screensaver). Fire TV runs it while the Jellyfin app is open. |
+| Jellyfin on **LG / Samsung TVs**, browsers, Jellyfin Media Player, Xbox | After choosing Settings → Display → Screensaver → **Backdrop** in the app (once per device). |
+| **HallFlix TV** app | Built-in screensaver: starts after a few minutes without a button press (never during playback), any button closes it. Timing, picture length and clock are set on the tab. |
+| Apple TV (Swiftfin, Infuse), Roku | Not possible: Apple TV doesn't let apps provide a screensaver, and Jellyfin's Roku app has none. Apple TV's own screensaver can show the same pictures from an iCloud Photos album. |
+
+Choose **only my pictures** or **mixed with movie & show backdrops** (with how much of each), and which apps get them. With no pictures (or the option off) every screensaver works as before.
+
+How it works: those screensavers ask the server for "random movies and shows with a backdrop". Artwork Studio recognises exactly those requests (from the Fire TV app, or the web app's backdrop screensaver) and answers with your pictures, served at Jellyfin's normal image address. Every other request is left alone.
 
 ## Other Jellyfin apps
 
@@ -88,5 +103,7 @@ Settings → *Where copied artwork is saved*: follow each library's "Save artwor
 | POST | `/ArtworkStudio/Items/{id}/Upload?type=&index=` | Multipart upload (`file`) |
 | POST | `/ArtworkStudio/Items/{id}/FromUrl` | `{ Type, Index, Url }` |
 | POST | `/ArtworkStudio/Items/{id}/FromNas` | `{ Type, Index, Root, Path, Mode }` |
+| GET / DELETE | `/ArtworkStudio/Backdrops/screensaver[/{file}]` | List / remove screensaver pictures |
+| POST | `/ArtworkStudio/Backdrops/screensaver/Upload` · `FromUrl` · `FromNas` | Add a screensaver picture |
 
 Delete, reorder and provider lookups use Jellyfin's standard image endpoints. Omit `Index` to add a new backdrop; pass one to replace that backdrop.

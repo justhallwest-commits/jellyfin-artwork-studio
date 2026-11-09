@@ -211,6 +211,8 @@
     var lastXY = '';
     document.addEventListener('mousemove', function (e) {
         var xy = e.clientX + ',' + e.clientY; if (xy === lastXY) { return; } lastXY = xy;
+        if (saver.on) { saver.stop(); return; }
+        saver.poke();
         var f = e.target.closest && e.target.closest('.f'); if (f && f !== current && focusRoot().contains(f)) { setFocus(f, true); }
     });
 
@@ -257,7 +259,11 @@
         try { window.close(); } catch (e2) { /* ignore */ }
     }
     // Android calls this for the Back button; false = close the app
-    window.HallFlix = { back: function () { return back(); }, nativeEvent: function (name, data) { player.nativeEvent(name, data); } };
+    window.HallFlix = {
+        back: function () { if (saver.on) { saver.stop(); return true; } saver.poke(); return back(); },
+        nativeEvent: function (name, data) { saver.poke(); player.nativeEvent(name, data); },
+        screensaver: function () { saver.start(); }   // for testing: start it now
+    };
 
     // ================================================================== menus (overlay)
     var menuReturn = null;
@@ -280,6 +286,8 @@
     // ================================================================== keys
     function isKey(e, list) { return list.indexOf(e.keyCode) >= 0; }
     function onKey(e) {
+        if (saver.on) { saver.stop(); if (e.preventDefault) { e.preventDefault(); } return; }
+        saver.poke();
         var k = e.keyCode, typing = document.activeElement && document.activeElement.tagName === 'INPUT';
         if (player.on && player.key(e)) { e.preventDefault(); return; }
         if (typing && (k === 8 || (k >= 48 && k <= 90) || k === 32)) { return; }   // let the keyboard type
@@ -1131,6 +1139,112 @@
             if (top && top.lastFocus && top.el.contains(top.lastFocus)) { setFocus(top.lastFocus, true); } else { focusFirst(); }
         }
     };
+
+    // ================================================================== screensaver
+    // Pictures from Artwork Studio → Screensaver (optionally mixed with movie / show backdrops), shown after
+    // a few minutes without a button press. Never during playback; any button or pointer move closes it.
+    var saver = {
+        on: false, el: null, slides: [], i: 0, which: 0, last: Date.now(), slideTimer: null, clockTimer: null, gen: 0,
+        cfg: function () { return CFG.screensaver || {}; },
+        ready: function () { var c = this.cfg(); return !!c.enabled && ((c.files || []).length > 0 || (c.mode === 'mix' && !!auth)); },
+        poke: function () { this.last = Date.now(); },
+        tick: function () {
+            if (this.on) { return; }
+            if (player.on || document.hidden) { this.poke(); return; }
+            if (!this.ready()) { return; }
+            if (Date.now() - this.last >= Math.max(1, this.cfg().idleMinutes || 5) * 60000) { this.start(); }
+        },
+        deck: function (list, count) {   // every picture once, reshuffled each round, never twice in a row
+            var out = [];
+            while (out.length < count && list.length) {
+                var round = list.slice().sort(function () { return Math.random() - 0.5; });
+                if (out.length && round.length > 1 && round[0].src === out[out.length - 1].src) { round.push(round.shift()); }
+                out = out.concat(round.slice(0, count - out.length));
+            }
+            return out;
+        },
+        build: function () {
+            var self = this, c = this.cfg();
+            var mine = (c.files || []).map(function (f) { return { src: brandUrl('screensaver', f) }; });
+            if (c.mode !== 'mix' || !auth) { return Promise.resolve(this.deck(mine, mine.length)); }
+            return api('GET', 'Items', { userId: uid(), IncludeItemTypes: 'Movie,Series', Recursive: true, SortBy: 'Random', ImageTypes: 'Backdrop', EnableImageTypes: 'Backdrop,Logo', Limit: 40 }).then(function (r) {
+                return (r && r.Items || []).filter(function (it) { return it.BackdropImageTags && it.BackdropImageTags.length; }).map(function (it) {
+                    return { src: img(it.Id, 'Backdrop', { index: 0, q: { maxWidth: 1920 } }, it.BackdropImageTags[0]), name: it.Name, logo: it.ImageTags && it.ImageTags.Logo ? img(it.Id, 'Logo', { q: { maxHeight: 200 } }, it.ImageTags.Logo) : null };
+                });
+            }, function () { return []; }).then(function (lib) {
+                if (!mine.length) { return lib; }
+                if (!lib.length) { return self.deck(mine, mine.length); }
+                var total = Math.max(lib.length, mine.length), mineCount = Math.max(1, Math.round(total * Math.min(90, Math.max(10, c.mixPercent || 50)) / 100));
+                var d = self.deck(mine, mineCount), out = [];
+                for (var i = 0; i < total; i++) {
+                    var take = Math.floor((i + 1) * mineCount / total) > Math.floor(i * mineCount / total);
+                    out.push(take && d.length ? d.shift() : (lib.length ? lib.shift() : d.shift()));
+                }
+                return out.filter(Boolean);
+            });
+        },
+        start: function () {
+            if (this.on) { return; }
+            var self = this, gen = ++this.gen;
+            this.on = true;
+            if (!this.el) {
+                this.el = el('div', '', '<div class="hf-saver-layer"></div><div class="hf-saver-layer"></div><div class="hf-saver-shade"></div><div class="hf-saver-info"></div><div class="hf-saver-clock"></div>');
+                this.el.id = 'hfSaver';
+                this.el.addEventListener('click', function () { self.stop(); });
+                document.body.appendChild(this.el);
+            }
+            this.el.style.display = 'block';
+            this.clock();
+            this.clockTimer = setInterval(function () { self.clock(); }, 15000);
+            this.build().then(function (slides) {
+                if (gen !== self.gen || !self.on) { return; }
+                if (!slides.length) { self.stop(); return; }
+                self.slides = slides; self.i = 0;
+                self.next(true);
+            });
+        },
+        next: function (first) {
+            var self = this, gen = this.gen;
+            if (!this.on) { return; }
+            if (this.i >= this.slides.length) {   // new round: new order (and new library backdrops)
+                this.build().then(function (slides) { if (gen === self.gen && self.on && slides.length) { self.slides = slides; self.i = 0; self.next(); } });
+                return;
+            }
+            var slide = this.slides[this.i++], secs = Math.max(5, this.cfg().seconds || 20), pic = new Image();
+            pic.onload = function () {
+                if (gen !== self.gen || !self.on) { return; }
+                var layers = self.el.querySelectorAll('.hf-saver-layer'), show = layers[self.which], hide = layers[1 - self.which];
+                self.which = 1 - self.which;
+                show.style.transitionDuration = '1.6s, ' + (secs + 2) + 's';
+                show.style.backgroundImage = 'url("' + slide.src + '")';
+                show.className = 'hf-saver-layer'; void show.offsetWidth; show.className = 'hf-saver-layer on';
+                hide.className = 'hf-saver-layer';
+                self.el.querySelector('.hf-saver-info').innerHTML = slide.logo ? '<img src="' + esc(slide.logo) + '" alt="">' : esc(slide.name || '');
+                if (first) { self.el.className = 'on'; }
+                self.slideTimer = setTimeout(function () { self.next(); }, secs * 1000);
+            };
+            pic.onerror = function () { if (gen === self.gen && self.on) { self.slideTimer = setTimeout(function () { self.next(first); }, 300); } };
+            pic.src = slide.src;
+        },
+        clock: function () {
+            if (!this.el) { return; }
+            var d = new Date(), h = d.getHours(), m = d.getMinutes();
+            this.el.querySelector('.hf-saver-clock').textContent = this.cfg().clock === false ? '' : ((h % 12) || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' AM' : ' PM');
+        },
+        stop: function () {
+            this.on = false; this.gen++;
+            clearTimeout(this.slideTimer); clearInterval(this.clockTimer);
+            if (this.el) {
+                var e = this.el; e.className = '';
+                setTimeout(function () { if (!saver.on) { e.style.display = 'none'; qsa('.hf-saver-layer', e).forEach(function (l) { l.className = 'hf-saver-layer'; l.style.backgroundImage = ''; }); } }, 1000);
+            }
+            this.poke();
+        }
+    };
+    setInterval(function () { saver.tick(); }, 10000);
+    document.addEventListener('visibilitychange', function () { saver.poke(); });
+    document.addEventListener('click', function () { saver.poke(); }, true);
+    document.addEventListener('touchstart', function () { if (saver.on) { saver.stop(); } saver.poke(); }, true);
 
     // ================================================================== start
     function startApp() {

@@ -296,8 +296,42 @@ public class HomeLayoutSettings
     public string Stamp { get; set; } = string.Empty;
 }
 
+/// <summary>The screensaver gallery (pictures from Artwork Studio → Screensaver) in the TV apps.</summary>
+public class ScreensaverSettings
+{
+    /// <summary>Gets or sets a value indicating whether the gallery is shown in the apps' screensavers.</summary>
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>Gets or sets "only" (just the gallery) or "mix" (gallery mixed with movie and show backdrops).</summary>
+    public string Mode { get; set; } = "only";
+
+    /// <summary>Gets or sets the share of gallery pictures when mixing, in percent.</summary>
+    public int MixPercent { get; set; } = 50;
+
+    /// <summary>Gets or sets a value indicating whether the Jellyfin app for Android TV / Fire TV gets the gallery.</summary>
+    public bool NativeApps { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether web-based apps (LG, Samsung, browsers) get the gallery.</summary>
+    public bool WebApps { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether the HallFlix TV app shows its own screensaver.</summary>
+    public bool TvApp { get; set; } = true;
+
+    /// <summary>Gets or sets the minutes without a button press before the HallFlix TV screensaver starts.</summary>
+    public int TvIdleMinutes { get; set; } = 5;
+
+    /// <summary>Gets or sets the seconds each picture stays up in the HallFlix TV screensaver.</summary>
+    public int SlideSeconds { get; set; } = 20;
+
+    /// <summary>Gets or sets a value indicating whether the HallFlix TV screensaver shows the time.</summary>
+    public bool ShowClock { get; set; } = true;
+}
+
 public class PluginConfiguration : BasePluginConfiguration
 {
+    /// <summary>Gets or sets the screensaver gallery settings.</summary>
+    public ScreensaverSettings Screensaver { get; set; } = new ScreensaverSettings();
+
     /// <summary>Gets or sets the optional web app enhancements.</summary>
     public ExtrasSettings Extras { get; set; } = new ExtrasSettings();
 
